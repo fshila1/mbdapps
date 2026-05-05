@@ -1,0 +1,80 @@
+{
+  "project_name": "BDapps",
+  "theme": "Light",
+  "archetype": "Archetype 4: Swiss & High-Contrast",
+  "core_philosophy": "Objective, rigid, function-first interface mimicking elite developer platforms like Stripe or Twilio but stylized for a Bangladeshi telecom context. Avoids 'saas-bro' defaults by relying on Swiss grid discipline and high-contrast color blocks. Emphasizes authority and clarity.",
+  "colors": {
+    "primary": "#0f172a",
+    "primary_description": "Deep Navy (Mandatory). Use for structural elements: sidebars, top navs, and primary text.",
+    "accent": "#e11d48",
+    "accent_description": "Vibrant Red (Mandatory). Kinetic trigger. Use exclusively for primary CTAs (Create App, Add User, Submit), active states, and alert/notification pings. DO NOT over-use as a background color for large sections.",
+    "background": "#ffffff",
+    "background_description": "Pure White. Use for main content area and app store background.",
+    "surface": "#f8fafc",
+    "surface_description": "Tinted neutral. Slate-50 for secondary backgrounds like table headers or subtle card backgrounds.",
+    "border": "#e2e8f0",
+    "border_description": "Slate-200. Use for 1px sharp borders across all widgets and cards."
+  },
+  "typography": {
+    "headings": {
+      "family": "Cabinet Grotesk, sans-serif",
+      "rules": "Use for all H1-H4. Tracking-tight (e.g., tracking-tight or tracking-tighter). Never center-align by default."
+    },
+    "body": {
+      "family": "IBM Plex Sans, sans-serif",
+      "rules": "Developer-friendly structure. Use for tables, forms, and general UI text. Loose leading for readability (leading-relaxed)."
+    },
+    "code": {
+      "family": "JetBrains Mono, monospace",
+      "rules": "Use for API keys, JSON previews, or SMS template syntax. Also for Overlines / Labels in tiny uppercase wide tracking."
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "The 'Control Room' Grid. Dense but breathable. Optical alignment over geometric.",
+    "padding": "Cards and dashboard widgets MUST have internal p-6 or p-8 padding. No cramped content.",
+    "grid_system": "Base grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4. Summary widgets col-span-1, primary tables col-span-2 or 3.",
+    "alignment": "Left-align data, inputs, and headings. Center ONLY for empty states or standalone modals."
+  },
+  "surface_strategies": {
+    "dashboard_cards": "Flat solid surfaces. 1px border-slate-200. NO default box-shadow. Add subtle shadow-sm and border-slate-300 ONLY on hover.",
+    "modals": "Crystal glass overlay: bg-slate-900/60 backdrop-blur-sm. The modal itself must be solid white with a sharp shadow-2xl.",
+    "app_store_cards": "Neumorphic subtle lift. Must include image/icon, clean typography, and a distinct hover lift (-translate-y-1)."
+  },
+  "components_strategy": {
+    "buttons": "Primary: bg-[#e11d48] text-white hover:bg-[#be123c]. Secondary: bg-white text-[#0f172a] border border-slate-200 hover:border-[#0f172a]. Sharp corners rounded-md.",
+    "tables": "Shadcn based. Left-aligned columns. Right-aligned numerical data. Muted text for secondary info (dates, IDs). Custom padding: py-4 instead of default tight packing.",
+    "wizard": "Multi-step forms MUST show a clear progress indicator at the top. Break complex forms into manageable steps.",
+    "digital_templates": "Template gallery should feature card layouts that trigger modal previews showing simulated phone SMS layouts or architecture diagrams.",
+    "navigation": "Admin/Developer mode switch must be distinctly placed (e.g., in a unified Sidebar or Top Header). Sidebar navigation preferred for dashboards."
+  },
+  "icons": {
+    "library": "@phosphor-icons/react",
+    "style": "Duotone or Regular weight. Excellent for dense dashboards.",
+    "installation": "yarn add @phosphor-icons/react"
+  },
+  "media_and_assets": {
+    "images": [
+      {
+        "category": "app_store_hero",
+        "url": "https://images.unsplash.com/photo-1775150094058-345a412852bc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwyfHxtb2JpbGUlMjB0ZWxlY29tbXVuaWNhdGlvbiUyMG5ldHdvcmt8ZW58MHx8fHwxNzc3OTU0NTI1fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Telecommunication network hero banner. CRITICAL: Apply a dark navy gradient overlay (bg-gradient-to-r from-[#0f172a]/90 to-[#0f172a]/30) so the white hero text remains highly readable."
+      },
+      {
+        "category": "developer_coding",
+        "url": "https://images.unsplash.com/photo-1763568258535-fa1066506571?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHw0fHxhcHAlMjBkZXZlbG9wZXIlMjBjb2Rpbmd8ZW58MHx8fHwxNzc3OTU0NTI1fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Background image for 'BDapps Lite' or 'Provisioning' placeholder marketing cards."
+      },
+      {
+        "category": "mobile_app_preview",
+        "url": "https://images.unsplash.com/photo-1628233345409-349459e6f79a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwyfHxhcHAlMjBkZXZlbG9wZXIlMjBjb2Rpbmd8ZW58MHx8fHwxNzc3OTU0NTI1fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Use in the Digital Template gallery to represent mobile digital templates."
+      }
+    ],
+    "rules": "Images MUST be wrapped with responsive constraints (max-h-[80vh] for mobile). Banners MUST use overlays if text is placed on them. DO NOT use placeholder services."
+  },
+  "accessibility_and_testing": {
+    "data_testid": "MANDATORY. All interactive elements (buttons, links, form inputs, tabs) MUST include data-testid attributes (e.g., data-testid='create-app-submit').",
+    "contrast": "Ensure white text over Red (#e11d48) meets APCA standard. Hover state color MUST be a lighter hue of ACTIVE state."
+  },
+  "instructions_to_main_agent": "1. Write React code in .js / .jsx files. Do not use TypeScript (.tsx). 2. Do NOT use default Inter font. 3. Do NOT center align dashboard elements. 4. Build responsive grid layouts following the 'Control Room' protocol. 5. Heavily customize Shadcn components to remove the Vercel-look; use crisp rounded-md or rounded-sm. 6. Follow Deep Navy and Red hex codes strictly. 7. Implement Developer dashboard with 5 tiles and Admin dashboard with 6 tiles. 8. Ensure multi-step wizard, data tables, and tabbed dialogs are fully navigable with mocked data."
+}
