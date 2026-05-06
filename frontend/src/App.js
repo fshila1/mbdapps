@@ -1,53 +1,56 @@
-import { useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "sonner";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import { AppProvider } from "./context/AppContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import DeveloperDashboard from "./pages/DeveloperDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import Provisioning from "./pages/Provisioning";
+import Lite from "./pages/Lite";
+import { AppStore, AppStoreDetail } from "./pages/AppStore";
+import Reports from "./pages/Reports";
+import Digital from "./pages/Digital";
+import UserManagement from "./pages/admin/UserManagement";
+import AdminProvisioning from "./pages/admin/AdminProvisioning";
+import AppStoreAdmin from "./pages/admin/AppStoreAdmin";
+import TapAdmin from "./pages/admin/TapAdmin";
 
 function App() {
   return (
-    <div className="App">
+    <AppProvider>
       <BrowserRouter>
+        <Toaster position="top-right" richColors closeButton />
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Developer */}
+          <Route path="/dashboard" element={<ProtectedRoute role="developer"><DeveloperDashboard /></ProtectedRoute>} />
+          <Route path="/provisioning" element={<ProtectedRoute><Provisioning /></ProtectedRoute>} />
+          <Route path="/lite" element={<ProtectedRoute><Lite /></ProtectedRoute>} />
+          <Route path="/lite/:sub" element={<ProtectedRoute><Lite /></ProtectedRoute>} />
+          <Route path="/digital" element={<ProtectedRoute role="developer"><Digital /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+
+          {/* App Store - public */}
+          <Route path="/appstore" element={<AppStore />} />
+          <Route path="/appstore/:id" element={<AppStoreDetail />} />
+
+          {/* Admin */}
+          <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute role="admin"><UserManagement /></ProtectedRoute>} />
+          <Route path="/admin/provisioning" element={<ProtectedRoute role="admin"><AdminProvisioning /></ProtectedRoute>} />
+          <Route path="/admin/appstore" element={<ProtectedRoute role="admin"><AppStoreAdmin /></ProtectedRoute>} />
+          <Route path="/admin/tap" element={<ProtectedRoute role="admin"><TapAdmin /></ProtectedRoute>} />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-    </div>
+    </AppProvider>
   );
 }
 
