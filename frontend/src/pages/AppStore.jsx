@@ -8,7 +8,7 @@ import { Label } from "../components/ui/label";
 import { Logo } from "../components/Layout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../components/ui/dialog";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../components/ui/select";
-import { Search, Star, ChevronLeft, ChevronRight, Mail, Twitter, Facebook, ExternalLink } from "lucide-react";
+import { Search, Star, ChevronLeft, ChevronRight, Mail, Twitter, Facebook, ExternalLink, Share2, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 const AppCard = ({ app, onClick }) => (
@@ -54,7 +54,7 @@ export const AppStore = () => {
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => window.open("https://docs.bdapps.com", "_blank")} data-testid="api-docs"><ExternalLink size={14} className="mr-1" /> Create Your Own App</Button>
+            <Button variant="outline" onClick={() => window.open("/api-docs", "_blank")} data-testid="api-docs"><ExternalLink size={14} className="mr-1" /> Create Your Own App</Button>
             {appStoreUser ? <Button variant="outline" data-testid="store-user">{appStoreUser.phone}</Button>
               : <Button data-testid="store-signin" onClick={() => { setOtpOpen(true); setOtpStep(1); }} className="bg-[#e11d48] hover:bg-[#be123c]">Sign in via OTP</Button>}
           </div>
@@ -166,62 +166,246 @@ export const AppStore = () => {
 
 export const AppStoreDetail = () => {
   const { id } = useParams();
-  const { storeApps, appStoreUser } = useApp();
+  const { storeApps, appStoreUser, setAppStoreUser } = useApp();
   const navigate = useNavigate();
   const app = storeApps.find((a) => a.id === id);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
+  const [readMore, setReadMore] = useState(false);
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [otpStep, setOtpStep] = useState(1);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [otpInput, setOtpInput] = useState("");
 
   if (!app) return <div className="p-8">App not found. <Link to="/appstore" className="text-[#e11d48] underline">Back</Link></div>;
-  const fromDev = storeApps.filter((a) => a.developer === app.developer && a.id !== app.id).slice(0, 2);
+  const fromDev = storeApps.filter((a) => a.developer === app.developer && a.id !== app.id).slice(0, 4);
+
+  const stats = {
+    rating: app.rating,
+    reviews: 1248,
+    subscribers: 34500,
+    version: "2.4.1",
+    lastUpdated: "Jan 28, 2026",
+  };
+
+  const reviews = [
+    { name: "Sabbir A.", initial: "S", stars: 5, date: "5 days ago", text: "Reliable service, never misses an alert. Great value." },
+    { name: "Fahmida R.", initial: "F", stars: 4, date: "2 weeks ago", text: "Useful but the messages sometimes arrive a bit late." },
+    { name: "Mahin I.", initial: "M", stars: 5, date: "1 month ago", text: "Best in its category. Highly recommend!" },
+    { name: "Rahim K.", initial: "R", stars: 3, date: "2 months ago", text: "Decent but charging amount feels a bit much for daily use." },
+  ];
+
+  const breakdown = [
+    { stars: 5, pct: 68 },
+    { stars: 4, pct: 21 },
+    { stars: 3, pct: 7 },
+    { stars: 2, pct: 2 },
+    { stars: 1, pct: 2 },
+  ];
+
+  const screenshots = [
+    "from-rose-500 to-rose-700",
+    "from-slate-700 to-slate-900",
+    "from-amber-500 to-rose-600",
+    "from-emerald-600 to-teal-700",
+    "from-sky-600 to-indigo-700",
+  ];
+
+  const requireSignIn = (action) => {
+    if (appStoreUser) return action();
+    setPendingAction(() => action);
+    setOtpStep(1);
+    setSignInOpen(true);
+  };
+
+  const sendOtp = () => {
+    if (!phoneInput) return toast.error("Enter mobile");
+    toast.success("OTP sent (demo: any 4 digits)");
+    setOtpStep(2);
+  };
+
+  const verifyOtp = () => {
+    if (otpInput.length !== 4) return toast.error("Enter 4-digit OTP");
+    setAppStoreUser({ phone: phoneInput });
+    setSignInOpen(false);
+    setOtpInput("");
+    toast.success("Signed in!");
+    if (pendingAction) {
+      const fn = pendingAction;
+      setPendingAction(null);
+      setTimeout(() => fn(), 100);
+    }
+  };
+
+  const onSubscribe = () => requireSignIn(() => toast.success(`Subscribed to ${app.name}`));
+  const onWriteReview = () => requireSignIn(() => document.getElementById("write-review")?.scrollIntoView({ behavior: "smooth" }));
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
-      <header className="border-b border-slate-200 bg-white">
+      <header className="border-b border-slate-200 bg-white sticky top-0 z-30">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
           <Logo />
-          <Button variant="outline" onClick={() => navigate("/appstore")} data-testid="back-store"><ChevronLeft size={14} className="mr-1" /> Back to Store</Button>
+          <Button variant="outline" onClick={() => navigate("/appstore")} data-testid="back-store" size="sm"><ChevronLeft size={14} className="mr-1" /> Store</Button>
         </div>
       </header>
 
-      <main className="max-w-[1100px] mx-auto px-4 lg:px-8 py-10 space-y-10">
-        <div className="flex flex-col md:flex-row gap-8 items-start">
-          <div className="text-7xl bg-slate-100 rounded-md p-6 w-32 h-32 flex items-center justify-center flex-shrink-0">{app.icon}</div>
-          <div className="flex-1 space-y-3">
+      <main className="max-w-5xl mx-auto px-4 lg:px-8 py-6 lg:py-10 space-y-10">
+        {/* Hero */}
+        <div className="flex flex-col sm:flex-row gap-6 items-start">
+          <div className="text-7xl bg-slate-100 rounded-2xl p-5 w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center flex-shrink-0">{app.icon}</div>
+          <div className="flex-1 min-w-0 space-y-3">
             <div>
-              <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">{app.category}</p>
-              <h1 className="text-4xl tracking-tighter font-bold" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{app.name}</h1>
-              <p className="text-slate-500">by {app.developer}</p>
+              <h1 className="text-3xl md:text-4xl tracking-tighter font-bold leading-tight" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{app.name}</h1>
+              <p className="text-[#e11d48] font-medium text-sm">{app.developer}</p>
+              <p className="text-xs text-slate-500 mt-1">Contains ads · In-app purchases</p>
             </div>
-            <div className="flex items-center gap-4 text-sm">
-              <span className="flex items-center gap-1"><Star size={14} className="fill-amber-400 text-amber-400" /><span className="font-bold">{app.rating}</span></span>
-              <span className="text-slate-500">·</span>
-              <span className="font-semibold">{app.cost}</span>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-600">
+              <span className="flex items-center gap-1"><Star size={12} className="fill-amber-400 text-amber-400" /><span className="font-bold text-[#0f172a]">{stats.rating}</span> ({(stats.reviews / 1000).toFixed(1)}K)</span>
+              <span className="text-slate-300">·</span>
+              <span><span className="font-bold text-[#0f172a]">{(stats.subscribers / 1000).toFixed(0)}K+</span> subscribers</span>
+              <span className="text-slate-300">·</span>
+              <span className="bg-slate-100 px-2 py-0.5 rounded font-medium">{app.category}</span>
             </div>
-            <p className="text-slate-700 leading-relaxed">{app.description}</p>
-            <div className="bg-slate-50 border border-slate-200 rounded-md p-3 text-sm font-mono">{app.instructions}</div>
-            <Button data-testid="subscribe-btn" onClick={() => toast.success(appStoreUser ? `Subscribed to ${app.name}` : "Sign in first")} className="bg-[#e11d48] hover:bg-[#be123c]">Subscribe</Button>
+            <div className="flex flex-wrap gap-2 pt-2">
+              <Button data-testid="subscribe-btn" onClick={onSubscribe} className="bg-[#e11d48] hover:bg-[#be123c] h-11 px-8">Subscribe · {app.cost}</Button>
+              <Button variant="outline" onClick={() => { navigator.clipboard?.writeText(window.location.href); toast.success("Link copied"); }} data-testid="share-btn" className="h-11"><Share2 size={14} className="mr-1" /> Share</Button>
+              <Button variant="outline" data-testid="wishlist-btn" onClick={() => toast.success("Added to wishlist")} className="h-11"><Heart size={14} /></Button>
+            </div>
           </div>
         </div>
 
+        {/* Stats strip */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3 border-y border-slate-200 py-4">
+          <Stat label="Rating" value={`${stats.rating}★`} />
+          <Stat label="Reviews" value={stats.reviews.toLocaleString()} />
+          <Stat label="Subscribers" value={`${(stats.subscribers / 1000).toFixed(1)}K+`} />
+          <Stat label="Version" value={stats.version} />
+          <Stat label="Updated" value={stats.lastUpdated} />
+        </div>
+
+        {/* Screenshots */}
+        <section>
+          <h2 className="text-xl font-bold tracking-tight mb-3" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>Preview</h2>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
+            {screenshots.map((bg, i) => (
+              <div key={i} className={`shrink-0 w-44 h-80 rounded-xl bg-gradient-to-br ${bg} flex items-center justify-center text-white relative shadow-md`}>
+                <div className="text-center px-4">
+                  <div className="text-3xl mb-2">{app.icon}</div>
+                  <div className="text-sm font-bold">{app.name}</div>
+                  <div className="text-[10px] opacity-70 mt-1">Screenshot {i + 1}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* About */}
+        <section>
+          <h2 className="text-xl font-bold tracking-tight mb-3" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>About this app</h2>
+          <p className={`text-slate-700 leading-relaxed ${!readMore ? "line-clamp-3" : ""}`}>
+            {app.description} {app.description} Built specifically for the Bangladeshi telecom market, this service is optimized for Robi network conditions and works on any handset — feature phones included. No data charges. Reliable delivery via the BDapps engine. Subscribe today and join thousands of happy users.
+          </p>
+          <button onClick={() => setReadMore(!readMore)} data-testid="read-more" className="text-[#e11d48] font-medium text-sm mt-1 hover:underline">{readMore ? "Show less" : "Read more"}</button>
+          <div className="bg-slate-50 border border-slate-200 rounded-md p-3 text-sm font-mono mt-4">{app.instructions}</div>
+        </section>
+
+        {/* Ratings & Reviews */}
+        <section>
+          <h2 className="text-xl font-bold tracking-tight mb-4" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>Ratings &amp; Reviews</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+            <div className="text-center sm:border-r sm:border-slate-200">
+              <div className="text-6xl font-bold tracking-tighter" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{stats.rating}</div>
+              <div className="flex justify-center gap-0.5 my-1">{[1, 2, 3, 4, 5].map((n) => <Star key={n} size={16} className={n <= Math.round(stats.rating) ? "fill-amber-400 text-amber-400" : "text-slate-300"} />)}</div>
+              <div className="text-xs text-slate-500">{stats.reviews.toLocaleString()} reviews</div>
+            </div>
+            <div className="sm:col-span-2 space-y-1.5">
+              {breakdown.map((b) => (
+                <div key={b.stars} className="flex items-center gap-2 text-xs">
+                  <span className="w-4 font-mono text-slate-500">{b.stars}</span>
+                  <Star size={10} className="fill-amber-400 text-amber-400" />
+                  <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-amber-400" style={{ width: `${b.pct}%` }}></div></div>
+                  <span className="w-8 text-right text-slate-500">{b.pct}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {reviews.map((r, i) => (
+              <div key={i} className="border-b border-slate-100 pb-4 last:border-0">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-[#0f172a] text-white rounded-full flex items-center justify-center text-sm font-bold shrink-0">{r.initial}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm">{r.name}</span>
+                      <div className="flex gap-0.5">{[1, 2, 3, 4, 5].map((n) => <Star key={n} size={11} className={n <= r.stars ? "fill-amber-400 text-amber-400" : "text-slate-300"} />)}</div>
+                      <span className="text-xs text-slate-400">{r.date}</span>
+                    </div>
+                    <p className="text-sm text-slate-700 leading-relaxed mt-1">{r.text}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Button onClick={onWriteReview} variant="outline" className="mt-4" data-testid="write-review-btn">Write a Review</Button>
+        </section>
+
+        {/* Write review form (only when signed in) */}
         {appStoreUser && (
-          <section className="border border-slate-200 rounded-md p-6">
-            <h3 className="font-semibold text-lg tracking-tight mb-3">Rate this app</h3>
+          <section id="write-review" className="border border-slate-200 rounded-md p-6">
+            <h3 className="font-semibold text-lg tracking-tight mb-3">Your review</h3>
             <div className="flex gap-1 mb-3">{[1, 2, 3, 4, 5].map((n) => <button key={n} onClick={() => setRating(n)} data-testid={`star-${n}`}><Star size={28} className={n <= rating ? "fill-amber-400 text-amber-400" : "text-slate-300"} /></button>)}</div>
-            <textarea data-testid="review-text" placeholder="Write a review..." value={review} onChange={(e) => setReview(e.target.value)} className="w-full border border-slate-200 rounded-md p-3 text-sm" rows={3}></textarea>
-            <Button onClick={() => { toast.success("Review submitted!"); setReview(""); setRating(0); }} className="mt-2 bg-[#0f172a]" data-testid="submit-review">Submit Review</Button>
+            <textarea data-testid="review-text" placeholder="Share your experience..." value={review} onChange={(e) => setReview(e.target.value)} className="w-full border border-slate-200 rounded-md p-3 text-sm" rows={3}></textarea>
+            <Button onClick={() => { if (!rating) return toast.error("Pick a rating"); toast.success("Review submitted!"); setReview(""); setRating(0); }} className="mt-2 bg-[#0f172a]" data-testid="submit-review">Submit Review</Button>
           </section>
         )}
 
         {fromDev.length > 0 && (
           <section>
-            <h3 className="text-2xl tracking-tight font-bold mb-4" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>From Developer</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{fromDev.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}</div>
+            <h3 className="text-xl font-bold tracking-tight mb-4" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>More from {app.developer}</h3>
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">{fromDev.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}</div>
           </section>
         )}
       </main>
+
+      {/* Sign-in modal interception */}
+      <Dialog open={signInOpen} onOpenChange={(o) => { if (!o) { setSignInOpen(false); setPendingAction(null); setOtpStep(1); setOtpInput(""); } }}>
+        <DialogContent data-testid="signin-modal" className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Sign In Required</DialogTitle>
+            <DialogDescription>Please sign in to subscribe to this app.</DialogDescription>
+          </DialogHeader>
+          {otpStep === 1 ? (
+            <div className="space-y-2">
+              <Label>Phone Number</Label>
+              <Input data-testid="signin-phone" value={phoneInput} onChange={(e) => setPhoneInput(e.target.value)} placeholder="01812345678" />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label>Enter OTP</Label>
+              <Input data-testid="signin-otp" value={otpInput} onChange={(e) => setOtpInput(e.target.value)} maxLength={4} placeholder="1234" />
+              <p className="text-xs text-slate-500">Demo: any 4 digits will work</p>
+            </div>
+          )}
+          <DialogFooter className="!justify-between">
+            <button data-testid="signin-cancel" onClick={() => { setSignInOpen(false); setPendingAction(null); }} className="text-sm text-slate-500 hover:text-[#0f172a]">Cancel</button>
+            {otpStep === 1
+              ? <Button onClick={sendOtp} className="bg-[#e11d48] hover:bg-[#be123c]" data-testid="signin-request">Request OTP</Button>
+              : <Button onClick={verifyOtp} className="bg-[#e11d48] hover:bg-[#be123c]" data-testid="signin-verify">Verify</Button>}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
+
+const Stat = ({ label, value }) => (
+  <div className="text-center px-2">
+    <div className="text-lg md:text-xl font-bold tracking-tight" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{value}</div>
+    <div className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">{label}</div>
+  </div>
+);
 
 export default AppStore;

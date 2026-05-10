@@ -61,20 +61,18 @@ const ReportForm = ({ section }) => {
 
 const Reports = () => {
   const [active, setActive] = useState({ key: "overall", sub: "Yearly" });
-  const sidebar = (
-    <nav className="p-4 space-y-1">
-      <h3 className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-3 px-2">Reports</h3>
+  const subnav = (
+    <nav className="flex gap-1 p-3 max-w-full" data-testid="reports-subnav">
       {NAV.map((n) => (
-        <div key={n.key} className="mb-2">
-          <div className="text-sm font-semibold text-[#0f172a] px-2 py-1.5">{n.label}</div>
+        <div key={n.key} className="flex gap-1">
           {n.subs.length > 0 ? n.subs.map((s) => (
             <button key={s} data-testid={`nav-${n.key}-${s}`} onClick={() => setActive({ key: n.key, sub: s })}
-              className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition ${active.key === n.key && active.sub === s ? "bg-[#0f172a] text-white" : "hover:bg-slate-100"}`}>
-              {s}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition ${active.key === n.key && active.sub === s ? "bg-[#0f172a] text-white" : "bg-white border border-slate-200 hover:border-[#0f172a]"}`}>
+              {n.label.replace(" Reports", "")} · {s}
             </button>
           )) : (
             <button data-testid={`nav-${n.key}`} onClick={() => setActive({ key: n.key, sub: "" })}
-              className={`w-full text-left px-3 py-1.5 rounded-md text-sm transition ${active.key === n.key ? "bg-[#0f172a] text-white" : "hover:bg-slate-100"}`}>View</button>
+              className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition ${active.key === n.key ? "bg-[#0f172a] text-white" : "bg-white border border-slate-200 hover:border-[#0f172a]"}`}>{n.label}</button>
           )}
         </div>
       ))}
@@ -82,7 +80,7 @@ const Reports = () => {
   );
 
   return (
-    <Layout sidebar={sidebar}>
+    <Layout subnav={subnav}>
       <ReportForm section={`${NAV.find((n) => n.key === active.key).label}${active.sub ? " · " + active.sub : ""}`} />
     </Layout>
   );

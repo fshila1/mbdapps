@@ -14,6 +14,7 @@ import { Plus, Eye, BookOpen, Send, Bell, Wrench, Sparkles, FileText, FolderKanb
 import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import Tile from "../components/Tile";
+import { Req, Opt } from "../components/FieldLabel";
 import { seedMessageHistory, seedReportData } from "../mocks/data";
 
 // ============= LITE DASHBOARD =============
@@ -38,6 +39,8 @@ const LiteDashboard = () => {
 };
 
 // ============= CREATE LITE APP =============
+const SHORTCODES = ["16222", "16333", "16444"];
+
 const CreateLiteApp = () => {
   const navigate = useNavigate();
   const loc = useLocation();
@@ -47,25 +50,52 @@ const CreateLiteApp = () => {
   const [data, setData] = useState({
     template: pendingTemplate?.category || (loc.state?.template?.category || ""),
     name: pendingTemplate?.name || (loc.state?.template?.name || ""),
-    keyword: pendingTemplate?.keyword || (loc.state?.template?.keyword || ""),
     description: pendingTemplate?.description || (loc.state?.template?.description || ""),
-    response: "Thanks for subscribing. You will receive daily updates.",
-    charging: "Daily",
+    shortcode: "16222",
+    keyword: pendingTemplate?.keyword || (loc.state?.template?.keyword || ""),
+    enableExpiry: false,
+    expiryDate: "",
+    subSuccessMsg: "You have successfully subscribed.",
+    unsubSuccessMsg: "You have successfully unsubscribed.",
+    chargingMode: "perMessage",
+    daily: false, dailyAmount: "2.00",
+    weekly: false, weeklyAmount: "5.00",
+    monthly: false, monthlyAmount: "15.00",
+    scheduleType: "Immediate",
+    customInterval: "",
+    scheduledTime: "08:00",
+    msgContent: "",
+    dayOfWeek: "Monday",
+    dayOfMonth: "1",
   });
   const [errors, setErrors] = useState({});
 
   React.useEffect(() => () => setPendingTemplate(null), [setPendingTemplate]);
 
-  const update = (k, v) => setData({ ...data, [k]: v });
-  const autoKeyword = () => update("keyword", data.name.replace(/\s+/g, "").toUpperCase().slice(0, 8) || "MYAPP");
+  const update = (k, v) => setData((p) => ({ ...p, [k]: v }));
+  const autoKeyword = () => {
+    const random = Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+    update("keyword", random);
+  };
 
   const next = () => {
     const e = {};
     if (step === 1 && !data.template) e.template = "Select a template";
     if (step === 2) {
       if (!data.name) e.name = "Required";
-      if (!data.keyword) e.keyword = "Required";
       if (!data.description) e.description = "Required";
+      if (!data.shortcode) e.shortcode = "Required";
+      if (!data.keyword) e.keyword = "Required";
+      if (data.enableExpiry && !data.expiryDate) e.expiryDate = "Required";
+      if (!data.subSuccessMsg) e.subSuccessMsg = "Required";
+      if (!data.unsubSuccessMsg) e.unsubSuccessMsg = "Required";
+      if (data.chargingMode === "subscription" && !data.daily && !data.weekly && !data.monthly) e.charging = "Pick at least one frequency";
+      if (data.template === "Services") {
+        if (!data.scheduleType) e.scheduleType = "Required";
+        if (data.scheduleType === "Custom Interval" && !data.customInterval) e.customInterval = "Required";
+        if (!data.scheduledTime) e.scheduledTime = "Required";
+        if (!data.msgContent) e.msgContent = "Required";
+      }
     }
     setErrors(e);
     if (Object.keys(e).length) return;
@@ -73,9 +103,11 @@ const CreateLiteApp = () => {
   };
 
   const submit = () => {
-    addLiteApp({ name: data.name, keyword: data.keyword, category: data.template });
+    addLiteApp({ name: data.name, keyword: data.keyword, category: data.template, type: data.template });
     setStep(4);
   };
+
+  const SectionHdr = ({ children }) => <h3 className="text-xs font-bold uppercase tracking-widest text-[#e11d48] mt-6 mb-2 pb-2 border-b border-slate-100">{children}</h3>;
 
   return (
     <Layout>
@@ -110,39 +142,121 @@ const CreateLiteApp = () => {
         )}
 
         {step === 2 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold tracking-tight">App details</h2>
-            <div><Label>App Name *</Label><Input data-testid="lite-name" value={data.name} onChange={(e) => update("name", e.target.value)} className={errors.name ? "border-rose-500" : ""} />{errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name}</p>}</div>
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold tracking-tight">{data.template} App Configuration</h2>
+
+            <div><Label>Application Name<Req /></Label><Input data-testid="lite-name" value={data.name} onChange={(e) => update("name", e.target.value)} className={errors.name ? "border-rose-500" : ""} />{errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name}</p>}</div>
+            <div><Label>Description<Req /></Label><Textarea data-testid="lite-desc" value={data.description} onChange={(e) => update("description", e.target.value)} className={errors.description ? "border-rose-500" : ""} />{errors.description && <p className="text-xs text-rose-600 mt-1">{errors.description}</p>}</div>
+
+            <SectionHdr>Keyword Details</SectionHdr>
+            <div><Label>Choose Shortcode<Req /></Label>
+              <Select value={data.shortcode} onValueChange={(v) => update("shortcode", v)}>
+                <SelectTrigger data-testid="lite-shortcode" className={errors.shortcode ? "border-rose-500" : ""}><SelectValue /></SelectTrigger>
+                <SelectContent>{SHORTCODES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
             <div>
-              <Label>Keyword *</Label>
+              <Label>Keyword Text<Req /></Label>
               <div className="flex gap-2">
                 <Input data-testid="lite-keyword" value={data.keyword} onChange={(e) => update("keyword", e.target.value.toUpperCase())} className={errors.keyword ? "border-rose-500" : ""} />
-                <Button type="button" variant="outline" onClick={autoKeyword} data-testid="auto-keyword">Auto</Button>
+                <Button type="button" variant="outline" onClick={autoKeyword} data-testid="auto-keyword">Auto Generate</Button>
               </div>
               {errors.keyword && <p className="text-xs text-rose-600 mt-1">{errors.keyword}</p>}
             </div>
-            <div><Label>Description *</Label><Textarea data-testid="lite-desc" value={data.description} onChange={(e) => update("description", e.target.value)} className={errors.description ? "border-rose-500" : ""} /></div>
-            <div>
-              <Label>Response Config</Label>
-              <Textarea readOnly value={data.response} className="bg-slate-50" />
-              <p className="text-xs text-slate-500 mt-1">Pre-filled. Editable after launch.</p>
-            </div>
-            <div>
-              <Label className="mb-2 block">Charging Method</Label>
-              <RadioGroup value={data.charging} onValueChange={(v) => update("charging", v)} className="flex gap-6">
-                <div className="flex items-center gap-2"><RadioGroupItem value="Daily" id="d" data-testid="charge-daily" /><Label htmlFor="d">Daily</Label></div>
-                <div className="flex items-center gap-2"><RadioGroupItem value="Monthly" id="m" data-testid="charge-monthly" /><Label htmlFor="m">Monthly</Label></div>
-              </RadioGroup>
-            </div>
+
+            <SectionHdr>App Validity Duration</SectionHdr>
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={data.enableExpiry} onCheckedChange={(v) => update("enableExpiry", !!v)} data-testid="enable-expiry" />
+              Enable App Expiry Date
+            </label>
+            {data.enableExpiry && (
+              <div><Label>Expiry Date<Req /></Label><Input type="date" value={data.expiryDate} onChange={(e) => update("expiryDate", e.target.value)} className={errors.expiryDate ? "border-rose-500" : ""} data-testid="expiry-date" />{errors.expiryDate && <p className="text-xs text-rose-600 mt-1">{errors.expiryDate}</p>}</div>
+            )}
+
+            <SectionHdr>Response Config</SectionHdr>
+            <div><Label>Subscription Success Message<Req /></Label><Input value={data.subSuccessMsg} onChange={(e) => update("subSuccessMsg", e.target.value)} data-testid="sub-success" className={errors.subSuccessMsg ? "border-rose-500" : ""} /></div>
+            <div><Label>Unsubscription Success Message<Req /></Label><Input value={data.unsubSuccessMsg} onChange={(e) => update("unsubSuccessMsg", e.target.value)} data-testid="unsub-success" className={errors.unsubSuccessMsg ? "border-rose-500" : ""} /></div>
+
+            <SectionHdr>Charging</SectionHdr>
+            <RadioGroup value={data.chargingMode} onValueChange={(v) => update("chargingMode", v)} className="space-y-2">
+              <label className="flex items-start gap-2 border border-slate-200 rounded-md p-3 cursor-pointer">
+                <RadioGroupItem value="perMessage" id="cm-pm" data-testid="charge-per-message" className="mt-0.5" />
+                <div><div className="font-medium text-sm">Charging Per Message</div><div className="text-xs text-slate-500">Tk. 2.00 + VAT + SD + SC</div></div>
+              </label>
+              <label className="flex items-start gap-2 border border-slate-200 rounded-md p-3 cursor-pointer">
+                <RadioGroupItem value="subscription" id="cm-sub" data-testid="charge-subscription" className="mt-0.5" />
+                <div><div className="font-medium text-sm">Charging for Subscription</div><div className="text-xs text-slate-500">Recurring charges from subscribers</div></div>
+              </label>
+            </RadioGroup>
+            {data.chargingMode === "subscription" && (
+              <div className="border border-slate-200 rounded-md p-4 space-y-2 bg-slate-50">
+                {[
+                  { k: "daily", l: "Daily", ak: "dailyAmount" },
+                  { k: "weekly", l: "Weekly", ak: "weeklyAmount" },
+                  { k: "monthly", l: "Monthly", ak: "monthlyAmount" },
+                ].map((it) => (
+                  <div key={it.k} className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm w-28"><Checkbox checked={data[it.k]} onCheckedChange={(v) => update(it.k, !!v)} data-testid={`freq-${it.k}`} />{it.l}</label>
+                    {data[it.k] && (
+                      <div className="flex items-center gap-2 flex-1"><span className="text-xs text-slate-500">Amount (BDT)</span><Input className="max-w-[120px]" value={data[it.ak]} onChange={(e) => update(it.ak, e.target.value)} data-testid={`amt-${it.k}`} /></div>
+                    )}
+                  </div>
+                ))}
+                {errors.charging && <p className="text-xs text-rose-600">{errors.charging}</p>}
+              </div>
+            )}
+
+            {data.template === "Services" && (
+              <>
+                <SectionHdr>Message Scheduling</SectionHdr>
+                <div><Label>Schedule Type<Req /></Label>
+                  <Select value={data.scheduleType} onValueChange={(v) => update("scheduleType", v)}>
+                    <SelectTrigger data-testid="schedule-type" className={errors.scheduleType ? "border-rose-500" : ""}><SelectValue /></SelectTrigger>
+                    <SelectContent>{["Immediate", "Daily", "Weekly", "Monthly", "Custom Interval"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                {data.scheduleType === "Custom Interval" && (
+                  <div><Label>Interval (hours)<Req /></Label><Input type="number" value={data.customInterval} onChange={(e) => update("customInterval", e.target.value)} data-testid="custom-interval" className={errors.customInterval ? "border-rose-500" : ""} /></div>
+                )}
+                <div><Label>Scheduled Time<Req /></Label><Input type="time" value={data.scheduledTime} onChange={(e) => update("scheduledTime", e.target.value)} data-testid="scheduled-time" className={errors.scheduledTime ? "border-rose-500" : ""} /></div>
+                <div>
+                  <Label>Message Content<Req /></Label>
+                  <Textarea maxLength={300} value={data.msgContent} onChange={(e) => update("msgContent", e.target.value)} data-testid="msg-content" className={errors.msgContent ? "border-rose-500" : ""} />
+                  <p className="text-xs text-slate-500 text-right mt-1">{data.msgContent.length} / 300</p>
+                </div>
+                {data.scheduleType === "Weekly" && (
+                  <div><Label>Day of Week<Req /></Label>
+                    <Select value={data.dayOfWeek} onValueChange={(v) => update("dayOfWeek", v)}>
+                      <SelectTrigger data-testid="day-of-week"><SelectValue /></SelectTrigger>
+                      <SelectContent>{["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {data.scheduleType === "Monthly" && (
+                  <div><Label>Day of Month<Req /></Label><Input type="number" min="1" max="31" value={data.dayOfMonth} onChange={(e) => update("dayOfMonth", e.target.value)} data-testid="day-of-month" /></div>
+                )}
+              </>
+            )}
           </div>
         )}
 
         {step === 3 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold tracking-tight">Review</h2>
+            <h2 className="text-lg font-semibold tracking-tight">Review</h2>
             <div className="border border-slate-200 rounded-md divide-y">
-              {Object.entries(data).map(([k, v]) => (
-                <div key={k} className="flex justify-between p-3 text-sm"><span className="text-slate-500 uppercase tracking-wide font-semibold text-xs">{k}</span><span className="font-medium text-right max-w-[60%] truncate">{v}</span></div>
+              {[
+                ["Template", data.template], ["Application Name", data.name], ["Description", data.description],
+                ["Shortcode", data.shortcode], ["Keyword", data.keyword],
+                ["Expiry", data.enableExpiry ? data.expiryDate : "—"],
+                ["Subscription Success", data.subSuccessMsg], ["Unsubscription Success", data.unsubSuccessMsg],
+                ["Charging", data.chargingMode === "perMessage" ? "Per Message · Tk 2.00" : `Subscription · ${[data.daily && "Daily", data.weekly && "Weekly", data.monthly && "Monthly"].filter(Boolean).join(", ") || "—"}`],
+                ...(data.template === "Services" ? [
+                  ["Schedule", `${data.scheduleType}${data.scheduleType === "Custom Interval" ? ` · ${data.customInterval}h` : ""}`],
+                  ["Time", data.scheduledTime],
+                  ["Message", data.msgContent],
+                ] : []),
+              ].map(([k, v], i) => (
+                <div key={i} className="flex justify-between p-3 text-sm gap-3"><span className="text-slate-500 uppercase tracking-wide font-semibold text-xs flex-shrink-0">{k}</span><span className="font-medium text-right max-w-[60%] break-words">{v || "—"}</span></div>
               ))}
             </div>
           </div>
@@ -210,18 +324,19 @@ const MyApplications = () => {
           <Button onClick={() => navigate("/lite/create")} className="bg-[#e11d48] hover:bg-[#be123c]"><Plus size={14} className="mr-1" /> New</Button>
         </div>
 
-        <div className="border border-slate-200 rounded-md overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="border border-slate-200 rounded-md overflow-x-auto">
+          <table className="w-full text-sm min-w-[640px]">
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-              <tr><th className="text-left p-3">Name</th><th className="text-left p-3">Keyword</th><th className="text-left p-3">Status</th><th className="text-left p-3">Actions</th></tr>
+              <tr><th className="text-left p-3">Name</th><th className="text-left p-3">Type</th><th className="text-left p-3">Keyword</th><th className="text-left p-3">Status</th><th className="text-left p-3">Actions</th></tr>
             </thead>
             <tbody>
               {liteApps.map((a) => (
                 <tr key={a.id} className="border-t border-slate-100 hover:bg-slate-50">
                   <td className="p-3 font-medium">{a.name}</td>
+                  <td className="p-3"><span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${(a.type || a.category) === "Alert" ? "bg-amber-100 text-amber-700" : "bg-sky-100 text-sky-700"}`}>{a.type || a.category}</span></td>
                   <td className="p-3 font-mono">{a.keyword}</td>
                   <td className="p-3"><span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${a.status === "Active" ? "bg-emerald-100 text-emerald-700" : a.status === "Rejected" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700"}`}>{a.status}</span></td>
-                  <td className="p-3 space-x-2">
+                  <td className="p-3 space-x-1 space-y-1 whitespace-nowrap">
                     {a.status === "Active" && (<>
                       <Button size="sm" variant="outline" onClick={() => setComposeApp(a)} data-testid={`use-${a.id}`}>Use</Button>
                       <Button size="sm" variant="outline" onClick={() => setViewApp(a)} data-testid={`view-${a.id}`}>View</Button>

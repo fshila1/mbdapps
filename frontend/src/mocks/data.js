@@ -123,10 +123,10 @@ export const seedApps = [
 ];
 
 export const seedLiteApps = [
-  { id: "LITE-001", name: "Morning News Bangla", status: "Active", category: "Alert", keyword: "MNEWS" },
-  { id: "LITE-002", name: "Weather Today", status: "Active", category: "Alert", keyword: "WTHR" },
-  { id: "LITE-003", name: "Daily Hadith", status: "Pending", category: "Services", keyword: "HADITH" },
-  { id: "LITE-004", name: "Stock Brief", status: "Rejected", category: "Services", keyword: "STKBR" },
+  { id: "LITE-001", name: "Morning News Bangla", status: "Active", category: "Alert", keyword: "MNEWS", type: "Alert" },
+  { id: "LITE-002", name: "Weather Today", status: "Active", category: "Alert", keyword: "WTHR", type: "Alert" },
+  { id: "LITE-003", name: "Daily Hadith", status: "Pending", category: "Services", keyword: "HADITH", type: "Services" },
+  { id: "LITE-004", name: "Stock Brief", status: "Rejected", category: "Services", keyword: "STKBR", type: "Services" },
 ];
 
 export const seedKeywords = [
@@ -163,16 +163,42 @@ export const seedBuildFiles = [
 ];
 
 export const seedAds = [
-  { id: "AD-01", name: "Robi Internet Pack", content: "Get 5GB at Tk99" },
-  { id: "AD-02", name: "Eid Bonus", content: "Free 100 SMS today!" },
+  { id: "AD-01", name: "Robi Offer 1", content: "Get 1GB@9Tk!" },
+  { id: "AD-02", name: "Summer Deal", content: "50% OFF Now" },
+  { id: "AD-03", name: "Eid Bonus", content: "Free 100 SMS" },
+  { id: "AD-04", name: "Cricket Pack", content: "Live scores 5Tk" },
 ];
 
-export const seedSubscriptions = [
-  { mobile: "+8801711234567", appName: "Cricket Live Updates", spName: "BDapps", status: "Active", channel: "SMS",
-    charging: { instrument: "Mobile Account", amount: 2, frequency: "Daily", lastCharged: daysAgo(0), startDate: daysAgo(30), endDate: "" } },
-  { mobile: "+8801712345678", appName: "Daily Hadith", spName: "BDapps", status: "Suspended", channel: "USSD",
-    charging: { instrument: "Mobile Account", amount: 1, frequency: "Daily", lastCharged: daysAgo(2), startDate: daysAgo(20), endDate: "" } },
+export const seedAdAssignments = [
+  { appId: "APP-1001", appName: "Cricket Live Updates", adId: "AD-04", adName: "Cricket Pack" },
+  { appId: "APP-1002", appName: "Daily Quiz Bangla", adId: null, adName: null },
+  { appId: "APP-1006", appName: "City Prayer Times", adId: "AD-02", adName: "Summer Deal" },
+  { appId: "APP-1003", appName: "Bus Ticket USSD", adId: null, adName: null },
+  { appId: "APP-1005", appName: "Stock Trade Alerts", adId: "AD-01", adName: "Robi Offer 1" },
 ];
+
+export const VALID_USSD_APP_IDS = ["APP001", "APP002", "APP003"];
+
+export const seedSubscriptions = [
+  { mobile: "01812345678", appName: "Weather Alert", spName: "dev_user1", status: "Registered", channel: "DIRECT_USSD",
+    charging: { instrument: "Robi Wallet", amount: "2.00 BDT", frequency: "Daily", lastCharged: daysAgo(0), startDate: daysAgo(30), endDate: "" } },
+  { mobile: "01612345679", appName: "Daily Hadith", spName: "islamic_dev", status: "Registered", channel: "SMS",
+    charging: { instrument: "Robi Wallet", amount: "1.00 BDT", frequency: "Daily", lastCharged: daysAgo(0), startDate: daysAgo(45), endDate: "" } },
+  { mobile: "01912345680", appName: "Cricket Live Updates", spName: "bd_sports", status: "Reg_pending", channel: "DIRECT_HTTP",
+    charging: { instrument: "Robi Wallet", amount: "2.00 BDT", frequency: "Daily", lastCharged: "—", startDate: daysAgo(1), endDate: "" } },
+  { mobile: "01812345681", appName: "Stock Brief BD", spName: "finhub", status: "Temporary_blocked", channel: "SMS",
+    charging: { instrument: "Robi Wallet", amount: "5.00 BDT", frequency: "Daily", lastCharged: daysAgo(5), startDate: daysAgo(60), endDate: "" } },
+  { mobile: "01612345682", appName: "Bangla Quiz", spName: "eduplay", status: "Unregistered", channel: "USSD",
+    charging: { instrument: "Robi Wallet", amount: "1.00 BDT", frequency: "Weekly", lastCharged: daysAgo(15), startDate: daysAgo(90), endDate: daysAgo(7) } },
+  { mobile: "01912345683", appName: "Salah Times", spName: "islamic_dev", status: "Registered", channel: "DIRECT_USSD",
+    charging: { instrument: "Robi Wallet", amount: "0.00 BDT", frequency: "Free", lastCharged: "—", startDate: daysAgo(120), endDate: "" } },
+  { mobile: "01812345684", appName: "Movie Buff", spName: "cineplex", status: "Initial", channel: "SMS",
+    charging: { instrument: "Robi Wallet", amount: "3.00 BDT", frequency: "Daily", lastCharged: "—", startDate: daysAgo(0), endDate: "" } },
+  { mobile: "01612345685", appName: "Health Tips Pro", spName: "medbangla", status: "Registered", channel: "DIRECT_HTTP",
+    charging: { instrument: "Robi Wallet", amount: "0.00 BDT", frequency: "Free", lastCharged: "—", startDate: daysAgo(15), endDate: "" } },
+];
+
+export const VALID_OPERATOR_PREFIXES = ["018", "016", "019"];
 
 export const seedAppStore = [
   { id: "AS-01", name: "Cricket Live", developer: "BD Sports", rating: 4.8, category: "Entertainment", icon: "🏏", cost: "Tk 2/day", description: "Real-time cricket scores via SMS.", instructions: "Send CRIC to 21333 to subscribe." },

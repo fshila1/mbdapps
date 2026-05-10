@@ -14,6 +14,7 @@ import Lite from "./pages/Lite";
 import { AppStore, AppStoreDetail } from "./pages/AppStore";
 import Reports from "./pages/Reports";
 import Digital from "./pages/Digital";
+import ApiDocs from "./pages/ApiDocs";
 import UserManagement from "./pages/admin/UserManagement";
 import AdminProvisioning from "./pages/admin/AdminProvisioning";
 import AppStoreAdmin from "./pages/admin/AppStoreAdmin";
@@ -39,6 +40,7 @@ function App() {
           {/* App Store - public */}
           <Route path="/appstore" element={<AppStore />} />
           <Route path="/appstore/:id" element={<AppStoreDetail />} />
+          <Route path="/api-docs" element={<ApiDocs />} />
 
           {/* Admin */}
           <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />

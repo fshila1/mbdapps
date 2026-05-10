@@ -14,9 +14,10 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "../components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
-import { Search, Grid2X2, List, Plus, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { Search, Grid2X2, List, Plus, ChevronLeft, ChevronRight, Filter, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Req, Opt } from "../components/FieldLabel";
 
 const PER_PAGE = 3;
 const API_OPTIONS = ["SMS", "USSD", "CaaS", "Subscription", "Downloadable", "OTP"];
@@ -24,9 +25,8 @@ const API_OPTIONS = ["SMS", "USSD", "CaaS", "Subscription", "Downloadable", "OTP
 export const CreateAppDialog = ({ open, onOpenChange, prefill = null }) => {
   const { addApp } = useApp();
   const [step, setStep] = useState(1);
-  const [detailsTab, setDetailsTab] = useState("basic");
   const [basic, setBasic] = useState({ name: "", description: "", host: "", whitelist: "", blacklist: "" });
-  const [advanced, setAdvanced] = useState({ contentGov: true, ads: true, masking: true, autoExpire: false, chargingSdk: false, startTime: new Date().toISOString().slice(0, 16) });
+  const [advanced, setAdvanced] = useState({ autoExpire: false, startTime: new Date().toISOString().slice(0, 16) });
   const [services, setServices] = useState({ operator: true, apis: [] });
   const [errors, setErrors] = useState({});
 
@@ -87,57 +87,40 @@ export const CreateAppDialog = ({ open, onOpenChange, prefill = null }) => {
         </div>
 
         {step === 1 && (
-          <Tabs value={detailsTab} onValueChange={setDetailsTab}>
-            <TabsList className="grid grid-cols-2">
-              <TabsTrigger value="basic" data-testid="tab-basic">Basic</TabsTrigger>
-              <TabsTrigger value="advanced" data-testid="tab-advanced">Advanced</TabsTrigger>
-            </TabsList>
-            <TabsContent value="basic" className="space-y-4 pt-4">
+          <div className="space-y-4 pt-2">
+            <div>
+              <Label>App Name<Req /></Label>
+              <Input data-testid="app-name" value={basic.name} onChange={(e) => setBasic({ ...basic, name: e.target.value })} className={errors.name ? "border-rose-500" : ""} />
+              {errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name}</p>}
+            </div>
+            <div>
+              <Label>App Description<Req /></Label>
+              <Textarea data-testid="app-desc" value={basic.description} onChange={(e) => setBasic({ ...basic, description: e.target.value })} className={errors.description ? "border-rose-500" : ""} />
+              {errors.description && <p className="text-xs text-rose-600 mt-1">{errors.description}</p>}
+            </div>
+            <div>
+              <Label>Allowed Host Address<Req /></Label>
+              <Input data-testid="app-host" placeholder="https://api.example.com" value={basic.host} onChange={(e) => setBasic({ ...basic, host: e.target.value })} className={errors.host ? "border-rose-500" : ""} />
+              {errors.host && <p className="text-xs text-rose-600 mt-1">{errors.host}</p>}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label>App Name *</Label>
-                <Input data-testid="app-name" value={basic.name} onChange={(e) => setBasic({ ...basic, name: e.target.value })} className={errors.name ? "border-rose-500" : ""} />
-                {errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name}</p>}
+                <Label>Whitelisted Numbers<Opt /></Label>
+                <Input placeholder="comma separated" value={basic.whitelist} onChange={(e) => setBasic({ ...basic, whitelist: e.target.value })} />
               </div>
               <div>
-                <Label>App Description *</Label>
-                <Textarea data-testid="app-desc" value={basic.description} onChange={(e) => setBasic({ ...basic, description: e.target.value })} className={errors.description ? "border-rose-500" : ""} />
-                {errors.description && <p className="text-xs text-rose-600 mt-1">{errors.description}</p>}
+                <Label>Blacklisted Numbers<Opt /></Label>
+                <Input placeholder="comma separated" value={basic.blacklist} onChange={(e) => setBasic({ ...basic, blacklist: e.target.value })} />
               </div>
+            </div>
+            <div className="flex items-center justify-between border border-slate-200 rounded-md p-4 mt-4">
               <div>
-                <Label>Allowed Host Address *</Label>
-                <Input data-testid="app-host" placeholder="https://api.example.com" value={basic.host} onChange={(e) => setBasic({ ...basic, host: e.target.value })} className={errors.host ? "border-rose-500" : ""} />
-                {errors.host && <p className="text-xs text-rose-600 mt-1">{errors.host}</p>}
+                <Label className="font-medium">Enable Automatic Application Expiration</Label>
+                <p className="text-xs text-slate-500 mt-0.5">App will be auto-archived after expiry date.</p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Whitelisted Numbers</Label>
-                  <Input placeholder="comma separated" value={basic.whitelist} onChange={(e) => setBasic({ ...basic, whitelist: e.target.value })} />
-                </div>
-                <div>
-                  <Label>Blacklisted Numbers</Label>
-                  <Input placeholder="comma separated" value={basic.blacklist} onChange={(e) => setBasic({ ...basic, blacklist: e.target.value })} />
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="advanced" className="space-y-4 pt-4">
-              {[
-                { k: "contentGov", l: "Auto Content Governance" },
-                { k: "ads", l: "Enable Ads" },
-                { k: "masking", l: "Mobile Number Masking" },
-                { k: "autoExpire", l: "Auto Expiration" },
-                { k: "chargingSdk", l: "Charging SDK" },
-              ].map((it) => (
-                <div key={it.k} className="flex items-center justify-between border border-slate-200 rounded-md p-4">
-                  <Label>{it.l}</Label>
-                  <Switch data-testid={`adv-${it.k}`} checked={advanced[it.k]} onCheckedChange={(v) => setAdvanced({ ...advanced, [it.k]: v })} />
-                </div>
-              ))}
-              <div>
-                <Label>App Start Time</Label>
-                <Input type="datetime-local" value={advanced.startTime} onChange={(e) => setAdvanced({ ...advanced, startTime: e.target.value })} />
-              </div>
-            </TabsContent>
-          </Tabs>
+              <Switch data-testid="auto-expire" checked={advanced.autoExpire} onCheckedChange={(v) => setAdvanced({ ...advanced, autoExpire: v })} />
+            </div>
+          </div>
         )}
 
         {step === 2 && (
@@ -179,21 +162,23 @@ export const CreateAppDialog = ({ open, onOpenChange, prefill = null }) => {
 
         {step === 3 && (
           <div className="space-y-3 pt-2">
-            <h3 className="text-lg font-semibold tracking-tight">Review & Submit</h3>
+            <h3 className="text-lg font-semibold tracking-tight">Review &amp; Submit</h3>
             <div className="border border-slate-200 rounded-md divide-y divide-slate-200">
               {[
                 ["App Name", basic.name],
                 ["Description", basic.description],
                 ["Host", basic.host],
+                ["Auto Application Expiration", advanced.autoExpire ? "Yes" : "No"],
                 ["Operator", services.operator ? "Robi" : "—"],
                 ["APIs", services.apis.join(", ") || "None"],
-                ["Content Governance", advanced.contentGov ? "Yes" : "No"],
-                ["Ads", advanced.ads ? "Yes" : "No"],
-                ["Masking", advanced.masking ? "Yes" : "No"],
+                ["Enable Automatic Content Governance", "Yes"],
+                ["Enable Advertisements", "Yes"],
+                ["Enable Mobile Number Masking", "Yes"],
+                ["Enable Charging SDK", "Yes"],
               ].map(([k, v], i) => (
-                <div key={i} className="flex justify-between p-3 text-sm">
-                  <span className="text-slate-500 uppercase tracking-wide font-semibold text-xs">{k}</span>
-                  <span className="font-medium text-right max-w-[60%]">{v || "—"}</span>
+                <div key={i} className="flex justify-between p-3 text-sm gap-3">
+                  <span className="text-slate-500 uppercase tracking-wide font-semibold text-xs flex-shrink-0">{k}</span>
+                  <span className="font-medium text-right max-w-[60%] break-words">{v || "—"}</span>
                 </div>
               ))}
             </div>
@@ -217,76 +202,204 @@ export const CreateAppDialog = ({ open, onOpenChange, prefill = null }) => {
   );
 };
 
+// ====== Helpers used inside API configs ======
+const Section = ({ title, children, defaultOpen = true }) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border border-slate-200 rounded-md bg-white">
+      <button type="button" onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition">
+        <span className="text-xs font-bold uppercase tracking-widest text-[#0f172a]">{title}</span>
+        <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && <div className="p-4 pt-2 border-t border-slate-100 space-y-3">{children}</div>}
+    </div>
+  );
+};
+
+const SubSection = ({ title, children }) => (
+  <div className="border-l-2 border-[#e11d48] pl-3 space-y-3">
+    <p className="text-xs font-bold uppercase tracking-wide text-[#e11d48]">{title}</p>
+    {children}
+  </div>
+);
+
+const ToggleRow = ({ label, checked, onChange, testid }) => (
+  <div className="flex items-center justify-between">
+    <Label className="font-medium">{label}</Label>
+    <Switch checked={checked} onCheckedChange={onChange} data-testid={testid} />
+  </div>
+);
+
+const Locked = ({ label, value }) => (
+  <div>
+    <Label>{label}</Label>
+    <Input value={value} disabled className="bg-slate-50" />
+  </div>
+);
+
+// ====== API Configurations (Common/Robi) ======
+const ApiConfigSMS = () => {
+  const [mo, setMo] = useState(true);
+  const [mt, setMt] = useState(true);
+  const [dr, setDr] = useState(false);
+  const [moCharge, setMoCharge] = useState(false);
+  const [mtCharge, setMtCharge] = useState(true);
+
+  return (
+    <Tabs defaultValue="common">
+      <TabsList><TabsTrigger value="common" data-testid="sms-common">Common</TabsTrigger><TabsTrigger value="robi" data-testid="sms-robi">Robi</TabsTrigger></TabsList>
+      <TabsContent value="common" className="pt-3 space-y-3">
+        <ToggleRow label="Enable Mobile Originated SMS" checked={mo} onChange={setMo} testid="sms-mo" />
+        {mo && <div><Label>Message Receiving URL<Req /></Label><Input placeholder="https://api.example.com/sms" data-testid="sms-mo-url" /></div>}
+        <ToggleRow label="Enable Mobile Terminated SMS" checked={mt} onChange={setMt} testid="sms-mt" />
+        {mt && <>
+          <div><Label>Default Sender Address</Label><Input defaultValue="BDapps" /></div>
+          <div><Label>Sender Address Aliases<Opt /></Label><Input defaultValue="BDapps,BDA" /></div>
+        </>}
+        <ToggleRow label="Enable Delivery Reports" checked={dr} onChange={setDr} testid="sms-dr" />
+        {dr && <div><Label>Delivery Report URL<Req /></Label><Input placeholder="https://api.example.com/dr" data-testid="sms-dr-url" /></div>}
+        <ToggleRow label="Subscription Required" checked={false} onChange={() => {}} testid="sms-subreq" />
+      </TabsContent>
+      <TabsContent value="robi" className="pt-3 space-y-3">
+        <Section title="Robi SMS Configuration">
+          <SubSection title="Configure Mobile Originated SMS">
+            <div><Label>SMS Short Code<Req /></Label><Select defaultValue="16222"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{["16222", "16333", "16444"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select></div>
+            <div><Label>SMS Keyword<Req /></Label><Input placeholder="MYAPP" /></div>
+            <ToggleRow label="Enable Mobile Originated Traffic Charging" checked={moCharge} onChange={setMoCharge} testid="sms-mocharge" />
+            <Locked label="Messages Per Second" value="10" />
+            <Locked label="Messages Per Day" value="10000" />
+          </SubSection>
+          <SubSection title="Configure Mobile Terminated SMS">
+            <ToggleRow label="Enable Mobile Terminated Traffic Charging" checked={mtCharge} onChange={setMtCharge} testid="sms-mtcharge" />
+            <Locked label="Messages Per Second" value="10" />
+            <Locked label="Messages Per Day" value="10000" />
+          </SubSection>
+        </Section>
+        {(moCharge || mtCharge) && (
+          <Section title="Robi SMS Charging Configuration">
+            {moCharge && <SubSection title="Configure Mobile Originated SMS">
+              <div><Label>Charged Party<Req /></Label><Select defaultValue="Subscriber"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Subscriber">Subscriber</SelectItem><SelectItem value="Developer">Developer</SelectItem></SelectContent></Select></div>
+              <div><Label>Charging Amount (BDT)<Req /></Label><Input defaultValue="2.00" /></div>
+            </SubSection>}
+            {mtCharge && <SubSection title="Configure Mobile Terminated SMS">
+              <div><Label>Charged Party<Req /></Label><Select defaultValue="Subscriber"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Subscriber">Subscriber</SelectItem><SelectItem value="Developer">Developer</SelectItem></SelectContent></Select></div>
+              <div><Label>Charging Amount (BDT)<Req /></Label><Input defaultValue="2.00" /></div>
+            </SubSection>}
+          </Section>
+        )}
+      </TabsContent>
+    </Tabs>
+  );
+};
+
+const ApiConfigUSSD = () => {
+  const [charge, setCharge] = useState(true);
+  return (
+    <Tabs defaultValue="common">
+      <TabsList><TabsTrigger value="common" data-testid="ussd-common">Common</TabsTrigger><TabsTrigger value="robi" data-testid="ussd-robi">Robi</TabsTrigger></TabsList>
+      <TabsContent value="common" className="pt-3 space-y-3">
+        <div><Label>Connection URL<Req /></Label><Input placeholder="https://api.example.com/ussd" data-testid="ussd-url" /></div>
+        <ToggleRow label="Subscription Required" checked={false} onChange={() => {}} testid="ussd-subreq" />
+      </TabsContent>
+      <TabsContent value="robi" className="pt-3 space-y-3">
+        <Section title="Robi USSD Configuration">
+          <div><Label>Service Code<Req /></Label><Select defaultValue="*123#"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="*123#">*123#</SelectItem><SelectItem value="*456#">*456#</SelectItem><SelectItem value="*789#">*789#</SelectItem></SelectContent></Select></div>
+          <div><Label>Keyword (numeric)<Req /></Label><Input placeholder="00000–99999" maxLength={5} /></div>
+          <Locked label="Maximum Messages Per Second" value="10" />
+          <Locked label="Maximum Messages Per Day" value="5000" />
+          <ToggleRow label="Enable USSD Charging" checked={charge} onChange={setCharge} testid="ussd-charge" />
+        </Section>
+        {charge && (
+          <Section title="Robi USSD Charging Configuration">
+            <div><Label>Charged Party<Req /></Label><Select defaultValue="Subscriber"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Subscriber">Subscriber</SelectItem><SelectItem value="Developer">Developer</SelectItem></SelectContent></Select></div>
+            <div><Label>Charging Amount (BDT)<Req /></Label><Input defaultValue="2.00" /></div>
+          </Section>
+        )}
+      </TabsContent>
+    </Tabs>
+  );
+};
+
+const ApiConfigCaaS = () => {
+  const [debit, setDebit] = useState(false);
+  const [mobAcc, setMobAcc] = useState(false);
+  return (
+    <Tabs defaultValue="common">
+      <TabsList><TabsTrigger value="common" data-testid="caas-common">Common</TabsTrigger><TabsTrigger value="robi" data-testid="caas-robi">Robi</TabsTrigger></TabsList>
+      <TabsContent value="common" className="pt-3 space-y-3">
+        <div><Label>Charging Notification URL<Opt /></Label><Input type="url" placeholder="https://..." /></div>
+        <div><Label>Subscription Required<Req /></Label><Select defaultValue="No"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Yes">Yes</SelectItem><SelectItem value="No">No</SelectItem></SelectContent></Select></div>
+      </TabsContent>
+      <TabsContent value="robi" className="pt-3 space-y-3">
+        <Locked label="Maximum Transactions Per Second" value="5" />
+        <Locked label="Maximum Transactions Per Day" value="2000" />
+        <ToggleRow label="Enable Debit Requests" checked={debit} onChange={setDebit} testid="caas-debit" />
+        {debit && <>
+          <Locked label="Minimum Debit Amount (BDT)" value="1.00" />
+          <Locked label="Maximum Debit Amount (BDT)" value="500.00" />
+        </>}
+        <ToggleRow label="Enable Mobile Account for Robi" checked={mobAcc} onChange={setMobAcc} testid="caas-mobacc" />
+        {mobAcc && <Locked label="Service Charge Percentage" value="2.5%" />}
+      </TabsContent>
+    </Tabs>
+  );
+};
+
+const ApiConfigSubscription = () => {
+  const [notif, setNotif] = useState(true);
+  const [http, setHttp] = useState(true);
+  const [charge, setCharge] = useState(true);
+  const [daily, setDaily] = useState(true);
+  const [weekly, setWeekly] = useState(false);
+  const [monthly, setMonthly] = useState(false);
+  return (
+    <Tabs defaultValue="common">
+      <TabsList><TabsTrigger value="common" data-testid="sub-common">Common</TabsTrigger><TabsTrigger value="robi" data-testid="sub-robi">Robi</TabsTrigger></TabsList>
+      <TabsContent value="common" className="pt-3 space-y-3">
+        <div><Label>Subscription Response Message<Req /></Label><Textarea defaultValue="Welcome! You have subscribed." /></div>
+        <div><Label>Un-subscription Response Message<Req /></Label><Textarea defaultValue="You have unsubscribed." /></div>
+        <div className="flex items-center justify-between">
+          <Label className="font-medium">Subscriber Confirmation Required</Label>
+          <Switch checked disabled aria-label="locked" />
+        </div>
+        <ToggleRow label="Send Subscription Notification" checked={notif} onChange={setNotif} testid="sub-notif" />
+        {notif && <div><Label>Subscription Notification URL<Req /></Label><Input placeholder="https://..." data-testid="sub-notif-url" /></div>}
+        <ToggleRow label="Allow HTTP Subscription API" checked={http} onChange={setHttp} testid="sub-http" />
+      </TabsContent>
+      <TabsContent value="robi" className="pt-3 space-y-3">
+        <Locked label="Maximum number of Broadcast Messages Per Day" value="1000" />
+        <ToggleRow label="Enable Subscription Charging" checked={charge} onChange={setCharge} testid="sub-charge" />
+        {charge && (
+          <div className="border border-slate-200 rounded-md p-3 space-y-2 bg-slate-50">
+            <Label className="text-xs uppercase tracking-widest font-bold text-slate-500">Charging Frequency<Req /></Label>
+            <div className="flex flex-wrap gap-4">
+              <label className="flex items-center gap-2"><Checkbox checked={daily} onCheckedChange={(v) => setDaily(!!v)} data-testid="sub-daily" /> Daily</label>
+              <label className="flex items-center gap-2"><Checkbox checked={weekly} onCheckedChange={(v) => setWeekly(!!v)} data-testid="sub-weekly" /> Weekly</label>
+              <label className="flex items-center gap-2"><Checkbox checked={monthly} onCheckedChange={(v) => setMonthly(!!v)} data-testid="sub-monthly" /> Monthly</label>
+            </div>
+            <div className="pt-2"><Label>Charging Amount (BDT)<Req /></Label><Input defaultValue="2.00" /></div>
+          </div>
+        )}
+      </TabsContent>
+    </Tabs>
+  );
+};
+
 const ApiConfig = ({ api }) => {
-  if (api === "SMS") return (
-    <>
-      <div className="flex items-center justify-between"><Label>MO Enabled</Label><Switch defaultChecked /></div>
-      <div><Label>Message URL</Label><Input placeholder="https://api.example.com/sms" /></div>
-      <div className="flex items-center justify-between"><Label>MT Enabled</Label><Switch defaultChecked /></div>
-      <div><Label>Sender Address</Label><Input placeholder="21333" /></div>
-      <div className="flex items-center justify-between"><Label>Delivery Reports</Label><Switch defaultChecked /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label>Robi Short Code</Label><Input defaultValue="21333" /></div>
-        <div><Label>Keyword</Label><Input placeholder="MYAPP" /></div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label>MPS</Label><Input defaultValue="100" /></div>
-        <div><Label>MPD</Label><Input defaultValue="10000" /></div>
-      </div>
-    </>
-  );
-  if (api === "USSD") return (
-    <>
-      <div><Label>Connection URL</Label><Input placeholder="https://api.example.com/ussd" /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label>Service Code</Label><Input defaultValue="*123*45#" /></div>
-        <div><Label>Keyword (numeric)</Label><Input defaultValue="45" /></div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label>MPS</Label><Input defaultValue="50" /></div>
-        <div><Label>MPD</Label><Input defaultValue="5000" /></div>
-      </div>
-      <div className="flex items-center justify-between"><Label>Charging Enabled</Label><Switch /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label>Charged Party</Label><Select defaultValue="subscriber"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="subscriber">Subscriber</SelectItem><SelectItem value="developer">Developer</SelectItem></SelectContent></Select></div>
-        <div><Label>Amount (BDT)</Label><Input defaultValue="1" /></div>
-      </div>
-    </>
-  );
-  if (api === "CaaS") return (
-    <>
-      <div><Label>Charging Notification URL</Label><Input placeholder="optional" /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label>Max TPS</Label><Input defaultValue="100" /></div>
-        <div><Label>Max TPD</Label><Input defaultValue="10000" /></div>
-      </div>
-      <div className="flex items-center justify-between"><Label>Debit Requests</Label><Switch defaultChecked /></div>
-      <div className="flex items-center justify-between"><Label>Mobile Account</Label><Switch defaultChecked /></div>
-    </>
-  );
-  if (api === "Subscription") return (
-    <>
-      <div><Label>Welcome Message *</Label><Textarea defaultValue="Welcome! You have subscribed." /></div>
-      <div><Label>Notification URL</Label><Input placeholder="https://..." /></div>
-      <div className="flex items-center justify-between"><Label>Allow HTTP</Label><Switch /></div>
-      <div className="flex items-center justify-between"><Label>Confirmation Required</Label><Switch checked disabled /></div>
-      <div><Label>Broadcast MPD</Label><Input defaultValue="1000" /></div>
-      <div className="grid grid-cols-2 gap-3">
-        <div><Label>Charging Frequency</Label><Select defaultValue="daily"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="daily">Daily</SelectItem><SelectItem value="weekly">Weekly</SelectItem><SelectItem value="monthly">Monthly</SelectItem></SelectContent></Select></div>
-        <div><Label>Amount (BDT)</Label><Input defaultValue="2" /></div>
-      </div>
-    </>
-  );
+  if (api === "SMS") return <ApiConfigSMS />;
+  if (api === "USSD") return <ApiConfigUSSD />;
+  if (api === "CaaS") return <ApiConfigCaaS />;
+  if (api === "Subscription") return <ApiConfigSubscription />;
   if (api === "Downloadable") return (
-    <>
-      <div><Label>SDK Version</Label><Select defaultValue="v3"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="v3">v3.2</SelectItem><SelectItem value="v2">v2.8</SelectItem></SelectContent></Select></div>
-      <div><Label>Build Version</Label><Input defaultValue="1.0.0" /></div>
-      <div><Label>APK Upload</Label><Input type="file" accept=".apk" /></div>
-    </>
+    <div className="space-y-3">
+      <div><Label>SDK Version<Req /></Label><Select defaultValue="v3"><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="v3">v3.2</SelectItem><SelectItem value="v2">v2.8</SelectItem></SelectContent></Select></div>
+      <div><Label>Build Version<Req /></Label><Input defaultValue="1.0.0" /></div>
+      <div><Label>APK Upload<Req /></Label><Input type="file" accept=".apk" /></div>
+    </div>
   );
   if (api === "OTP") return (
-    <div className="text-sm text-slate-600 p-3 bg-emerald-50 border border-emerald-200 rounded-md">
-      OTP service configured. Default TTL: 5 minutes. Max retries: 3.
+    <div className="text-sm text-emerald-700 p-4 bg-emerald-50 border border-emerald-200 rounded-md">
+      OTP service configured. Default TTL: 5 minutes. Max retries: 3. No further configuration required.
     </div>
   );
   return null;
