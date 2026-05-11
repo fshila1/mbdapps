@@ -2,12 +2,17 @@ import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { useApp } from "../context/AppContext";
 import { LITE_TEMPLATES, PROVISIONING_TEMPLATES } from "../mocks/data";
+import { WEB_TEMPLATES, ANDROID_TEMPLATES } from "../mocks/builderTemplates";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
-import { Search, Sparkles, Smartphone, ArrowRight } from "lucide-react";
+import { Search, Sparkles, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import MyGeneratedAppsShelf from "../components/digital/MyGeneratedAppsShelf";
+import TemplateGallery from "../components/digital/TemplateGallery";
+import DesignChooserModal from "../components/digital/DesignChooserModal";
+import AppBuilder from "../components/digital/AppBuilder";
 
 const Digital = () => {
   const navigate = useNavigate();
@@ -15,6 +20,12 @@ const Digital = () => {
   const [search, setSearch] = useState("");
   const [previewLite, setPreviewLite] = useState(null);
   const [previewPro, setPreviewPro] = useState(null);
+
+  // Web/Android builder state
+  const [activeBuilder, setActiveBuilder] = useState(null); // 'web' | 'android' | null
+  const [chooserTemplate, setChooserTemplate] = useState(null);
+  const [chooserType, setChooserType] = useState(null);
+  const [builderState, setBuilderState] = useState(null); // { template, designId, type }
 
   const applyLite = (t) => {
     setPendingTemplate({ name: t.name, keyword: t.keyword, description: t.description, category: t.category });
@@ -28,9 +39,36 @@ const Digital = () => {
   const filterLite = LITE_TEMPLATES.filter((t) => !search || t.name.toLowerCase().includes(search.toLowerCase()));
   const filterPro = PROVISIONING_TEMPLATES.filter((t) => !search || t.name.toLowerCase().includes(search.toLowerCase()));
 
+  const openChooser = (tpl, type) => {
+    setChooserTemplate(tpl);
+    setChooserType(type);
+  };
+  const onGenerate = ({ template, designId }) => {
+    setBuilderState({ template, designId, type: chooserType });
+    setChooserTemplate(null);
+  };
+  const backToTemplates = () => setBuilderState(null);
+
+  // If in builder, show builder view
+  if (builderState) {
+    return (
+      <Layout>
+        <AppBuilder
+          template={builderState.template}
+          designId={builderState.designId}
+          type={builderState.type}
+          onBack={backToTemplates}
+        />
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <div className="space-y-8">
+      <div className="space-y-6">
+        {/* Generated apps shelf */}
+        <MyGeneratedAppsShelf />
+
         {/* Gradient hero */}
         <div className="relative overflow-hidden rounded-md bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#7f1d1d] text-white p-8 md:p-12">
           <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#e11d48] opacity-30 rounded-full blur-3xl"></div>
@@ -43,24 +81,25 @@ const Digital = () => {
               Build Faster with Digital Templates.
             </h1>
             <p className="text-slate-300 mt-3 max-w-xl leading-relaxed">
-              Pre-configured blueprints for Lite and Pro apps. Pick a template, customize a few fields, and ship.
+              Pre-configured blueprints for Lite, Pro, Web, and Android apps. Pick a template, customize a few fields, and ship.
             </p>
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <Input data-testid="digital-search" placeholder="Search templates..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
-        </div>
-
         <Tabs defaultValue="lite">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="lite" data-testid="tab-lite-templates">Lite Templates</TabsTrigger>
             <TabsTrigger value="pro" data-testid="tab-pro-templates">Provisioning Templates</TabsTrigger>
+            <TabsTrigger value="web" data-testid="tab-web-builder">Web App Builder</TabsTrigger>
+            <TabsTrigger value="android" data-testid="tab-android-builder">Android App Builder</TabsTrigger>
           </TabsList>
 
+          {/* Lite */}
           <TabsContent value="lite" className="pt-6">
+            <div className="relative max-w-md mb-5">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Input data-testid="digital-search" placeholder="Search templates..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filterLite.map((t) => (
                 <div key={t.id} data-testid={`lite-tpl-${t.id}`} className="group border border-slate-200 rounded-md p-6 bg-white hover:border-[#e11d48] hover:-translate-y-1 transition-all hover:shadow-md">
@@ -79,7 +118,12 @@ const Digital = () => {
             </div>
           </TabsContent>
 
+          {/* Pro */}
           <TabsContent value="pro" className="pt-6">
+            <div className="relative max-w-md mb-5">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Input placeholder="Search templates..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filterPro.map((t) => (
                 <div key={t.id} data-testid={`pro-tpl-${t.id}`} className="group border border-slate-200 rounded-md p-6 bg-white hover:border-[#e11d48] hover:-translate-y-1 transition-all hover:shadow-md">
@@ -97,8 +141,37 @@ const Digital = () => {
               ))}
             </div>
           </TabsContent>
+
+          {/* Web App Builder */}
+          <TabsContent value="web" className="pt-6">
+            <TemplateGallery
+              templates={WEB_TEMPLATES}
+              banner="All web apps are generated as React + Tailwind CSS projects — ready to run with npm install && npm start"
+              onSelect={(t) => openChooser(t, "web")}
+              testidPrefix="web"
+            />
+          </TabsContent>
+
+          {/* Android App Builder */}
+          <TabsContent value="android" className="pt-6">
+            <TemplateGallery
+              templates={ANDROID_TEMPLATES}
+              banner="All Android apps are generated as Flutter projects — ready to build with flutter pub get && flutter run"
+              badges={["Flutter 3.x", "Material 3 Design", "Supports Android 8+"]}
+              onSelect={(t) => openChooser(t, "android")}
+              testidPrefix="android"
+            />
+          </TabsContent>
         </Tabs>
       </div>
+
+      {/* Design Chooser modal */}
+      <DesignChooserModal
+        template={chooserTemplate}
+        open={!!chooserTemplate}
+        onClose={() => setChooserTemplate(null)}
+        onGenerate={onGenerate}
+      />
 
       {/* Lite preview - phone screen */}
       <Dialog open={!!previewLite} onOpenChange={(o) => !o && setPreviewLite(null)}>
@@ -106,7 +179,6 @@ const Digital = () => {
           <DialogHeader><DialogTitle>{previewLite?.name}</DialogTitle><DialogDescription>{previewLite?.description}</DialogDescription></DialogHeader>
           {previewLite && (
             <div className="flex flex-col items-center pt-2">
-              {/* Phone */}
               <div className="w-64 h-[450px] bg-[#0f172a] rounded-[2.5rem] p-3 shadow-2xl">
                 <div className="bg-white h-full rounded-[2rem] overflow-hidden flex flex-col">
                   <div className="bg-slate-100 p-2 text-center text-xs font-mono">{previewLite.keyword} · 21333</div>
