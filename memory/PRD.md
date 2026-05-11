@@ -29,7 +29,17 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 - Data-testid on every interactive element
 - Mock data persisted across reloads via localStorage
 
-## What's Been Implemented (Feb 6, 2026 — initial; Feb 10, 2026 — fixes)
+## What's Been Implemented (Feb 6, 2026 — initial; Feb 10, 2026 — fixes; Feb 11, 2026 — Web/Android Builders)
+
+### Iteration 3 — Web & Android App Builders (Feb 11, 2026)
+- Added Web App Builder + Android App Builder tabs to `/digital`
+- Persistent "My Generated Apps" shelf at top (localStorage; last 3 recent; View All modal)
+- 12 new templates (6 web + 6 android) with category pills, search, ratings
+- 3-design chooser modal (Modern Card / Minimal List / Full Screen) — CSS-only phone mockups
+- Full builder view: live phone preview, color picker, emoji icon picker, app name/desc/dev/version
+- Mock actions: Share Preview (copy URL toast), Download Code (3-step progress), Push to GitHub (3-step + connect step + repo URL), Deploy to Web (Netlify/Vercel cards + 3-step + URL), Submit to Play Store (Pro upgrade modal)
+- Rate Template stars 1–5 — persists in localStorage and shows on gallery cards
+- New files: `/components/digital/{PhonePreview,TemplateGallery,DesignChooserModal,AppBuilder,MyGeneratedAppsShelf}.jsx`, `/hooks/useBuilderStorage.js`, `/mocks/builderTemplates.js`
 
 ### Iteration 2 Fixes (Feb 10, 2026)
 - **Persistent left sidebar** for all authenticated routes (Dev: 6 links, Admin: 7 links). Mobile slides in as drawer with overlay. Active route highlighted red.
@@ -65,10 +75,13 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
   - Reports with Message History + link to Other Reports
 - **App Store** (`/appstore`, public): rotating hero (3 slides), search, tab nav (All/Newly/Top/Most), category dropdown, sub-banner, 3 horizontal scroll sections, OTP login dialog, app detail page with rate/review, "From Developer" section, footer
 - **Reports** (`/reports`): sidebar nav (Overall/Application/Subscription) + form with Year/Month/Operator/etc. + recharts bar chart + table + Excel/PDF/Print exports
-- **★ Digital** (`/digital`): gradient hero "Build Faster with Digital Templates", search, 2 tabs:
+- **★ Digital** (`/digital`): gradient hero "Build Faster with Digital Templates", **persistent "My Generated Apps" shelf** at top (last 3 generated, with View All modal), 4 tabs:
   - Lite Templates (6 cards with phone-screen SMS preview modal)
   - Provisioning Templates (4 cards with architecture flow diagram preview)
-  - "Use This Template" pre-fills the respective creation flow
+  - **Web App Builder (NEW Feb 11, 2026)**: 6 templates (E-Commerce, Landing Page, Health Portal, Education Hub, Restaurant Menu, Islamic Portal), search + 8 category pills, "View Design Options →" opens design chooser with 3 styles (Modern Card / Minimal List / Full Screen), Generate App opens full builder view with live phone preview (color + name + emoji icon live-update), 4 action buttons (Share Preview / Download Code / Push to GitHub / Deploy to Web via Netlify or Vercel) — all mocked with progress modals/toasts. Banner: "React + Tailwind CSS".
+  - **Android App Builder (NEW Feb 11, 2026)**: 6 Flutter templates (Daily Alerts, Prayer Reminder, Health Tracker, Classroom Companion, Sports Scores, Finance Tracker), banner + badges (Flutter 3.x · Material 3 · Android 8+), same 3-step flow; Submit to Play Store is gated behind "Upgrade to BDapps Pro" modal.
+  - Star rating per template (1–5) persists in localStorage, aggregates with mock base rating.
+  - "Use This Template" pre-fills the respective creation flow (Lite/Pro).
 
 ### Admin Module
 - Dashboard with 6 tiles + stats

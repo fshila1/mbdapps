@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, X, Check } from "lucide-react";
-import { Dialog, DialogContent } from "../ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { DESIGN_OPTIONS } from "../../mocks/builderTemplates";
 import PhonePreview from "./PhonePreview";
@@ -20,6 +20,9 @@ const DesignChooserModal = ({ template, open, onClose, onGenerate }) => {
         data-testid="design-chooser-modal"
         className="max-w-4xl p-0 max-h-[92vh] overflow-hidden flex flex-col gap-0"
       >
+        {/* Accessible title (hidden visually, visible header below) */}
+        <DialogTitle className="sr-only">Choose Design for {template.name}</DialogTitle>
+        <DialogDescription className="sr-only">Select a UI design that fits your vision</DialogDescription>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white sticky top-0 z-10">
           <button data-testid="design-back" onClick={onClose} className="p-2 hover:bg-slate-100 rounded-md">
