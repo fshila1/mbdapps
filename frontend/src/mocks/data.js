@@ -123,10 +123,12 @@ export const seedApps = [
 ];
 
 export const seedLiteApps = [
-  { id: "LITE-001", name: "Morning News Bangla", status: "Active", category: "Alert", keyword: "MNEWS", type: "Alert" },
-  { id: "LITE-002", name: "Weather Today", status: "Active", category: "Alert", keyword: "WTHR", type: "Alert" },
+  { id: "LITE-001", name: "Morning News Bangla", status: "Active", category: "Alert", keyword: "MNEWS", type: "Alert", subscribers: 1284 },
+  { id: "LITE-002", name: "Weather Today", status: "Active", category: "Alert", keyword: "WTHR", type: "Alert", subscribers: 2156 },
   { id: "LITE-003", name: "Daily Hadith", status: "Pending", category: "Services", keyword: "HADITH", type: "Services" },
   { id: "LITE-004", name: "Stock Brief", status: "Rejected", category: "Services", keyword: "STKBR", type: "Services" },
+  { id: "LITE-005", name: "Daily Health Tips", status: "Active", category: "Services", keyword: "HEALTH16222", type: "Service", subscribers: 942, schedule: { type: "Daily", time: "09:00 AM" } },
+  { id: "LITE-006", name: "Daily Hadith", status: "Active", category: "Services", keyword: "HADITH16333", type: "Service", subscribers: 1830, schedule: { type: "Daily", time: "06:00 AM" } },
 ];
 
 export const seedKeywords = [

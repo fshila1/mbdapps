@@ -22,17 +22,29 @@ const StarRow = ({ value, count, userRating }) => {
   );
 };
 
-const TemplateCard = ({ tpl, onView, userRating, aggregate }) => (
+const TemplateCard = ({ tpl, onView, userRating, aggregate, compareMode, isSelected, onToggleCompare }) => (
   <div
     data-testid={`template-card-${tpl.id}`}
-    className="relative group border border-slate-200 rounded-2xl bg-white p-5 hover:border-[#e11d48] hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col"
+    className={`relative group border rounded-2xl bg-white p-5 hover:shadow-lg hover:-translate-y-1 transition-all flex flex-col ${isSelected ? "border-[#7c3aed] ring-2 ring-purple-200" : "border-slate-200 hover:border-[#e11d48]"}`}
   >
     {userRating > 0 && (
       <div className="absolute -top-2 -right-2 bg-amber-400 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-md">
         <Star size={12} className="fill-white" />
       </div>
     )}
-    <div className="flex items-start gap-3 mb-3">
+    {compareMode && (
+      <label className="absolute top-3 left-3 flex items-center gap-1.5 cursor-pointer bg-white rounded-md border border-slate-200 px-2 py-1 shadow-sm">
+        <input
+          type="checkbox"
+          data-testid={`compare-check-${tpl.id}`}
+          checked={!!isSelected}
+          onChange={() => onToggleCompare?.(tpl.id)}
+          className="accent-[#7c3aed]"
+        />
+        <span className="text-[10px] uppercase tracking-widest font-bold text-slate-600">Compare</span>
+      </label>
+    )}
+    <div className={`flex items-start gap-3 mb-3 ${compareMode ? "mt-8" : ""}`}>
       <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tpl.iconGradient} flex items-center justify-center text-3xl shadow-sm flex-shrink-0`}>
         {tpl.icon}
       </div>
@@ -65,7 +77,7 @@ const TemplateCard = ({ tpl, onView, userRating, aggregate }) => (
   </div>
 );
 
-const TemplateGallery = ({ templates, banner, badges, onSelect, testidPrefix }) => {
+const TemplateGallery = ({ templates, banner, badges, onSelect, testidPrefix, compareMode, compareSelected = [], onToggleCompare }) => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const { getUserRating, getAggregateRating } = useTemplateRatings();
@@ -141,6 +153,9 @@ const TemplateGallery = ({ templates, banner, badges, onSelect, testidPrefix }) 
               onView={onSelect}
               userRating={getUserRating(t.id)}
               aggregate={getAggregateRating(t.id, t.baseRating)}
+              compareMode={compareMode}
+              isSelected={compareSelected.includes(t.id)}
+              onToggleCompare={onToggleCompare}
             />
           ))}
         </div>

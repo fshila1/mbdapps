@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend-only end-to-end testing of the BDapps major patch (iteration 2): Lite Service-template fixes, Alert broadcast dialog, Scheduled Content manager (Queue + Single + Bulk), Digital hub web/android customization & generation, browser/phone mockups, View Code drawer, What's Included, Compare mode, and Demo Tour. 25+ acceptance checks executed via Playwright — all critical criteria PASS. No blocking issues.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Demo Tour", "issues": ["Tour-tooltip can be positioned outside viewport when the spotlight target sits near a screen edge; Playwright click on 'tour-next' on the 5th/6th step needed scroll-into-view. Consider clamping tooltip coordinates so it always remains within the visible viewport (works for users who can scroll, but is brittle for very tall steps)."]},
+      {"screen": "Fonts (all pages)", "issues": ["CORS error for api.fontshare.com (Cabinet Grotesk @400/500/700/800). Browser logs show 'Access-Control-Allow-Origin' mismatch. Headings fall back to sans-serif. Consider self-hosting the font or removing the cross-origin link."]}
+    ]
+  },
+  "test_report_links": ["/app/test_reports/iteration_2.json"],
+  "action_items": [
+    "(Low) Clamp DemoTour tooltip position to stay inside the viewport (or auto-scroll target into view before advancing). Functionality works but UX is fragile on the last 1-2 steps.",
+    "(Low) Fix or remove the Fontshare CDN <link> on index.html — the CORS failure spams console errors on every page load.",
+    "(Optional) Add an explicit data-testid='browser-preview' wrapper inside AppBuilder for web type so automation can directly target the preview frame (the builder uses BrowserPreview but the outer wrapper has no testid). Not required by acceptance criteria, only for future regression."
+  ],
+  "critical_code_review_comments": [
+    "LiteAppActions.jsx is ~500 lines and contains TWO large dialog components (AlertBroadcastDialog + ScheduledContentDialog with Single/Bulk forms + Edit dialog). Splitting ScheduledContentDialog into its own file (and pulling Queue table + Add tab into sub-components) would improve maintainability.",
+    "ScheduledContentDialog re-seeds the queue from PRESEED_QUEUE/PRESEED_HADITH inside a useEffect whenever (open, app) changes — so any edits/deletes made by the user during a session are wiped if the dialog is closed and reopened on the same app. If state persistence is desired, lift the queue into AppContext / localStorage keyed by app.id.",
+    "Digital.jsx is ~385 lines with 5 separate render-branches (customizing → generating → builderState → tabs). Splitting the conditional renders into dedicated route components or a small state machine would improve readability.",
+    "WebCustomizationForm prefills name/tagline from template defaults, which means 'cust-generate' is enabled immediately on first render. The review spec said it should be disabled if no name/tagline. Current behaviour matches the validator (name && tagline) — it's only effectively disabled when both are blank. Confirm this is intended; otherwise force-empty the customization form on first mount."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100% of acceptance criteria executed; all critical checks pass"},
+  "test_credentials": "developer@bdapps.com / dev123 (works) — sourced from /app/memory/test_credentials.md",
+  "seed_data_creation": "Used default seed: LITE-001..LITE-006 from seedLiteApps. Alert broadcast posts a transient toast; scheduled content delete on q5 verified in-session.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All verified PASS via single Playwright run on REACT_APP_BACKEND_URL: (1) Lite/create Step 2 Services has NO 'msg-content' and shows the sky info note + scheduled-time. (2) /lite/applications shows 6 rows; type-LITE-005='Service' with bg-teal-100 class; type-LITE-006='Service'. (3) Alert broadcast: dialog opens, active-subs-line visible, no phone input, send-to-all opens broadcast-confirm; confirm-send shows 'Message sent to N subscribers' toast and closes both dialogs. (4) LITE-005 'Use' opens scheduled-content-dialog; sc-type-badge='Service', sc-tab-queue & sc-tab-add tabs visible; queue-row-q5 deletable via del-q5; single flow (single-slot dropdown + single-message + single-add) works; bulk starts with 2 'bulk-row-*' rows; bulk-add-row adds row (became 3); bulk-queue works. (5) /digital shows 4 tabs and 'start-tour'. (6) Web tab: view-design-web-ecom opens design-chooser-modal with 4 options including design-option-dashboard; wireframe labels (NAV/HERO/CARDS/SIDEBAR/CHART/CONTENT) present. (7) design-continue opens web-customization-form with cust-name/cust-tagline/cust-skip/cust-generate; cust-generate fires generation-progress; app-builder-view appears after ~3s. (8) view-code-toggle opens code-drawer; whats-included present. (9) Compare: compare-toggle reveals 6 compare-check-* checkboxes; selecting 2 shows compare-floating-bar with compare-now opening compare-modal. (10) start-tour shows tour-overlay + tour-tooltip, advances through steps with tour-next. (11) Android tab: view-design-and-prayer chooser shows 3 options (no dashboard); design-continue opens android-customization-form. Minor: WebCustomizationForm prefills template name so cust-generate is not initially disabled — see code-review comment.",
+  "rca of the issue": "No critical bugs. Tour-tooltip-outside-viewport on later steps was a Playwright auto-click artifact (the test passed once Playwright scrolled into view); root cause is the DemoTour tooltip positioning logic does not clamp to viewport bounds. Font CORS error is unrelated to features being tested."
+}

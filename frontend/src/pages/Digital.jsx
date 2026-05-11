@@ -7,12 +7,17 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
-import { Search, Sparkles, ArrowRight } from "lucide-react";
+import { Search, Sparkles, ArrowRight, GitCompare, Star as StarIcon, PlayCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import MyGeneratedAppsShelf from "../components/digital/MyGeneratedAppsShelf";
 import TemplateGallery from "../components/digital/TemplateGallery";
 import DesignChooserModal from "../components/digital/DesignChooserModal";
 import AppBuilder from "../components/digital/AppBuilder";
+import { WebCustomizationForm, AndroidCustomizationForm } from "../components/digital/CustomizationForm";
+import GenerationProgress from "../components/digital/GenerationProgress";
+import { CompareFloatingBar, CompareModal } from "../components/digital/Compare";
+import DemoTour from "../components/digital/DemoTour";
 
 const Digital = () => {
   const navigate = useNavigate();
@@ -21,11 +26,23 @@ const Digital = () => {
   const [previewLite, setPreviewLite] = useState(null);
   const [previewPro, setPreviewPro] = useState(null);
 
-  // Web/Android builder state
-  const [activeBuilder, setActiveBuilder] = useState(null); // 'web' | 'android' | null
+  // Web/Android builder flow state
   const [chooserTemplate, setChooserTemplate] = useState(null);
   const [chooserType, setChooserType] = useState(null);
-  const [builderState, setBuilderState] = useState(null); // { template, designId, type }
+  const [customizing, setCustomizing] = useState(null); // { template, designId, type }
+  const [generating, setGenerating] = useState(null); // { template, designId, type, customization }
+  const [builderState, setBuilderState] = useState(null); // { template, designId, type, customization }
+
+  // Compare mode
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareSelected, setCompareSelected] = useState([]); // list of template ids
+  const [compareOpen, setCompareOpen] = useState(false);
+
+  // Demo tour
+  const [tourOpen, setTourOpen] = useState(false);
+
+  // Active tab tracker (for compare mode templates lookup)
+  const [activeTab, setActiveTab] = useState("lite");
 
   const applyLite = (t) => {
     setPendingTemplate({ name: t.name, keyword: t.keyword, description: t.description, category: t.category });
@@ -43,13 +60,90 @@ const Digital = () => {
     setChooserTemplate(tpl);
     setChooserType(type);
   };
-  const onGenerate = ({ template, designId }) => {
-    setBuilderState({ template, designId, type: chooserType });
+
+  const onContinueFromDesign = ({ template, designId }) => {
+    setCustomizing({ template, designId, type: chooserType });
     setChooserTemplate(null);
   };
-  const backToTemplates = () => setBuilderState(null);
 
-  // If in builder, show builder view
+  const onCustomizationSubmit = (customization) => {
+    setGenerating({ ...customizing, customization });
+    setCustomizing(null);
+  };
+
+  const onCustomizationSkip = () => {
+    setGenerating({ ...customizing, customization: null });
+    setCustomizing(null);
+  };
+
+  const onGenerationDone = () => {
+    setBuilderState(generating);
+    setGenerating(null);
+  };
+
+  const backToTemplates = () => {
+    setBuilderState(null);
+  };
+
+  // Compare handlers
+  const toggleCompare = (templateId) => {
+    setCompareSelected((p) => {
+      if (p.includes(templateId)) return p.filter((x) => x !== templateId);
+      if (p.length >= 3) {
+        toast.error("You can compare up to 3 templates");
+        return p;
+      }
+      return [...p, templateId];
+    });
+  };
+
+  const compareTemplates = () => {
+    const pool = activeTab === "web" ? WEB_TEMPLATES : activeTab === "android" ? ANDROID_TEMPLATES : [];
+    return pool.filter((t) => compareSelected.includes(t.id));
+  };
+
+  const chooseFromCompare = (t) => {
+    setCompareOpen(false);
+    setCompareSelected([]);
+    setCompareMode(false);
+    openChooser(t, activeTab);
+  };
+
+  // Render Customization step
+  if (customizing) {
+    return (
+      <Layout>
+        <div className="max-w-2xl mx-auto py-6">
+          {customizing.type === "web" ? (
+            <WebCustomizationForm
+              template={customizing.template}
+              onSubmit={onCustomizationSubmit}
+              onSkip={onCustomizationSkip}
+              onBack={() => { setChooserTemplate(customizing.template); setChooserType(customizing.type); setCustomizing(null); }}
+            />
+          ) : (
+            <AndroidCustomizationForm
+              template={customizing.template}
+              onSubmit={onCustomizationSubmit}
+              onSkip={onCustomizationSkip}
+              onBack={() => { setChooserTemplate(customizing.template); setChooserType(customizing.type); setCustomizing(null); }}
+            />
+          )}
+        </div>
+      </Layout>
+    );
+  }
+
+  // Render Generation progress
+  if (generating) {
+    return (
+      <Layout>
+        <GenerationProgress onDone={onGenerationDone} />
+      </Layout>
+    );
+  }
+
+  // Render builder
   if (builderState) {
     return (
       <Layout>
@@ -57,11 +151,19 @@ const Digital = () => {
           template={builderState.template}
           designId={builderState.designId}
           type={builderState.type}
+          customization={builderState.customization}
           onBack={backToTemplates}
         />
       </Layout>
     );
   }
+
+  const onTabChange = (val) => {
+    setActiveTab(val);
+    // Reset compare selection when switching tabs
+    setCompareSelected([]);
+    setCompareMode(false);
+  };
 
   return (
     <Layout>
@@ -73,26 +175,46 @@ const Digital = () => {
         <div className="relative overflow-hidden rounded-md bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#7f1d1d] text-white p-8 md:p-12">
           <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#e11d48] opacity-30 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-1/3 w-40 h-40 bg-amber-500 opacity-20 rounded-full blur-3xl"></div>
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-xs uppercase tracking-widest font-bold mb-4 backdrop-blur-sm">
-              <Sparkles size={12} /> Digital Hub
+          <div className="relative flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-xs uppercase tracking-widest font-bold mb-4 backdrop-blur-sm">
+                <Sparkles size={12} /> Digital Hub
+              </div>
+              <h1 className="text-4xl md:text-6xl tracking-tighter font-bold leading-[0.95] max-w-3xl" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>
+                Build Faster with Digital Templates.
+              </h1>
+              <p className="text-slate-300 mt-3 max-w-xl leading-relaxed">
+                Pre-configured blueprints for Lite, Pro, Web, and Android apps. Pick a template, customize a few fields, and ship.
+              </p>
             </div>
-            <h1 className="text-4xl md:text-6xl tracking-tighter font-bold leading-[0.95] max-w-3xl" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>
-              Build Faster with Digital Templates.
-            </h1>
-            <p className="text-slate-300 mt-3 max-w-xl leading-relaxed">
-              Pre-configured blueprints for Lite, Pro, Web, and Android apps. Pick a template, customize a few fields, and ship.
-            </p>
+            <Button
+              data-testid="start-tour"
+              onClick={() => setTourOpen(true)}
+              className="bg-white/10 backdrop-blur hover:bg-white/20 border border-white/20 text-white whitespace-nowrap"
+            >
+              <PlayCircle size={14} className="mr-1.5" /> Take a Demo Tour
+            </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="lite">
-          <TabsList className="flex-wrap h-auto">
-            <TabsTrigger value="lite" data-testid="tab-lite-templates">Lite Templates</TabsTrigger>
-            <TabsTrigger value="pro" data-testid="tab-pro-templates">Provisioning Templates</TabsTrigger>
-            <TabsTrigger value="web" data-testid="tab-web-builder">Web App Builder</TabsTrigger>
-            <TabsTrigger value="android" data-testid="tab-android-builder">Android App Builder</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={onTabChange}>
+          <div data-tour="tabs-bar" className="flex items-center justify-between flex-wrap gap-3">
+            <TabsList className="flex-wrap h-auto">
+              <TabsTrigger value="lite" data-testid="tab-lite-templates">Lite Templates</TabsTrigger>
+              <TabsTrigger value="pro" data-testid="tab-pro-templates">Provisioning Templates</TabsTrigger>
+              <TabsTrigger value="web" data-testid="tab-web-builder">Web App Builder</TabsTrigger>
+              <TabsTrigger value="android" data-testid="tab-android-builder">Android App Builder</TabsTrigger>
+            </TabsList>
+            {(activeTab === "web" || activeTab === "android") && (
+              <button
+                data-testid="compare-toggle"
+                onClick={() => { setCompareMode(!compareMode); setCompareSelected([]); }}
+                className={`text-xs font-semibold flex items-center gap-1.5 px-3 py-1.5 rounded-md border transition ${compareMode ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"}`}
+              >
+                <GitCompare size={12} /> {compareMode ? "Exit Compare" : "Compare"}
+              </button>
+            )}
+          </div>
 
           {/* Lite */}
           <TabsContent value="lite" className="pt-6">
@@ -102,7 +224,7 @@ const Digital = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filterLite.map((t) => (
-                <div key={t.id} data-testid={`lite-tpl-${t.id}`} className="group border border-slate-200 rounded-md p-6 bg-white hover:border-[#e11d48] hover:-translate-y-1 transition-all hover:shadow-md">
+                <div key={t.id} data-tour="template-card" data-testid={`lite-tpl-${t.id}`} className="group border border-slate-200 rounded-md p-6 bg-white hover:border-[#e11d48] hover:-translate-y-1 transition-all hover:shadow-md">
                   <div className="flex justify-between mb-3 items-start">
                     <div className="text-4xl">{t.icon}</div>
                     <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${t.category === "Alert" ? "bg-amber-100 text-amber-700" : "bg-sky-100 text-sky-700"}`}>{t.category}</span>
@@ -149,6 +271,9 @@ const Digital = () => {
               banner="All web apps are generated as React + Tailwind CSS projects — ready to run with npm install && npm start"
               onSelect={(t) => openChooser(t, "web")}
               testidPrefix="web"
+              compareMode={compareMode}
+              compareSelected={compareSelected}
+              onToggleCompare={toggleCompare}
             />
           </TabsContent>
 
@@ -160,18 +285,40 @@ const Digital = () => {
               badges={["Flutter 3.x", "Material 3 Design", "Supports Android 8+"]}
               onSelect={(t) => openChooser(t, "android")}
               testidPrefix="android"
+              compareMode={compareMode}
+              compareSelected={compareSelected}
+              onToggleCompare={toggleCompare}
             />
           </TabsContent>
         </Tabs>
       </div>
 
+      {/* Floating compare bar */}
+      <CompareFloatingBar
+        selected={compareSelected}
+        onClear={() => setCompareSelected([])}
+        onCompare={() => setCompareOpen(true)}
+      />
+
+      {/* Compare modal */}
+      <CompareModal
+        open={compareOpen}
+        onClose={() => setCompareOpen(false)}
+        templates={compareTemplates()}
+        onChoose={chooseFromCompare}
+      />
+
       {/* Design Chooser modal */}
       <DesignChooserModal
         template={chooserTemplate}
+        type={chooserType}
         open={!!chooserTemplate}
         onClose={() => setChooserTemplate(null)}
-        onGenerate={onGenerate}
+        onContinue={onContinueFromDesign}
       />
+
+      {/* Demo Tour */}
+      <DemoTour open={tourOpen} onClose={() => setTourOpen(false)} />
 
       {/* Lite preview - phone screen */}
       <Dialog open={!!previewLite} onOpenChange={(o) => !o && setPreviewLite(null)}>

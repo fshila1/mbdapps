@@ -1,5 +1,6 @@
 // Templates for Web App Builder and Android App Builder
 
+// Designs available for Android (phone-based)
 export const DESIGN_OPTIONS = [
   {
     id: "modern-card",
@@ -27,6 +28,46 @@ export const DESIGN_OPTIONS = [
     components: ["Glass Cards", "Gradient Buttons", "Drawer Menu", "Animations"],
     tags: ["Premium", "Glassmorphism", "Animated"],
     gradient: "from-indigo-700 via-purple-700 to-fuchsia-600",
+  },
+];
+
+// Designs available for Web (4 options including Dashboard Style)
+export const WEB_DESIGN_OPTIONS = [
+  {
+    id: "modern-card",
+    name: "Modern Card Design",
+    description: "Clean and modern with card-based layout and smooth animations",
+    screens: ["Home Page", "Features", "Pricing", "Contact"],
+    components: ["Nav Bar", "Hero Section", "Card Grid", "Footer"],
+    tags: ["Modern", "Card UI", "Responsive"],
+    gradient: "from-rose-500 via-pink-500 to-orange-400",
+  },
+  {
+    id: "minimal-list",
+    name: "Minimal List Design",
+    description: "Simple and elegant list-based layout with sidebar and content rows",
+    screens: ["Home", "Article List", "Article Detail", "Categories"],
+    components: ["Top Nav", "Sidebar", "List Rows", "Pagination"],
+    tags: ["Clean UI", "Sidebar", "Minimal"],
+    gradient: "from-slate-700 via-slate-600 to-slate-500",
+  },
+  {
+    id: "fullscreen",
+    name: "Full Screen Experience",
+    description: "Immersive full-bleed gradient sections stacked vertically",
+    screens: ["Splash Hero", "Section 2", "Section 3", "CTA"],
+    components: ["Full Bleed Hero", "Stacked Sections", "Sticky CTA", "Animations"],
+    tags: ["Premium", "Gradients", "Animated"],
+    gradient: "from-indigo-700 via-purple-700 to-fuchsia-600",
+  },
+  {
+    id: "dashboard",
+    name: "Dashboard Style",
+    description: "Admin/SaaS dashboard with sidebar, stat cards, and charts",
+    screens: ["Overview", "Analytics", "Reports", "Settings"],
+    components: ["Sidebar", "Stat Cards", "Bar Chart", "Data Table"],
+    tags: ["SaaS", "Charts", "Data-driven"],
+    gradient: "from-sky-600 via-cyan-600 to-emerald-600",
   },
 ];
 
@@ -190,6 +231,27 @@ export const ALL_CATEGORIES = [
   "Finance",
   "Utilities",
 ];
+
+export const COLOR_PRESETS = [
+  { name: "Red", hex: "#e11d48" },
+  { name: "Navy", hex: "#0f172a" },
+  { name: "Green", hex: "#16a34a" },
+  { name: "Blue", hex: "#2563eb" },
+  { name: "Purple", hex: "#7c3aed" },
+  { name: "Orange", hex: "#ea580c" },
+];
+
+export const FONT_PRESETS = ["Modern Sans", "Classic Serif", "Playful Display", "Monospace Tech"];
+
+// Content categories per Android template
+export const ANDROID_CATEGORIES_BY_TEMPLATE = {
+  "and-alerts": ["Weather Alerts", "News Alerts", "Sports Scores", "Cricket Live", "Stock Updates", "Traffic"],
+  "and-prayer": ["Hadith", "Prayer Times", "Quran", "Du'a", "Islamic Calendar", "Quiz"],
+  "and-health": ["Step Counter", "Water Intake", "Sleep", "Workout", "Meals", "Mindfulness"],
+  "and-class": ["Notes", "Flashcards", "Quizzes", "Reading List", "Exam Prep", "Schedule"],
+  "and-sports": ["Football", "Cricket", "Tennis", "Basketball", "Hockey", "Esports"],
+  "and-finance": ["Expenses", "Budget", "Income", "Savings", "Investments", "Bills"],
+};
 
 export const EMOJI_PALETTE = [
   "🚀", "⚡", "🔥", "💎", "🌟", "🎨",

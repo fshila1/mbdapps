@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
-  ArrowLeft, Download, Github, Rocket, Link2, Lock, Copy, Check, Star, Loader2,
+  ArrowLeft, Download, Github, Rocket, Link2, Lock, Copy, Check, Star, Loader2, Code as CodeIcon,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -11,8 +11,11 @@ import {
 } from "../ui/dialog";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { toast } from "sonner";
-import PhonePreview from "./PhonePreview";
-import { DESIGN_OPTIONS, EMOJI_PALETTE } from "../../mocks/builderTemplates";
+import RealisticPhonePreview from "./RealisticPhonePreview";
+import BrowserPreview from "./BrowserPreview";
+import CodeDrawer from "./CodeDrawer";
+import WhatsIncluded from "./WhatsIncluded";
+import { DESIGN_OPTIONS, WEB_DESIGN_OPTIONS, EMOJI_PALETTE } from "../../mocks/builderTemplates";
 import { useGeneratedApps, useTemplateRatings } from "../../hooks/useBuilderStorage";
 import { useApp } from "../../context/AppContext";
 
@@ -107,17 +110,21 @@ const RateTemplate = ({ templateId }) => {
 };
 
 // ---------- Main App Builder ----------
-const AppBuilder = ({ template, designId, type, onBack }) => {
-  const design = DESIGN_OPTIONS.find((d) => d.id === designId) || DESIGN_OPTIONS[0];
+const AppBuilder = ({ template, designId, type, customization, onBack }) => {
+  const designSet = type === "web" ? WEB_DESIGN_OPTIONS : DESIGN_OPTIONS;
+  const design = designSet.find((d) => d.id === designId) || designSet[0];
   const { user } = useApp();
   const { addApp } = useGeneratedApps();
 
-  const [appName, setAppName] = useState(template.name);
+  const [appName, setAppName] = useState(customization?.name || template.name);
   const [appDesc, setAppDesc] = useState(template.description);
-  const [color, setColor] = useState("#e11d48");
+  const [tagline, setTagline] = useState(customization?.tagline || customization?.slogan || template.description);
+  const [color, setColor] = useState(customization?.primaryColor || "#e11d48");
+  const [secondaryColor] = useState(customization?.secondaryColor || "#0f172a");
   const [icon, setIcon] = useState(template.icon);
   const [devName, setDevName] = useState(user?.name || user?.username || "Developer");
   const [version, setVersion] = useState("1.0.0");
+  const [codeOpen, setCodeOpen] = useState(false);
 
   // Preview-share state
   const [previewUrl, setPreviewUrl] = useState("");
@@ -283,9 +290,9 @@ const AppBuilder = ({ template, designId, type, onBack }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-5">
+      <div data-tour="preview-pane" className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-5">
         {/* LEFT — config */}
-        <div className="space-y-4 border border-slate-200 rounded-2xl bg-white p-5 h-fit">
+        <div data-tour="cust-form" className="space-y-4 border border-slate-200 rounded-2xl bg-white p-5 h-fit">
           <div>
             <div className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-1">App Configuration</div>
             <div className="text-xs text-slate-400">Customize your app details</div>
@@ -347,8 +354,37 @@ const AppBuilder = ({ template, designId, type, onBack }) => {
         {/* RIGHT — preview + actions */}
         <div className="space-y-4">
           <div className="border border-slate-200 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 p-6 flex flex-col items-center">
-            <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-3">Live Phone Preview</div>
-            <PhonePreview design={designId} color={color} appName={appName} icon={icon} size="lg" />
+            <div className="flex items-center justify-between w-full mb-3">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500">
+                Live {type === "web" ? "Web" : "App"} Preview
+              </div>
+              <button
+                data-testid="view-code-toggle"
+                onClick={() => setCodeOpen(true)}
+                className="text-xs font-semibold flex items-center gap-1.5 text-slate-600 hover:text-[#0f172a] px-2.5 py-1.5 border border-slate-200 rounded-md bg-white"
+              >
+                <CodeIcon size={12} /> View Code
+              </button>
+            </div>
+            {type === "web" ? (
+              <BrowserPreview
+                design={designId}
+                url={previewUrl || `preview.bdapps.app/${template.slug}`}
+                appName={appName}
+                tagline={tagline}
+                primaryColor={color}
+                secondaryColor={secondaryColor}
+              />
+            ) : (
+              <RealisticPhonePreview
+                design={designId}
+                color={color}
+                appName={appName}
+                tagline={tagline}
+                icon={icon}
+                categories={customization?.categories || []}
+              />
+            )}
             {previewUrl && (
               <div data-testid="preview-share-badge" className="mt-4 flex items-center gap-2 bg-white border border-slate-200 rounded-full px-3 py-1.5 text-xs">
                 <Link2 size={12} className="text-[#7c3aed]" />
@@ -387,7 +423,7 @@ const AppBuilder = ({ template, designId, type, onBack }) => {
           </div>
 
           {/* Action bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div data-tour="action-bar" className="grid grid-cols-2 md:grid-cols-4 gap-2">
             <Button data-testid="action-share" onClick={onSharePreview} variant="outline" className="gap-2">
               <Link2 size={14} /> Share Preview
             </Button>
@@ -415,8 +451,19 @@ const AppBuilder = ({ template, designId, type, onBack }) => {
           </div>
 
           <RateTemplate templateId={template.id} />
+          <WhatsIncluded type={type} sectionsCount={parseInt(customization?.sections, 10) || 4} />
         </div>
       </div>
+
+      {/* Code drawer */}
+      <CodeDrawer
+        open={codeOpen}
+        onClose={() => setCodeOpen(false)}
+        type={type}
+        appName={appName}
+        primaryColor={color}
+        tagline={tagline}
+      />
 
       {/* Download progress */}
       <ProgressModal

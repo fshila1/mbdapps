@@ -2,15 +2,17 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, X, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../ui/dialog";
 import { Button } from "../ui/button";
-import { DESIGN_OPTIONS } from "../../mocks/builderTemplates";
+import { DESIGN_OPTIONS, WEB_DESIGN_OPTIONS } from "../../mocks/builderTemplates";
 import PhonePreview from "./PhonePreview";
+import BrowserPreview from "./BrowserPreview";
 
-const DesignChooserModal = ({ template, open, onClose, onGenerate }) => {
-  const [selected, setSelected] = useState("modern-card");
+const DesignChooserModal = ({ template, type = "android", open, onClose, onContinue }) => {
+  const options = type === "web" ? WEB_DESIGN_OPTIONS : DESIGN_OPTIONS;
+  const [selected, setSelected] = useState(options[0].id);
 
   useEffect(() => {
-    if (open) setSelected("modern-card");
-  }, [open, template?.id]);
+    if (open) setSelected(options[0].id);
+  }, [open, template?.id, options]);
 
   if (!template) return null;
 
@@ -18,12 +20,10 @@ const DesignChooserModal = ({ template, open, onClose, onGenerate }) => {
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
         data-testid="design-chooser-modal"
-        className="max-w-4xl p-0 max-h-[92vh] overflow-hidden flex flex-col gap-0"
+        className="max-w-5xl p-0 max-h-[92vh] overflow-hidden flex flex-col gap-0"
       >
-        {/* Accessible title (hidden visually, visible header below) */}
         <DialogTitle className="sr-only">Choose Design for {template.name}</DialogTitle>
         <DialogDescription className="sr-only">Select a UI design that fits your vision</DialogDescription>
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white sticky top-0 z-10">
           <button data-testid="design-back" onClick={onClose} className="p-2 hover:bg-slate-100 rounded-md">
             <ArrowLeft size={18} />
@@ -37,10 +37,9 @@ const DesignChooserModal = ({ template, open, onClose, onGenerate }) => {
           </button>
         </div>
 
-        {/* Body */}
-        <div className="overflow-y-auto px-6 py-5 flex-1 bg-slate-50">
+        <div data-tour="design-picker" className="overflow-y-auto px-6 py-5 flex-1 bg-slate-50">
           <div className="space-y-4">
-            {DESIGN_OPTIONS.map((d) => {
+            {options.map((d) => {
               const isActive = selected === d.id;
               return (
                 <button
@@ -51,11 +50,13 @@ const DesignChooserModal = ({ template, open, onClose, onGenerate }) => {
                     isActive ? "border-[#7c3aed] shadow-lg" : "border-slate-200 hover:border-slate-300"
                   }`}
                 >
-                  {/* Phone */}
-                  <div className="flex-shrink-0 mx-auto sm:mx-0">
-                    <PhonePreview design={d.id} color="#7c3aed" appName={template.name} icon={template.icon} size="sm" />
+                  <div className="flex-shrink-0 mx-auto sm:mx-0 w-full sm:w-72">
+                    {type === "web" ? (
+                      <BrowserPreview design={d.id} mode="wireframe" url={`preview.bdapps.app/${template.slug}`} />
+                    ) : (
+                      <PhonePreview design={d.id} color="#7c3aed" appName={template.name} icon={template.icon} size="sm" />
+                    )}
                   </div>
-                  {/* Details */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <h3 className={`font-bold text-lg tracking-tight ${isActive ? "text-[#7c3aed]" : "text-slate-900"}`}>
@@ -68,7 +69,6 @@ const DesignChooserModal = ({ template, open, onClose, onGenerate }) => {
                       )}
                     </div>
                     <p className="text-sm text-slate-600 mb-3">{d.description}</p>
-
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                       <div>
                         <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1">Screens</div>
@@ -91,7 +91,6 @@ const DesignChooserModal = ({ template, open, onClose, onGenerate }) => {
                         </ul>
                       </div>
                     </div>
-
                     <div className="flex flex-wrap gap-1.5">
                       {d.tags.map((t, i) => (
                         <span
@@ -111,15 +110,14 @@ const DesignChooserModal = ({ template, open, onClose, onGenerate }) => {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="px-6 py-4 border-t border-slate-200 bg-white">
           <Button
-            data-testid="design-generate"
-            onClick={() => onGenerate({ template, designId: selected })}
+            data-testid="design-continue"
+            onClick={() => onContinue({ template, designId: selected })}
             className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white"
             size="lg"
           >
-            Generate App →
+            Continue →
           </Button>
         </div>
       </DialogContent>

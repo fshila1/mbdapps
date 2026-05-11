@@ -23,7 +23,14 @@ const safeParse = (key, fallback) => {
 export const AppProvider = ({ children }) => {
   const [user, setUser] = useState(() => safeParse("bdapps_user", null));
   const [apps, setApps] = useState(() => safeParse("bdapps_apps", seedApps));
-  const [liteApps, setLiteApps] = useState(() => safeParse("bdapps_liteapps", seedLiteApps));
+  const [liteApps, setLiteApps] = useState(() => {
+    const existing = safeParse("bdapps_liteapps", null);
+    if (!existing) return seedLiteApps;
+    // Migration: ensure Service-type sample apps are present (LITE-005, LITE-006)
+    const ids = new Set(existing.map((a) => a.id));
+    const missing = seedLiteApps.filter((s) => !ids.has(s.id));
+    return missing.length ? [...existing, ...missing] : existing;
+  });
   const [keywords] = useState(seedKeywords);
   const [systemUsers, setSystemUsers] = useState(seedSystemUsers);
   const [appCreators] = useState(seedAppCreators);

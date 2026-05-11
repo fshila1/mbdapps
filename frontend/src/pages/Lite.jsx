@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import Tile from "../components/Tile";
 import { Req, Opt } from "../components/FieldLabel";
 import { seedMessageHistory, seedReportData } from "../mocks/data";
+import { AlertBroadcastDialog, ScheduledContentDialog } from "../components/lite/LiteAppActions";
 
 // ============= LITE DASHBOARD =============
 const LiteDashboard = () => {
@@ -94,7 +95,6 @@ const CreateLiteApp = () => {
         if (!data.scheduleType) e.scheduleType = "Required";
         if (data.scheduleType === "Custom Interval" && !data.customInterval) e.customInterval = "Required";
         if (!data.scheduledTime) e.scheduledTime = "Required";
-        if (!data.msgContent) e.msgContent = "Required";
       }
     }
     setErrors(e);
@@ -103,7 +103,15 @@ const CreateLiteApp = () => {
   };
 
   const submit = () => {
-    addLiteApp({ name: data.name, keyword: data.keyword, category: data.template, type: data.template });
+    const isService = data.template === "Services";
+    addLiteApp({
+      name: data.name,
+      keyword: data.keyword,
+      category: data.template,
+      type: isService ? "Service" : data.template,
+      subscribers: 0,
+      ...(isService ? { schedule: { type: data.scheduleType, time: data.scheduledTime, customInterval: data.customInterval, dayOfWeek: data.dayOfWeek, dayOfMonth: data.dayOfMonth } } : {}),
+    });
     setStep(4);
   };
 
@@ -219,10 +227,8 @@ const CreateLiteApp = () => {
                   <div><Label>Interval (hours)<Req /></Label><Input type="number" value={data.customInterval} onChange={(e) => update("customInterval", e.target.value)} data-testid="custom-interval" className={errors.customInterval ? "border-rose-500" : ""} /></div>
                 )}
                 <div><Label>Scheduled Time<Req /></Label><Input type="time" value={data.scheduledTime} onChange={(e) => update("scheduledTime", e.target.value)} data-testid="scheduled-time" className={errors.scheduledTime ? "border-rose-500" : ""} /></div>
-                <div>
-                  <Label>Message Content<Req /></Label>
-                  <Textarea maxLength={300} value={data.msgContent} onChange={(e) => update("msgContent", e.target.value)} data-testid="msg-content" className={errors.msgContent ? "border-rose-500" : ""} />
-                  <p className="text-xs text-slate-500 text-right mt-1">{data.msgContent.length} / 300</p>
+                <div className="rounded-md bg-sky-50 border border-sky-200 p-3 text-xs text-sky-800">
+                  <strong className="font-bold">Note:</strong> Service apps deliver scheduled content. You can add and manage the content queue from <span className="font-semibold">My Applications → Use</span> after this app is approved.
                 </div>
                 {data.scheduleType === "Weekly" && (
                   <div><Label>Day of Week<Req /></Label>
@@ -253,7 +259,6 @@ const CreateLiteApp = () => {
                 ...(data.template === "Services" ? [
                   ["Schedule", `${data.scheduleType}${data.scheduleType === "Custom Interval" ? ` · ${data.customInterval}h` : ""}`],
                   ["Time", data.scheduledTime],
-                  ["Message", data.msgContent],
                 ] : []),
               ].map(([k, v], i) => (
                 <div key={i} className="flex justify-between p-3 text-sm gap-3"><span className="text-slate-500 uppercase tracking-wide font-semibold text-xs flex-shrink-0">{k}</span><span className="font-medium text-right max-w-[60%] break-words">{v || "—"}</span></div>
@@ -305,13 +310,27 @@ const CreateLiteApp = () => {
 const MyApplications = () => {
   const { liteApps } = useApp();
   const navigate = useNavigate();
-  const [composeApp, setComposeApp] = useState(null);
+  const [alertUseApp, setAlertUseApp] = useState(null);
+  const [serviceUseApp, setServiceUseApp] = useState(null);
   const [viewApp, setViewApp] = useState(null);
   const [helpApp, setHelpApp] = useState(null);
   const [publishApp, setPublishApp] = useState(null);
-  const [message, setMessage] = useState("");
-  const [subscribers, setSubscribers] = useState(["+8801711000001"]);
   const [pubForm, setPubForm] = useState({ name: "", category: "", description: "", short: "", instructions: "" });
+
+  const onUse = (app) => {
+    const t = app.type || app.category;
+    if (t === "Service" || t === "Services") {
+      setServiceUseApp(app);
+    } else {
+      setAlertUseApp(app);
+    }
+  };
+
+  const badgeClass = (t) => {
+    if (t === "Alert") return "bg-amber-100 text-amber-700";
+    if (t === "Service" || t === "Services") return "bg-teal-100 text-teal-700";
+    return "bg-sky-100 text-sky-700";
+  };
 
   return (
     <Layout>
@@ -330,50 +349,37 @@ const MyApplications = () => {
               <tr><th className="text-left p-3">Name</th><th className="text-left p-3">Type</th><th className="text-left p-3">Keyword</th><th className="text-left p-3">Status</th><th className="text-left p-3">Actions</th></tr>
             </thead>
             <tbody>
-              {liteApps.map((a) => (
-                <tr key={a.id} className="border-t border-slate-100 hover:bg-slate-50">
-                  <td className="p-3 font-medium">{a.name}</td>
-                  <td className="p-3"><span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${(a.type || a.category) === "Alert" ? "bg-amber-100 text-amber-700" : "bg-sky-100 text-sky-700"}`}>{a.type || a.category}</span></td>
-                  <td className="p-3 font-mono">{a.keyword}</td>
-                  <td className="p-3"><span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${a.status === "Active" ? "bg-emerald-100 text-emerald-700" : a.status === "Rejected" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700"}`}>{a.status}</span></td>
-                  <td className="p-3 space-x-1 space-y-1 whitespace-nowrap">
-                    {a.status === "Active" && (<>
-                      <Button size="sm" variant="outline" onClick={() => setComposeApp(a)} data-testid={`use-${a.id}`}>Use</Button>
-                      <Button size="sm" variant="outline" onClick={() => setViewApp(a)} data-testid={`view-${a.id}`}>View</Button>
-                      <Button size="sm" variant="outline" onClick={() => setHelpApp(a)} data-testid={`help-${a.id}`}>Help</Button>
-                      <Button size="sm" className="bg-[#e11d48] hover:bg-[#be123c]" onClick={() => setPublishApp(a)} data-testid={`publish-${a.id}`}>Publish</Button>
-                    </>)}
-                    {a.status === "Rejected" && <Button size="sm" variant="outline" onClick={() => setViewApp(a)}>View</Button>}
-                    {a.status === "Pending" && <span className="text-xs text-slate-400">Awaiting approval</span>}
-                  </td>
-                </tr>
-              ))}
+              {liteApps.map((a) => {
+                const t = a.type || a.category;
+                return (
+                  <tr key={a.id} className="border-t border-slate-100 hover:bg-slate-50">
+                    <td className="p-3 font-medium">{a.name}</td>
+                    <td className="p-3"><span data-testid={`type-${a.id}`} className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${badgeClass(t)}`}>{t === "Services" ? "Service" : t}</span></td>
+                    <td className="p-3 font-mono">{a.keyword}</td>
+                    <td className="p-3"><span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${a.status === "Active" ? "bg-emerald-100 text-emerald-700" : a.status === "Rejected" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700"}`}>{a.status}</span></td>
+                    <td className="p-3 space-x-1 space-y-1 whitespace-nowrap">
+                      {a.status === "Active" && (<>
+                        <Button size="sm" variant="outline" onClick={() => onUse(a)} data-testid={`use-${a.id}`}>Use</Button>
+                        <Button size="sm" variant="outline" onClick={() => setViewApp(a)} data-testid={`view-${a.id}`}>View</Button>
+                        <Button size="sm" variant="outline" onClick={() => setHelpApp(a)} data-testid={`help-${a.id}`}>Help</Button>
+                        <Button size="sm" className="bg-[#e11d48] hover:bg-[#be123c]" onClick={() => setPublishApp(a)} data-testid={`publish-${a.id}`}>Publish</Button>
+                      </>)}
+                      {a.status === "Rejected" && <Button size="sm" variant="outline" onClick={() => setViewApp(a)}>View</Button>}
+                      {a.status === "Pending" && <span className="text-xs text-slate-400">Awaiting approval</span>}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Composer */}
-      <Dialog open={!!composeApp} onOpenChange={(o) => !o && setComposeApp(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Compose · {composeApp?.name}</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>Message</Label>
-              <Textarea data-testid="compose-msg" maxLength={300} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type your SMS (max 300 chars)" rows={4} />
-              <p className="text-xs text-slate-500 mt-1 text-right">{message.length} / 300</p>
-            </div>
-            <div>
-              <Label>Subscribers</Label>
-              <div className="space-y-2">
-                {subscribers.map((s, i) => <div key={i} className="flex items-center gap-2"><Input value={s} onChange={(e) => { const c = [...subscribers]; c[i] = e.target.value; setSubscribers(c); }} /></div>)}
-                <Button size="sm" variant="outline" onClick={() => setSubscribers([...subscribers, ""])} data-testid="add-subscriber"><Plus size={14} className="mr-1" /> Add</Button>
-              </div>
-            </div>
-          </div>
-          <DialogFooter><Button onClick={() => { toast.success(`Sent to ${subscribers.length} subscribers`); setComposeApp(null); setMessage(""); }} data-testid="send-msg" className="bg-[#e11d48] hover:bg-[#be123c]"><Send size={14} className="mr-1" /> Send</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Alert broadcast */}
+      <AlertBroadcastDialog app={alertUseApp} open={!!alertUseApp} onClose={() => setAlertUseApp(null)} />
+
+      {/* Service scheduled content */}
+      <ScheduledContentDialog app={serviceUseApp} open={!!serviceUseApp} onClose={() => setServiceUseApp(null)} />
 
       {/* View */}
       <Dialog open={!!viewApp} onOpenChange={(o) => !o && setViewApp(null)}>
