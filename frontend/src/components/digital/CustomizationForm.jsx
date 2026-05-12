@@ -8,7 +8,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Switch } from "../ui/switch";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Req } from "../FieldLabel";
-import { COLOR_PRESETS, FONT_PRESETS, ANDROID_CATEGORIES_BY_TEMPLATE } from "../../mocks/builderTemplates";
+import { COLOR_PRESETS, FONT_PRESETS, ANDROID_CATEGORIES_BY_TEMPLATE, BDAPPS_SHORTCODES, CONNECTED_BDAPPS_APPS } from "../../mocks/builderTemplates";
 import { ArrowLeft, Image as ImageIcon } from "lucide-react";
 
 const Section = ({ title, children }) => (
@@ -47,8 +47,8 @@ export const WebCustomizationForm = ({ template, initial, onSubmit, onBack, onSk
   const [v, setV] = useState({
     name: initial?.name || template?.name || "",
     tagline: initial?.tagline || template?.description || "",
-    primaryColor: initial?.primaryColor || "#e11d48",
-    secondaryColor: initial?.secondaryColor || "#0f172a",
+    primaryColor: initial?.primaryColor || template?.palette?.primary || "#e11d48",
+    secondaryColor: initial?.secondaryColor || template?.palette?.accent || "#0f172a",
     sections: initial?.sections || "4",
     includePricing: initial?.includePricing ?? true,
     includeContact: initial?.includeContact ?? true,
@@ -56,10 +56,23 @@ export const WebCustomizationForm = ({ template, initial, onSubmit, onBack, onSk
     language: initial?.language || "English",
     logo: initial?.logo || null,
     font: initial?.font || "Modern Sans",
+    // BDapps-specific
+    shortcode: initial?.shortcode || BDAPPS_SHORTCODES[0],
+    connectedApp: initial?.connectedApp || "",
+    otpLogin: initial?.otpLogin ?? true,
+    subscriberOnly: initial?.subscriberOnly ?? false,
   });
 
   const update = (k, val) => setV((p) => ({ ...p, [k]: val }));
-  const valid = v.name.trim() && v.tagline.trim();
+
+  // Auto-fill name/keyword when a connected app is picked
+  const pickConnectedApp = (appId) => {
+    update("connectedApp", appId);
+    const app = CONNECTED_BDAPPS_APPS.find((a) => a.id === appId);
+    if (app && !v.name.trim()) update("name", app.name);
+  };
+
+  const valid = v.name.trim() && v.tagline.trim() && v.shortcode;
 
   return (
     <div data-testid="web-customization-form" className="space-y-5">
@@ -121,6 +134,36 @@ export const WebCustomizationForm = ({ template, initial, onSubmit, onBack, onSk
         </div>
       </Section>
 
+      <Section title="BDapps Connection">
+        <div>
+          <Label className="text-xs">BDapps Shortcode<Req /></Label>
+          <Select value={v.shortcode} onValueChange={(val) => update("shortcode", val)}>
+            <SelectTrigger data-testid="cust-shortcode"><SelectValue /></SelectTrigger>
+            <SelectContent>{BDAPPS_SHORTCODES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+          </Select>
+          <div className="text-[10px] text-slate-400 mt-1">Links this web app to your developer's SMS service.</div>
+        </div>
+        <div>
+          <Label className="text-xs">Connected BDapps App <span className="text-slate-400">(Optional)</span></Label>
+          <Select value={v.connectedApp || "none"} onValueChange={(val) => pickConnectedApp(val === "none" ? "" : val)}>
+            <SelectTrigger data-testid="cust-connected-app"><SelectValue placeholder="None" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— None —</SelectItem>
+              {CONNECTED_BDAPPS_APPS.map((a) => <SelectItem key={a.id} value={a.id}>{a.name} · {a.keyword} · {a.type}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <div className="text-[10px] text-slate-400 mt-1">Pre-fills the app name from your existing Lite/Pro apps.</div>
+        </div>
+        <div className="flex items-center justify-between p-3 border border-slate-200 rounded-md">
+          <Label htmlFor="cust-otp-login" className="text-sm cursor-pointer">OTP Login for Users</Label>
+          <Switch id="cust-otp-login" data-testid="cust-otp-login" checked={v.otpLogin} onCheckedChange={(c) => update("otpLogin", c)} />
+        </div>
+        <div className="flex items-center justify-between p-3 border border-slate-200 rounded-md">
+          <Label htmlFor="cust-sub-only" className="text-sm cursor-pointer">Subscriber-only Content</Label>
+          <Switch id="cust-sub-only" data-testid="cust-sub-only" checked={v.subscriberOnly} onCheckedChange={(c) => update("subscriberOnly", c)} />
+        </div>
+      </Section>
+
       <Section title="Branding (Optional)">
         <div>
           <Label className="text-xs">Upload Logo</Label>
@@ -170,7 +213,7 @@ export const AndroidCustomizationForm = ({ template, initial, onSubmit, onBack, 
   const [v, setV] = useState({
     name: initial?.name || template?.name || "",
     slogan: initial?.slogan || template?.description || "",
-    primaryColor: initial?.primaryColor || "#e11d48",
+    primaryColor: initial?.primaryColor || template?.palette?.primary || "#e11d48",
     iconStyle: initial?.iconStyle || "abstract",
     frequency: initial?.frequency || "Once daily",
     categories: initial?.categories || baseCategories.slice(0, 3),
@@ -179,11 +222,26 @@ export const AndroidCustomizationForm = ({ template, initial, onSubmit, onBack, 
     offlineMode: initial?.offlineMode ?? true,
     audience: initial?.audience || "General Public",
     language: initial?.language || "Bengali",
+    // BDapps-specific
+    shortcode: initial?.shortcode || BDAPPS_SHORTCODES[0],
+    subscribeKeyword: initial?.subscribeKeyword || (template?.slug || "").toUpperCase().replace(/[^A-Z]/g, "").slice(0, 8) || "ALERT",
+    pushViaSms: initial?.pushViaSms ?? true,
+    connectedApp: initial?.connectedApp || "",
   });
 
   const update = (k, val) => setV((p) => ({ ...p, [k]: val }));
   const toggleCat = (c) => setV((p) => ({ ...p, categories: p.categories.includes(c) ? p.categories.filter((x) => x !== c) : [...p.categories, c] }));
-  const valid = v.name.trim() && v.slogan.trim();
+
+  const pickConnectedApp = (appId) => {
+    update("connectedApp", appId);
+    const app = CONNECTED_BDAPPS_APPS.find((a) => a.id === appId);
+    if (app) {
+      if (!v.name.trim() || v.name === template?.name) update("name", app.name);
+      update("subscribeKeyword", app.keyword);
+    }
+  };
+
+  const valid = v.name.trim() && v.slogan.trim() && v.shortcode && v.subscribeKeyword.trim();
 
   return (
     <div data-testid="android-customization-form" className="space-y-5">
@@ -258,6 +316,35 @@ export const AndroidCustomizationForm = ({ template, initial, onSubmit, onBack, 
         <div className="flex items-center justify-between p-3 border border-slate-200 rounded-md">
           <Label className="text-sm cursor-pointer">Enable Offline Mode</Label>
           <Switch data-testid="cust-offline" checked={v.offlineMode} onCheckedChange={(c) => update("offlineMode", c)} />
+        </div>
+      </Section>
+
+      <Section title="BDapps Connection">
+        <div>
+          <Label className="text-xs">SMS Shortcode<Req /></Label>
+          <Select value={v.shortcode} onValueChange={(val) => update("shortcode", val)}>
+            <SelectTrigger data-testid="cust-shortcode"><SelectValue /></SelectTrigger>
+            <SelectContent>{BDAPPS_SHORTCODES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">Subscribe Keyword<Req /></Label>
+          <Input data-testid="cust-keyword" value={v.subscribeKeyword} onChange={(e) => update("subscribeKeyword", e.target.value.toUpperCase().replace(/\s/g, ""))} placeholder="ALERT" className="font-mono" />
+          <div className="text-[10px] text-slate-400 mt-1">Users SMS this keyword to your shortcode to subscribe.</div>
+        </div>
+        <div className="flex items-center justify-between p-3 border border-slate-200 rounded-md">
+          <Label htmlFor="cust-push-sms" className="text-sm cursor-pointer">Push Notification via SMS</Label>
+          <Switch id="cust-push-sms" data-testid="cust-push-sms" checked={v.pushViaSms} onCheckedChange={(c) => update("pushViaSms", c)} />
+        </div>
+        <div>
+          <Label className="text-xs">Connected BDapps App <span className="text-slate-400">(Optional)</span></Label>
+          <Select value={v.connectedApp || "none"} onValueChange={(val) => pickConnectedApp(val === "none" ? "" : val)}>
+            <SelectTrigger data-testid="cust-connected-app"><SelectValue placeholder="None" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— None —</SelectItem>
+              {CONNECTED_BDAPPS_APPS.map((a) => <SelectItem key={a.id} value={a.id}>{a.name} · {a.keyword} · {a.type}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
       </Section>
 

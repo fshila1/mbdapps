@@ -1,0 +1,64 @@
+import React from "react";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../ui/dialog";
+import { Button } from "../ui/button";
+import { X, ArrowRight } from "lucide-react";
+import BDappsWebPreview from "./interactive/WebPreviews";
+import BDappsAndroidPreview from "./interactive/AndroidPreviews";
+
+const LivePreviewModal = ({ open, onClose, template, type, onUse }) => {
+  if (!template) return null;
+  const primary = template.palette?.primary || "#0f172a";
+  const accent = template.palette?.accent || "#e11d48";
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent data-testid="live-preview-modal" className="!max-w-[90vw] w-[90vw] !p-0 max-h-[85vh] overflow-hidden flex flex-col gap-0">
+        <DialogTitle className="sr-only">Live preview of {template.name}</DialogTitle>
+        <DialogDescription className="sr-only">Interactive preview</DialogDescription>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-white">
+          <div>
+            <div className="font-bold tracking-tight">{template.name}</div>
+            <div className="text-[11px] text-slate-500 flex items-center gap-2 flex-wrap">
+              <span>{template.category}</span>
+              {(template.apis || []).map((a) => <span key={a} className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px] font-semibold">{a}</span>)}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              data-testid="live-preview-use"
+              onClick={() => { onUse?.(template); onClose(); }}
+              className="bg-[#e11d48] hover:bg-[#be123c]"
+              size="sm"
+            >
+              Use This Template <ArrowRight size={14} className="ml-1" />
+            </Button>
+            <button data-testid="live-preview-close" onClick={onClose} className="p-2 hover:bg-slate-100 rounded-md"><X size={16} /></button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto bg-slate-50 p-5">
+          {type === "web" ? (
+            <BDappsWebPreview
+              templateId={template.id}
+              appName={template.name}
+              tagline={template.description}
+              primaryColor={primary}
+              secondaryColor={accent}
+              language="English"
+              height="h-[65vh]"
+            />
+          ) : (
+            <BDappsAndroidPreview
+              templateId={template.id}
+              appName={template.name}
+              tagline={template.description}
+              primaryColor={primary}
+              icon={template.icon}
+              language="English"
+            />
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default LivePreviewModal;

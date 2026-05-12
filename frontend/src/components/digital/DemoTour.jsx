@@ -41,9 +41,22 @@ const DemoTour = ({ open, onClose }) => {
 
   if (!open || !step) return null;
 
-  // Place tooltip below the target if there's room
-  const ttTop = rect ? rect.top + rect.height + 12 : window.innerHeight / 2 - 100;
-  const ttLeft = rect ? Math.max(16, Math.min(window.innerWidth - 320, rect.left + rect.width / 2 - 160)) : window.innerWidth / 2 - 160;
+  // Place tooltip below the target if there's room, otherwise above. Tooltip is fixed so we use viewport-relative coords (rect already is).
+  const TT_W = 320;
+  const TT_H = 180;
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 800;
+  // rect.top is viewport-relative because rect comes from getBoundingClientRect when first computed,
+  // but we stored `top: r.top + scrollY` (document coords) in useTargetRect for the spotlight.
+  // For the tooltip we need viewport coords, so subtract scrollY back.
+  const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
+  const vpTop = rect ? rect.top - scrollY : vh / 2;
+  let ttTop = rect ? vpTop + rect.height + 12 : vh / 2 - TT_H / 2;
+  if (ttTop + TT_H > vh - 16) {
+    ttTop = rect ? vpTop - TT_H - 12 : 16;
+  }
+  ttTop = Math.max(16, Math.min(vh - TT_H - 16, ttTop));
+  const ttLeft = rect ? Math.max(16, Math.min(vw - TT_W - 16, rect.left + rect.width / 2 - TT_W / 2)) : vw / 2 - TT_W / 2;
 
   const isLast = idx === STEPS.length - 1;
 

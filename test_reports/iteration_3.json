@@ -1,0 +1,31 @@
+{
+  "summary": "Frontend-only end-to-end Playwright testing of the BDapps Digital ecosystem patch (8 web + 8 android BDapps-native templates, interactive Live Previews, new BDapps Connection fields in CustomizationForm, GenerationProgress, AppBuilder action buttons, and WhatsNext checklist). Executed 50 distinct acceptance checks across 2 runs. 50/50 PASS. No blocking issues. Recharts emits transient width/height(-1) warnings on initial mount but charts render correctly (4 SVG surfaces verified for web-analytics).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Web Analytics Live Preview", "issues": ["Recharts logs 4x console warning: 'width(-1) and height(-1) of chart should be greater than 0 ... or add minWidth(0)/minHeight'. Charts still render correctly after initial mount. Fix by giving ResponsiveContainer a min-height or wrapping in a sized div before the chart mounts."]},
+      {"screen": "All pages (carry-over from iter-2)", "issues": ["api.fontshare.com still returns CORS error for Cabinet Grotesk — console spam, not a blocker."]}
+    ]
+  },
+  "test_report_links": ["/app/test_reports/iteration_3.json"],
+  "action_items": [
+    "(Low) Wrap Recharts ResponsiveContainer in the web-analytics Live Preview with an explicit min-height (e.g., min-h-[260px]) to silence the width/height(-1) warnings on first mount.",
+    "(Low / carry-over) Remove or self-host the Fontshare CDN <link> in /app/frontend/public/index.html — the CORS failure persists from iteration 2."
+  ],
+  "critical_code_review_comments": [
+    "Digital.jsx remains ~400 lines with 5 conditional render branches (customizing / generating / builderState / tabs + modals). Refactor into a small state machine or split into <DigitalCustomize>, <DigitalGenerate>, <DigitalBuilder> route-style sub-components for readability.",
+    "LivePreviewModal + the 16 interactive previews (WebPreviews.jsx, AndroidPreviews.jsx) likely route by templateId via switch. Confirm each preview component is lazy-loaded; otherwise the digital bundle includes all 16 immersive previews even when the modal is closed.",
+    "WebCustomizationForm/AndroidCustomizationForm gained BDapps Connection section (shortcode/keyword/push-sms/connected-app/otp-login/sub-only) — ensure these values are persisted into the generated app's localStorage record (My Generated Apps shelf) and surface in 'View Code' drawer, not just the in-memory state.",
+    "GenerationProgress fires a 2s timeout — if the user navigates away mid-generation, the parent onDone callback can fire after unmount. Wrap setTimeout in a useEffect cleanup to avoid 'setState on unmounted component' warnings."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only app, localStorage only)", "frontend": "50/50 acceptance checks PASS (100%)"},
+  "test_credentials": "developer@bdapps.com / dev123 — works, sourced from /app/memory/test_credentials.md",
+  "seed_data_creation": "None. Used default localStorage seed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All BDapps Digital acceptance criteria PASS via two Playwright runs against REACT_APP_BACKEND_URL. Verified: (1) Login developer@bdapps.com/dev123 → /digital. (2) 4 tabs render (tab-lite-templates, tab-pro-templates, tab-web-builder, tab-android-builder). (3) Web tab shows exactly 8 BDapps templates (web-sub-portal, web-ussd-companion, web-content-dash, web-analytics, web-otp-landing, web-app-store, web-premium, web-admin) each with live-preview-* and use-template-* buttons. (4) Android tab shows exactly 8 BDapps templates (and-alert, and-content, and-wallet, and-otp, and-store, and-premium, and-sports, and-islamic). (5) live-preview-and-alert opens modal with splash → home (and-alert-card-1 clickable, expandable) → subscribe page. (6) live-preview-web-sub-portal exposes web-sub-card-weather and web-sub-btn-weather. (7) live-preview-web-analytics renders 4 recharts SVGs + analytics-export button. (8) live-preview-web-content-dash OTP login: cd-phone → cd-phone-next → cd-otp → cd-login → cd-cat-* filters (4 categories). (9) use-template-and-alert opens design-chooser with 3 design-option-*; web chooser shows 4 (includes dashboard). design-continue navigates to customization form. (10) Android CustomizationForm has cust-shortcode, cust-keyword, cust-push-sms, cust-connected-app, cust-name, cust-generate. (11) Web CustomizationForm has cust-shortcode, cust-connected-app, cust-otp-login, cust-sub-only. (12) cust-generate triggers GenerationProgress (~2s) then AppBuilder. (13) AppBuilder Android shows action-share, action-download, action-github, action-playstore (NO action-deploy). Web shows action-share, action-download, action-github, action-deploy (NO action-playstore). (14) whats-next-panel renders with whats-next-go-lite (→ /lite verified by URL change), whats-next-go-provisioning, whats-next-go-appstore. (15) Mobile 480px: 8 web cards stack single-column (verified via bounding box y-offsets 1475 vs 1881). Generated Android preview displays 3 phone frames with Bengali content (টেস্ট অ্যালার্ট, সাবস্ক্রাইব, etc.) confirming interactive previews render correctly. Only follow-up items are the two low-priority design issues listed.",
+  "rca of the issue": "No bugs. Recharts width(-1) warning is a documented Recharts behavior when ResponsiveContainer's parent has no measured height on first mount (modal animates in). Functionally non-blocking — the chart sizes correctly after layout commits."
+}

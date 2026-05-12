@@ -18,15 +18,21 @@ const COMPLEXITY_COLOR = {
   Advanced: "bg-rose-100 text-rose-700",
 };
 
-// Best For per category
+// Best For per category (BDapps ecosystem)
 const BEST_FOR = {
-  Business: "Startups, agencies, SaaS",
-  Health: "Clinics, wellness brands",
-  Education: "Schools, learning portals",
-  Entertainment: "Media, sports, fan apps",
-  Islamic: "Religious content brands",
-  Finance: "Fintech, personal finance",
-  Utilities: "Productivity, services",
+  "Subscription Service": "Subscription apps with OTP onboarding",
+  "USSD Companion": "USSD service operators",
+  "Content Service": "Daily content subscribers (Hadith, news)",
+  "Analytics": "Developers tracking subscriber growth",
+  "OTP Service": "Businesses needing OTP auth",
+  "App Store": "Multi-service developers",
+  "Premium Content": "Paid CaaS-backed content",
+  "Admin Dashboard": "Service provider operators",
+  "Alert Service": "SMS alert subscriber apps",
+  "USSD / CaaS": "Wallet + USSD companion users",
+  "CaaS Content": "Pay-per-unlock content apps",
+  "Sports Alert": "Sports fans + scores",
+  "Religious Service": "Islamic daily companion apps",
 };
 
 const CompareFloatingBar = ({ selected, onClear, onCompare }) => {
@@ -61,9 +67,12 @@ const CompareModal = ({ open, onClose, templates, onChoose }) => (
         <div className={`grid gap-4`} style={{ gridTemplateColumns: `repeat(${templates.length}, minmax(0, 1fr))` }}>
           {templates.map((t) => (
             <div key={t.id} className="border border-slate-200 rounded-xl p-4 flex flex-col">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${t.iconGradient} flex items-center justify-center text-2xl mb-3`}>{t.icon}</div>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${t.iconGradient || "from-slate-500 to-slate-700"} flex items-center justify-center text-2xl mb-3`}>{t.icon}</div>
               <h3 className="font-bold tracking-tight">{t.name}</h3>
-              <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 self-start mt-1">{t.category}</span>
+              <div className="flex flex-wrap gap-1 mt-1 self-start">
+                <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">{t.category}</span>
+                {(t.apis || []).map((a) => <span key={a} className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-rose-50 text-rose-700">{a}</span>)}
+              </div>
               <div className="mt-3">
                 <div className="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1">Features</div>
                 <ul className="space-y-1">

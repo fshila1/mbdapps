@@ -18,6 +18,7 @@ import { WebCustomizationForm, AndroidCustomizationForm } from "../components/di
 import GenerationProgress from "../components/digital/GenerationProgress";
 import { CompareFloatingBar, CompareModal } from "../components/digital/Compare";
 import DemoTour from "../components/digital/DemoTour";
+import LivePreviewModal from "../components/digital/LivePreviewModal";
 
 const Digital = () => {
   const navigate = useNavigate();
@@ -40,6 +41,9 @@ const Digital = () => {
 
   // Demo tour
   const [tourOpen, setTourOpen] = useState(false);
+
+  // Live preview modal (from gallery cards)
+  const [livePreview, setLivePreview] = useState(null); // { template, type }
 
   // Active tab tracker (for compare mode templates lookup)
   const [activeTab, setActiveTab] = useState("lite");
@@ -268,8 +272,10 @@ const Digital = () => {
           <TabsContent value="web" className="pt-6">
             <TemplateGallery
               templates={WEB_TEMPLATES}
-              banner="All web apps are generated as React + Tailwind CSS projects — ready to run with npm install && npm start"
+              type="web"
+              banner="BDapps-native web templates. Each one is wired for real SMS, Subscription, OTP and CaaS flows — preview the actual interactive app before you build."
               onSelect={(t) => openChooser(t, "web")}
+              onLivePreview={(t) => setLivePreview({ template: t, type: "web" })}
               testidPrefix="web"
               compareMode={compareMode}
               compareSelected={compareSelected}
@@ -281,9 +287,11 @@ const Digital = () => {
           <TabsContent value="android" className="pt-6">
             <TemplateGallery
               templates={ANDROID_TEMPLATES}
-              banner="All Android apps are generated as Flutter projects — ready to build with flutter pub get && flutter run"
+              type="android"
+              banner="BDapps-native Android templates. Connected to SMS/Subscription/CaaS APIs and ready for the Robi ecosystem."
               badges={["Flutter 3.x", "Material 3 Design", "Supports Android 8+"]}
               onSelect={(t) => openChooser(t, "android")}
+              onLivePreview={(t) => setLivePreview({ template: t, type: "android" })}
               testidPrefix="android"
               compareMode={compareMode}
               compareSelected={compareSelected}
@@ -319,6 +327,15 @@ const Digital = () => {
 
       {/* Demo Tour */}
       <DemoTour open={tourOpen} onClose={() => setTourOpen(false)} />
+
+      {/* Live Preview modal */}
+      <LivePreviewModal
+        open={!!livePreview}
+        onClose={() => setLivePreview(null)}
+        template={livePreview?.template}
+        type={livePreview?.type}
+        onUse={(t) => openChooser(t, livePreview?.type)}
+      />
 
       {/* Lite preview - phone screen */}
       <Dialog open={!!previewLite} onOpenChange={(o) => !o && setPreviewLite(null)}>

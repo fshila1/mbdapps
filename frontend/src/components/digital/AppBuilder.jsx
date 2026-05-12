@@ -11,10 +11,11 @@ import {
 } from "../ui/dialog";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { toast } from "sonner";
-import RealisticPhonePreview from "./RealisticPhonePreview";
-import BrowserPreview from "./BrowserPreview";
+import BDappsWebPreview from "./interactive/WebPreviews";
+import BDappsAndroidPreview from "./interactive/AndroidPreviews";
 import CodeDrawer from "./CodeDrawer";
 import WhatsIncluded from "./WhatsIncluded";
+import WhatsNext from "./WhatsNext";
 import { DESIGN_OPTIONS, WEB_DESIGN_OPTIONS, EMOJI_PALETTE } from "../../mocks/builderTemplates";
 import { useGeneratedApps, useTemplateRatings } from "../../hooks/useBuilderStorage";
 import { useApp } from "../../context/AppContext";
@@ -367,22 +368,24 @@ const AppBuilder = ({ template, designId, type, customization, onBack }) => {
               </button>
             </div>
             {type === "web" ? (
-              <BrowserPreview
-                design={designId}
-                url={previewUrl || `preview.bdapps.app/${template.slug}`}
+              <BDappsWebPreview
+                templateId={template.id}
                 appName={appName}
                 tagline={tagline}
                 primaryColor={color}
                 secondaryColor={secondaryColor}
+                language={customization?.language || "English"}
+                url={previewUrl || `${template.slug}.bdapps.app`}
+                height="h-[600px]"
               />
             ) : (
-              <RealisticPhonePreview
-                design={designId}
-                color={color}
+              <BDappsAndroidPreview
+                templateId={template.id}
                 appName={appName}
                 tagline={tagline}
+                primaryColor={color}
                 icon={icon}
-                categories={customization?.categories || []}
+                language={customization?.language || "English"}
               />
             )}
             {previewUrl && (
@@ -452,6 +455,7 @@ const AppBuilder = ({ template, designId, type, customization, onBack }) => {
 
           <RateTemplate templateId={template.id} />
           <WhatsIncluded type={type} sectionsCount={parseInt(customization?.sections, 10) || 4} />
+          <WhatsNext type={type} />
         </div>
       </div>
 
