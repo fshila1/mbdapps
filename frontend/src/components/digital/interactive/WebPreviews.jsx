@@ -349,8 +349,8 @@ const AnalyticsPreview = ({ appName, tagline, primary, accent, language }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
           <div className="bg-white border border-slate-200 rounded-lg p-3">
             <div className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-2">{T(language, "Subscriber Growth", "সাবস্ক্রাইবার বৃদ্ধি")}</div>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-40 min-h-[160px] w-full">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <LineChart data={growth}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="day" fontSize={10} />
@@ -363,8 +363,8 @@ const AnalyticsPreview = ({ appName, tagline, primary, accent, language }) => {
           </div>
           <div className="bg-white border border-slate-200 rounded-lg p-3">
             <div className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-2">{T(language, "Daily Revenue (BDT)", "দৈনিক আয় (BDT)")}</div>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-40 min-h-[160px] w-full">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <BarChart data={revenue}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="day" fontSize={10} />
@@ -670,8 +670,8 @@ const AdminPreview = ({ appName, tagline, primary, accent, language }) => {
         {tab === "revenue" && (
           <div className="bg-white border border-slate-200 rounded-lg p-4">
             <div className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-2">{T(language, "Revenue (last 7 days)", "আয় (গত ৭ দিন)")}</div>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-40 min-h-[160px] w-full">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <BarChart data={[{ d: "Mon", v: 9800 }, { d: "Tue", v: 11200 }, { d: "Wed", v: 10500 }, { d: "Thu", v: 13900 }, { d: "Fri", v: 12100 }, { d: "Sat", v: 11800 }, { d: "Sun", v: 12700 }]}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="d" fontSize={10} /><YAxis fontSize={10} /><Tooltip />
