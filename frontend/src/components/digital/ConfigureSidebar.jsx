@@ -72,7 +72,7 @@ const ConfigureSidebar = ({ cfg, onChange, type, onGenerate, onSaveDraft, onBack
         </div>
       </Section>
 
-      <Section title="📐 Layout" testid="cfg-section-layout">
+      <Section title="📐 Layout" defaultOpen testid="cfg-section-layout">
         <div>
           <Label className="text-[11px]">Corner Radius: {cfg.radius}px</Label>
           <input data-testid="cfg-radius" type="range" min="0" max="20" value={cfg.radius} onChange={(e) => set("radius", parseInt(e.target.value, 10))} className="w-full" />
