@@ -710,6 +710,15 @@ const PREVIEWS = {
   "web-app-store": StorePreview,
   "web-premium": PremiumPreview,
   "web-admin": AdminPreview,
+  // Pro App Builder aliases
+  "pro-sub-portal": SubPortalPreview,
+  "pro-ussd": UssdCompanionPreview,
+  "pro-content-dash": ContentDashPreview,
+  "pro-analytics": AnalyticsPreview,
+  "pro-otp": OtpLandingPreview,
+  "pro-store": StorePreview,
+  "pro-premium": PremiumPreview,
+  "pro-admin": AdminPreview,
 };
 
 const BDappsWebPreview = ({ templateId, appName = "BDapps App", tagline = "Your tagline", primaryColor = "#0f172a", secondaryColor = "#e11d48", language = "English", url, height }) => {

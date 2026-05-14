@@ -14,6 +14,7 @@ import Lite from "./pages/Lite";
 import { AppStore, AppStoreDetail } from "./pages/AppStore";
 import Reports from "./pages/Reports";
 import Digital from "./pages/Digital";
+import AddOns from "./pages/AddOns";
 import ApiDocs from "./pages/ApiDocs";
 import UserManagement from "./pages/admin/UserManagement";
 import AdminProvisioning from "./pages/admin/AdminProvisioning";
@@ -35,6 +36,7 @@ function App() {
           <Route path="/lite" element={<ProtectedRoute><Lite /></ProtectedRoute>} />
           <Route path="/lite/:sub" element={<ProtectedRoute><Lite /></ProtectedRoute>} />
           <Route path="/digital" element={<ProtectedRoute role="developer"><Digital /></ProtectedRoute>} />
+          <Route path="/add-ons" element={<ProtectedRoute role="developer"><AddOns /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
 
           {/* App Store - public */}

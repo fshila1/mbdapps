@@ -10,6 +10,7 @@ const DEV_LINKS = [
   { to: "/appstore", label: "App Store", icon: Store },
   { to: "/reports", label: "Reports", icon: BarChart3 },
   { to: "/digital", label: "Digital", icon: Layers, accent: true },
+  { to: "/add-ons", label: "Add-Ons", icon: Sparkles, accent: true },
 ];
 
 const ADMIN_LINKS = [

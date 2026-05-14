@@ -96,6 +96,10 @@ export const AppProvider = ({ children }) => {
     setBuildFiles((p) => p.map((b, i) => (i === idx ? { ...b, status } : b)));
   };
 
+  const addBuildFile = (file) => {
+    setBuildFiles((p) => [{ status: "Pending Approval", uploaded: new Date().toISOString().slice(0, 10), ...file }, ...p]);
+  };
+
   const addAd = (ad) => setAds((p) => [...p, { id: `AD-${String(p.length + 1).padStart(2, "0")}`, ...ad }]);
   const updateAd = (id, patch) => setAds((p) => p.map((a) => a.id === id ? { ...a, ...patch } : a));
   const removeAd = (id) => setAds((p) => p.filter((a) => a.id !== id));
@@ -107,7 +111,7 @@ export const AppProvider = ({ children }) => {
     apps, addApp, updateAppStatus,
     liteApps, addLiteApp,
     keywords, systemUsers, setSystemUsers, appCreators, appstoreUsers,
-    buildFiles, updateBuildFileStatus,
+    buildFiles, updateBuildFileStatus, addBuildFile,
     ads, addAd, updateAd, removeAd,
     subscriptions, storeApps, updateStoreApp,
     storeLayout, setStoreLayout,

@@ -70,3 +70,15 @@ code, .font-mono {
     border-left-color: inherit; border-right-color: inherit; border-top-color: inherit; border-bottom-color: inherit;
   }
 }
+
+@keyframes shineSweep {
+  0% { transform: translateX(-100%) skewX(12deg); }
+  100% { transform: translateX(400%) skewX(12deg); }
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+@keyframes countUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
