@@ -1,0 +1,38 @@
+{
+  "summary": "Retested 2 HIGH + 2 MED bugs from iteration_5. BUG-1 (action-deploy + action-share clipboard crash) is FIXED — copyLink helper's try/catch falls back to a 'Preview link: <url>' sonner toast when navigator.clipboard.writeText rejects with NotAllowedError. No CRA red overlay, no uncaught errors. BUG-2 (buildFiles persistence) is FIXED at the data layer — AppContext now safeParse's bdapps_buildfiles on init and useEffect-persists on change; verified 4 entries in localStorage survive a full reload, top entry is the newly submitted 'E-Commerce Shopping App.apk' with status 'Pending Approval'. MED (ConfigureSidebar defaultOpen) is FIXED — cfg-pay-ssl, cfg-subdomain, cfg-custom-domain (web) and cfg-pay-ssl, cfg-store-cat (android) are all visible without manual expand. Regression: 3 tabs render 8/8/8 templates, welcome modal still shows on cleared localStorage, demo-tour btn present, NO React rules-of-hooks errors. NEW BUG FOUND while verifying BUG-2 end-to-end: the new build-file row IS rendered in /admin/provisioning Build Files tab with the correct 'PENDING APPROVAL' status badge, BUT the Creator / App ID / App / Version / Date / Remarks cells are all empty because addBuildFile() in AppContext.jsx (lines 100-102) only writes name/app/type/size/uploadedBy/category/shortDesc/longDesc/icon/status/uploaded, while the admin table reads id, creator, version, created, remarks. Cross-session integration verification therefore fails visually even though the localStorage persistence layer is correct.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Submit-to-Store -> Admin Provisioning Build Files table rendering",
+        "issue": "addBuildFile() persists to localStorage successfully (verified count grew 3 -> 4, top entry = new APK with status 'Pending Approval' survives reload), and the corresponding new row DOES appear in Admin /admin/provisioning Build Files tab. HOWEVER all visible cells (Creator, App ID, App, Version, Date, Remarks) are empty — only the PENDING APPROVAL status badge is shown. Field-shape mismatch: addBuildFile stores {name, app, type, size, uploadedBy, category, shortDesc, longDesc, icon, status, uploaded} while the admin BuildFiles table renders {id, creator, app, version, created, remarks, status}. Fix: in AppContext.addBuildFile, generate id (e.g. `APP-${1000 + buildFiles.length}`), set creator = user?.username || 'developer', version='1.0.0', created=new Date().toISOString().slice(0,10), remarks='Initial build' — or update the admin BuildFiles table to read the alternate field names.",
+        "affected_selectors": ["action-submit-store", "confirm-submit-store", "/admin/provisioning Build Files row"]
+      }
+    ],
+    "design_issues": [
+      {"screen": "Console (carry-over)", "issues": ["api.fontshare.com still emits a CORS error on every page load (3-6 errors). Self-host or remove the Fontshare <link> in /app/frontend/public/index.html."]}
+    ]
+  },
+  "test_report_links": ["/app/test_reports/iteration_6.json", "/app/test_reports/iteration_5.json"],
+  "action_items": [
+    "(MED) Fix addBuildFile field-shape mismatch in /app/frontend/src/context/AppContext.jsx so the Admin Build Files table renders Creator / App ID / Version / Date / Remarks for newly submitted entries. Suggested patch: const addBuildFile = (file) => setBuildFiles((p) => [{ id: `APP-${1000 + p.length + 20}`, creator: (user?.username || 'developer'), version: '1.0.0', created: new Date().toISOString().slice(0,10), remarks: 'Initial submission', status: 'Pending Approval', uploaded: new Date().toISOString().slice(0,10), ...file }, ...p]);",
+    "(LOW carry-over) Self-host or remove Fontshare CDN <link> to silence CORS errors.",
+    "(LOW carry-over) Wrap Recharts in min-height to silence width(-1) warnings on /add-ons."
+  ],
+  "critical_code_review_comments": [
+    "AppBuilder.jsx copyLink helper (lines 31-38) is a clean fix — try/await navigator.clipboard.writeText then catch falls back to a toast that always surfaces the URL. Both action-deploy and action-share use it. Verified no NotAllowedError reaches the React error boundary in headless Chrome.",
+    "AppContext.jsx now persists buildFiles via useEffect (line 54) and seeds via safeParse (line 38) — symmetric with apps/liteApps/ads/storeApps. Good.",
+    "AppContext.jsx addBuildFile (line 100) omits id/creator/version/created/remarks — admin /admin/provisioning Build Files table thus shows a row with empty cells. Single-line patch needed (see action items).",
+    "ConfigureSidebar.jsx — cfg-section-pay and cfg-section-domain now defaultOpen for all relevant template types; cfg-section-store remains defaultOpen for android. All required-visible testids verified reachable without expand.",
+    "Carry-over: interactive/UniversalWebPreview (~583 LOC) and UniversalAndroidPreview (~378 LOC) still mix many template branches in one file — refactor candidate for code-splitting."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only mocked app)", "frontend": "~95%: 4/4 retest items PASS at the code/data level. 1 NEW MEDIUM bug: admin Build Files table shows empty cells for new addBuildFile entries due to field-shape mismatch (data persists correctly but render is incomplete)."},
+  "test_credentials": "developer@bdapps.com / dev123 (works). admin@bdapps.com / admin123 (works).",
+  "seed_data_creation": "Cleared localStorage and submitted one Android template (E-Commerce Shopping App.apk) via the Submit-to-Store flow. New buildFiles entry persists in localStorage but renders with empty cells in admin table.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "After main agent patches addBuildFile to include id/creator/version/created/remarks fields, retest the Submit-to-Store -> /admin/provisioning Build Files visual rendering. Steps: clear localStorage -> login developer -> /digital -> tab-android -> use-template-and-ecom -> design-option-* -> design-continue -> cust-preview -> cfg-generate -> action-submit-store -> confirm-submit-store -> reload -> clear bdapps_user -> login admin@bdapps.com -> /admin/provisioning -> Build Files tab -> verify the new row shows non-empty Creator='developer', App ID like 'APP-1024', App='E-Commerce Shopping App', Version='1.0.0', Date=today's date, Remarks='Initial submission', Status='Pending Approval'. All other previous bugs (clipboard, persistence, defaultOpen) are fixed and stable.",
+  "rca of the issue": "NEW: Admin Build Files renders empty cells for new submissions because addBuildFile() does not write the schema fields that the admin table reads. Persistence + state propagation are correct (verified via localStorage JSON inspection: 4 entries after submit, survives reload). Only the field-shape contract between developer-side addBuildFile and admin-side table is broken. Single-place fix in AppContext.jsx."
+}

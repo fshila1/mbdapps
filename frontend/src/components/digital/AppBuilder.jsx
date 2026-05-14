@@ -28,6 +28,15 @@ const AppBuilder = ({ template, type, designId, customization, onBack }) => {
   const [submitOpen, setSubmitOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const copyLink = async (url, label = "🔗 Preview link copied") => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(label);
+    } catch {
+      toast.success(`Preview link: ${url}`);
+    }
+  };
+
   const [cfg, setCfg] = useState({
     appName: customization?.name || template.name,
     tagline: customization?.tagline || template.description,
@@ -132,9 +141,9 @@ const AppBuilder = ({ template, type, designId, customization, onBack }) => {
               <Button data-testid="action-submit-store" onClick={() => setSubmitOpen(true)} className="bg-[#e11d48] hover:bg-[#be123c] gap-1"><Sparkles size={13} /> Submit to BDApps Store</Button>
             )}
             {type !== "android" && (
-              <Button data-testid="action-deploy" onClick={() => { navigator.clipboard?.writeText(`https://${cfg.domain.subdomain}.bdapps.app`); toast.success("🌐 Deployed! Link copied"); }} className="bg-emerald-600 hover:bg-emerald-700 gap-1"><ExternalLink size={13} /> Go Live Now</Button>
+              <Button data-testid="action-deploy" onClick={() => copyLink(`https://${cfg.domain.subdomain}.bdapps.app`, "🌐 Deployed! Link copied")} className="bg-emerald-600 hover:bg-emerald-700 gap-1"><ExternalLink size={13} /> Go Live Now</Button>
             )}
-            <Button data-testid="action-share" variant="outline" onClick={() => { navigator.clipboard?.writeText(`https://${cfg.domain.subdomain}.bdapps.app`); toast.success("🔗 Preview link copied"); }} className="gap-1"><Share2 size={13} /> Share</Button>
+            <Button data-testid="action-share" variant="outline" onClick={() => copyLink(`https://${cfg.domain.subdomain}.bdapps.app`, "🔗 Preview link copied")} className="gap-1"><Share2 size={13} /> Share</Button>
             <Button data-testid="action-analytics" variant="outline" onClick={() => navigate("/reports")} className="gap-1 text-purple-700 border-purple-200"><BarChart3 size={13} /> Analytics</Button>
           </div>
         </div>

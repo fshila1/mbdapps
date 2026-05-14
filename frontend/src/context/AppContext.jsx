@@ -35,7 +35,7 @@ export const AppProvider = ({ children }) => {
   const [systemUsers, setSystemUsers] = useState(seedSystemUsers);
   const [appCreators] = useState(seedAppCreators);
   const [appstoreUsers] = useState(seedAppstoreUsers);
-  const [buildFiles, setBuildFiles] = useState(seedBuildFiles);
+  const [buildFiles, setBuildFiles] = useState(() => safeParse("bdapps_buildfiles", seedBuildFiles));
   const [ads, setAds] = useState(() => safeParse("bdapps_ads", seedAds));
   const [subscriptions] = useState(seedSubscriptions);
   const [storeApps, setStoreApps] = useState(() => safeParse("bdapps_store", seedAppStore));
@@ -51,6 +51,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => localStorage.setItem("bdapps_ads", JSON.stringify(ads)), [ads]);
   useEffect(() => localStorage.setItem("bdapps_store", JSON.stringify(storeApps)), [storeApps]);
   useEffect(() => localStorage.setItem("bdapps_layout", JSON.stringify(storeLayout)), [storeLayout]);
+  useEffect(() => localStorage.setItem("bdapps_buildfiles", JSON.stringify(buildFiles)), [buildFiles]);
   useEffect(() => {
     appStoreUser ? localStorage.setItem("bdapps_storeuser", JSON.stringify(appStoreUser)) : localStorage.removeItem("bdapps_storeuser");
   }, [appStoreUser]);

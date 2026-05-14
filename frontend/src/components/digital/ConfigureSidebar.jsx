@@ -87,7 +87,7 @@ const ConfigureSidebar = ({ cfg, onChange, type, onGenerate, onSaveDraft, onBack
         </div>
       </Section>
 
-      <Section title="💳 Payments" testid="cfg-section-pay" defaultOpen={type === "pro"}>
+      <Section title="💳 Payments" testid="cfg-section-pay" defaultOpen>
         <div className="flex items-center justify-between"><Label className="text-[11px]">SSL Commerz Gateway</Label><Switch data-testid="cfg-pay-ssl" checked={!!cfg.payment?.ssl} onCheckedChange={(c) => setPayment("ssl", c)} /></div>
         <div className="flex items-center justify-between"><Label className="text-[11px]">Robi Operator Billing</Label><Switch data-testid="cfg-pay-robi" checked={!!cfg.payment?.robi} onCheckedChange={(c) => setPayment("robi", c)} /></div>
         <div className="flex items-center justify-between"><Label className="text-[11px]">Cash on Delivery</Label><Switch data-testid="cfg-pay-cod" checked={!!cfg.payment?.cod} onCheckedChange={(c) => setPayment("cod", c)} /></div>
@@ -159,7 +159,7 @@ const ConfigureSidebar = ({ cfg, onChange, type, onGenerate, onSaveDraft, onBack
       )}
 
       {type === "web" && (
-        <Section title="🌐 Domain & Hosting" testid="cfg-section-domain">
+        <Section title="🌐 Domain & Hosting" testid="cfg-section-domain" defaultOpen>
           <div>
             <Label className="text-[10px]">Subdomain</Label>
             <div className="flex items-center gap-1">
