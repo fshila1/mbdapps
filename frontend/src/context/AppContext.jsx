@@ -98,7 +98,17 @@ export const AppProvider = ({ children }) => {
   };
 
   const addBuildFile = (file) => {
-    setBuildFiles((p) => [{ status: "Pending Approval", uploaded: new Date().toISOString().slice(0, 10), ...file }, ...p]);
+    setBuildFiles((p) => [{
+      appId: `APP-${1020 + p.length}`,
+      appName: file.app || file.name || "New App",
+      creator: user?.username || "developer",
+      version: "1.0.0",
+      date: new Date().toISOString().slice(0, 10),
+      remarks: "Initial submission",
+      status: "Pending Approval",
+      uploaded: new Date().toISOString().slice(0, 10),
+      ...file,
+    }, ...p]);
   };
 
   const addAd = (ad) => setAds((p) => [...p, { id: `AD-${String(p.length + 1).padStart(2, "0")}`, ...ad }]);

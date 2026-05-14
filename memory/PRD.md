@@ -29,7 +29,14 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 - Data-testid on every interactive element
 - Mock data persisted across reloads via localStorage
 
-## What's Been Implemented (Feb 6, 2026 — initial; Feb 10, 2026 — fixes; Feb 11, 2026 — Web/Android Builders)
+## What's Been Implemented (Feb 6, 2026 — initial; Feb 10, 2026 — fixes; Feb 11, 2026 — Web/Android Builders; Feb 14, 2026 — Lucrative No-Code overhaul + bug fixes)
+
+### Iteration 6 — Lucrative No-Code Builder finalisation (Feb 14, 2026)
+- **Fixed compile blocker** in `UniversalAndroidPreview.jsx`: extracted hook-using inline `render`/`content` arrow functions (Payment / OTP / Lesson / Workout / Fare screens) into capitalised React components (PaymentScreen, OtpScreen, LessonScreen, WorkoutScreen, FareScreen) so `react-hooks/rules-of-hooks` no longer flags them.
+- **Fixed action-deploy crash**: introduced a shared `copyLink(url, label)` helper in `AppBuilder.jsx` that wraps `navigator.clipboard.writeText` in try/await/catch and falls back to a `Preview link: <url>` sonner toast — eliminates the `NotAllowedError` red overlay in CRA dev mode. Both `action-deploy` and `action-share` use it.
+- **Fixed buildFiles persistence**: `AppContext.jsx` now initialises `buildFiles` via `safeParse('bdapps_buildfiles', seedBuildFiles)` and has a `useEffect` that mirrors changes back to `localStorage`. Submitted entries survive full reload and developer→admin handover.
+- **Fixed Admin Build Files schema mismatch**: `addBuildFile` now writes `appId / appName / creator / version / date / remarks / status` so the admin table renders every cell correctly (previously fields were empty).
+- **ConfigureSidebar default-open**: `cfg-section-pay` and `cfg-section-domain` are now expanded by default for all relevant templates so the critical inputs (`cfg-pay-ssl`, `cfg-subdomain`, `cfg-custom-domain`) are immediately visible.
 
 ### Iteration 3 — Web & Android App Builders (Feb 11, 2026)
 - Added Web App Builder + Android App Builder tabs to `/digital`
