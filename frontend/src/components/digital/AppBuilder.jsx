@@ -9,6 +9,8 @@ import UniversalWebPreview from "./interactive/UniversalWebPreview";
 import UniversalAndroidPreview from "./interactive/UniversalAndroidPreview";
 import BDappsWebPreview from "./interactive/WebPreviews";
 import GenerationProgress from "./GenerationProgress";
+import LoadingSequence from "./LoadingSequence";
+import WebPreviewWrapper from "./WebPreviewWrapper";
 import { useGeneratedApps } from "../../hooks/useBuilderStorage";
 import { useApp } from "../../context/AppContext";
 import WhatsNext from "./WhatsNext";
@@ -19,6 +21,9 @@ const AppBuilder = ({ template, type, designId, customization, onBack }) => {
   const { addBuildFile } = useApp();
   const { saveApp } = useGeneratedApps();
   const [generating, setGenerating] = useState(true);
+  const [loadingPhase, setLoadingPhase] = useState(true);
+  const [customerMode, setCustomerMode] = useState(false);
+  const [restartKey, setRestartKey] = useState(0);
   const [celebration, setCelebration] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -52,20 +57,28 @@ const AppBuilder = ({ template, type, designId, customization, onBack }) => {
   }, [cfg.font]);
 
   useEffect(() => {
-    const t = setTimeout(() => setGenerating(false), 2200);
+    const t = setTimeout(() => setGenerating(false), 600);
     return () => clearTimeout(t);
   }, []);
 
   // Pick the right preview based on type + template id
   const Preview = useMemo(() => {
     if (type === "android") {
-      return <UniversalAndroidPreview templateId={template.id} cfg={cfg} />;
+      return <UniversalAndroidPreview key={restartKey} templateId={template.id} cfg={cfg} />;
     }
     if (type === "pro") {
-      return <BDappsWebPreview templateId={template.id} appName={cfg.appName} tagline={cfg.tagline} primaryColor={cfg.primary} secondaryColor={cfg.accent} language={cfg.language} height="h-[600px]" />;
+      return (
+        <WebPreviewWrapper url={`${cfg.domain?.subdomain || template.slug}.bdapps.app`} customerMode={customerMode} onCustomerToggle={() => setCustomerMode(!customerMode)} onRestart={() => setRestartKey((k) => k + 1)}>
+          <BDappsWebPreview key={restartKey} templateId={template.id} appName={cfg.appName} tagline={cfg.tagline} primaryColor={cfg.primary} secondaryColor={cfg.accent} language={cfg.language} height="h-[600px]" />
+        </WebPreviewWrapper>
+      );
     }
-    return <UniversalWebPreview templateId={template.id} cfg={cfg} height="h-[600px]" />;
-  }, [type, template.id, cfg]);
+    return (
+      <WebPreviewWrapper url={`${cfg.domain?.subdomain || template.slug}.bdapps.app`} customerMode={customerMode} onCustomerToggle={() => setCustomerMode(!customerMode)} onRestart={() => setRestartKey((k) => k + 1)}>
+        <UniversalWebPreview key={restartKey} templateId={template.id} cfg={cfg} height="h-[600px]" />
+      </WebPreviewWrapper>
+    );
+  }, [type, template.id, template.slug, cfg, customerMode, restartKey]);
 
   const onGenerate = () => {
     setGenerating(true);
@@ -127,11 +140,19 @@ const AppBuilder = ({ template, type, designId, customization, onBack }) => {
         </div>
       )}
 
-      <GenerationProgress show={generating} />
+      <GenerationProgress show={generating && !loadingPhase} />
 
+      {customerMode ? (
+        <div data-testid="customer-mode-overlay" className="bg-slate-900 rounded-2xl p-6">
+          <div className="flex items-center justify-end mb-3"><button data-testid="exit-customer-mode" onClick={() => setCustomerMode(false)} className="text-xs text-white bg-emerald-600 px-3 py-1.5 rounded-lg font-bold">← Exit Customer View</button></div>
+          <div className="bg-white rounded-xl overflow-hidden">{!loadingPhase && Preview}</div>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
         <div className="lg:col-span-8" data-testid="preview-pane">
-          {generating ? (
+          {loadingPhase ? (
+            <LoadingSequence appName={cfg.appName} primary={cfg.primary} onDone={() => setLoadingPhase(false)} />
+          ) : generating ? (
             <div className="bg-slate-50 border border-slate-200 rounded-xl h-[600px] flex items-center justify-center text-sm text-slate-500">Generating your app...</div>
           ) : Preview}
 
@@ -148,6 +169,7 @@ const AppBuilder = ({ template, type, designId, customization, onBack }) => {
           <ConfigureSidebar cfg={cfg} onChange={setCfg} type={type} onGenerate={onGenerate} onSaveDraft={() => toast.success("💾 Draft saved")} onBack={onBack} />
         </div>
       </div>
+      )}
 
       <Dialog open={submitOpen} onOpenChange={setSubmitOpen}>
         <DialogContent data-testid="submit-store-modal" className="max-w-md">

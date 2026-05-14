@@ -25,16 +25,23 @@ const Frame = ({ tpl, kids }) => (
 const WEB_MINI = {
   "web-ecom": (tpl) => (
     <div className="h-full flex flex-col">
-      <div className="h-3 flex items-center justify-between px-1.5" style={{ background: tpl.palette.primary }}>
-        <div className="text-[5px] text-white font-bold">SHOP</div>
-        <div className="flex gap-0.5"><span className="text-[5px] text-white">🛒</span></div>
+      <div className="h-3 flex items-center justify-between px-1.5" style={{ background: "#0f172a" }}>
+        <div className="text-[5px] text-white font-bold">🛍 SHOP</div>
+        <div className="flex gap-0.5"><span className="text-[5px] text-white">🔍</span><span className="text-[5px] text-white relative">🛒<sup className="text-[3px] bg-rose-500 text-white rounded-full px-0.5">2</sup></span></div>
       </div>
-      <div className="grid grid-cols-3 gap-0.5 p-1 flex-1">
-        {[0, 1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="rounded p-0.5 flex flex-col" style={{ background: `${tpl.palette.primary}10` }}>
-            <div className="h-3 rounded" style={{ background: `linear-gradient(135deg, ${tpl.palette.primary}, ${tpl.palette.accent})` }}></div>
-            <div className="h-0.5 mt-0.5 w-3/4 rounded bg-slate-300"></div>
-            <div className="h-0.5 mt-0.5 w-1/2 rounded" style={{ background: tpl.palette.accent }}></div>
+      <div className="h-8 flex items-center px-2 text-white text-[6px] font-bold" style={{ background: `linear-gradient(135deg, ${tpl.palette.primary}, ${tpl.palette.accent})` }}>
+        <div>SHOP DEALS<br/><span className="text-[4px] opacity-80">Free delivery 500+</span></div>
+        <div className="ml-auto text-[4px] bg-amber-400 text-slate-900 rounded px-1 py-0.5">🔥 50% OFF</div>
+      </div>
+      <div className="flex gap-0.5 px-1 py-0.5 bg-white">{["All", "Tech", "Fashion", "Home"].map((c, i) => <div key={c} className="text-[4px] px-1 rounded-full" style={i === 0 ? { background: tpl.palette.primary, color: "white" } : { background: "#f1f5f9" }}>{c}</div>)}</div>
+      <div className="grid grid-cols-3 gap-0.5 px-1 pb-1 flex-1">
+        {[{ e: "🎧", n: "Headph" }, { e: "⌚", n: "Watch" }, { e: "🔊", n: "Speaker" }].map((p, i) => (
+          <div key={i} className="rounded p-0.5 bg-white border border-slate-100">
+            <div className="h-4 rounded flex items-center justify-center text-[8px]" style={{ background: `linear-gradient(135deg, ${tpl.palette.primary}55, ${tpl.palette.accent}55)` }}>{p.e}</div>
+            <div className="text-[3px] font-bold mt-0.5">{p.n}</div>
+            <div className="text-[3px] flex items-center"><span className="text-amber-400">★</span>4.7</div>
+            <div className="text-[4px] font-bold" style={{ color: tpl.palette.primary }}>৳4500</div>
+            <div className="h-1 rounded mt-0.5" style={{ background: tpl.palette.primary }}></div>
           </div>
         ))}
       </div>
