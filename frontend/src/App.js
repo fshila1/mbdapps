@@ -37,6 +37,7 @@ import CmsReports from "./pages/cms/Reports";
 import GenericSection from "./pages/cms/GenericSection";
 import RobiMart from "./pages/apps/RobiMart";
 import DeshiFood from "./pages/apps/DeshiFood";
+import EduPath from "./pages/apps/EduPath";
 
 function App() {
   return (
@@ -95,8 +96,10 @@ function App() {
           {/* Showpiece launched apps */}
           <Route path="/apps/robimart-bd" element={<RobiMart />} />
           <Route path="/apps/deshifood" element={<DeshiFood />} />
+          <Route path="/apps/edupath-bd" element={<EduPath />} />
           <Route path="/apps/medilife-clinic" element={<RobiMart />} />
           <Route path="/apps/fitbd" element={<DeshiFood />} />
+          <Route path="/apps/shoplocal-bd" element={<RobiMart />} />
 
           {/* Admin */}
           <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />

@@ -8,21 +8,27 @@ import { Label } from "../components/ui/label";
 import { Logo } from "../components/Layout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../components/ui/dialog";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../components/ui/select";
-import { Search, Star, ChevronLeft, ChevronRight, Mail, Twitter, Facebook, ExternalLink, Share2, Heart } from "lucide-react";
+import { Search, Star, ChevronLeft, ChevronRight, Mail, Twitter, Facebook, Share2, Heart } from "lucide-react";
 import { toast } from "sonner";
+import AppArt from "../components/illustrations/AppArt";
+import { HeroDeveloperScene, HeroSubscribersScene, HeroBuilderScene } from "../components/illustrations/HeroArt";
+
+const HERO_SCENES = { developer: HeroDeveloperScene, subscribers: HeroSubscribersScene, builder: HeroBuilderScene };
 
 const AppCard = ({ app, onClick }) => (
   <button onClick={onClick} data-testid={`appstore-card-${app.id}`}
-    className="text-left bg-white border border-slate-200 rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all w-40 flex-shrink-0 group">
-    <div className={`aspect-square w-full bg-gradient-to-br ${app.iconGradient || "from-slate-500 to-slate-700"} flex items-center justify-center text-6xl shadow-inner relative`}>
-      <span className="drop-shadow-md">{app.icon}</span>
-      {app.type === "android" && <span className="absolute top-1.5 right-1.5 text-[8px] bg-emerald-500 text-white px-1.5 py-0.5 rounded font-bold">ANDROID</span>}
-      {app.type === "web" && <span className="absolute top-1.5 right-1.5 text-[8px] bg-blue-500 text-white px-1.5 py-0.5 rounded font-bold">WEB</span>}
+    className="text-left bg-white border border-slate-200 rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all w-full flex-shrink-0 group">
+    {/* TRUE FULL-BLEED ICON ART — zero padding, aspect-square, rounded top only */}
+    <div className="relative w-full aspect-square overflow-hidden rounded-t-2xl bg-slate-100">
+      <AppArt id={app.artId} initials={app.name?.[0]} />
+      {app.type === "android" && <span className="absolute top-2 right-2 text-[9px] bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold shadow-md">ANDROID</span>}
+      {app.type === "web" && <span className="absolute top-2 right-2 text-[9px] bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold shadow-md">WEB</span>}
+      {app.type === "lite" && <span className="absolute top-2 right-2 text-[9px] bg-rose-500 text-white px-2 py-0.5 rounded-full font-bold shadow-md">SMS</span>}
     </div>
-    <div className="p-2.5">
+    <div className="p-3">
       <h4 className="font-bold tracking-tight truncate text-sm">{app.name}</h4>
       <p className="text-[11px] text-slate-500 truncate">{app.developer}</p>
-      <div className="flex items-center gap-1 mt-1 text-xs"><Star size={10} className="fill-amber-400 text-amber-400" /><span className="font-bold">{app.rating}</span></div>
+      <div className="flex items-center gap-1 mt-1 text-xs"><Star size={10} className="fill-amber-400 text-amber-400" /><span className="font-bold">{app.rating}</span><span className="text-slate-400 ml-1">· {(app.subscribers / 1000).toFixed(0)}K+</span></div>
       <span className="inline-block mt-1 text-[9px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">{app.category}</span>
     </div>
   </button>
@@ -50,10 +56,10 @@ export const AppStore = () => {
     (!category || a.category === category)
   );
 
-  const sectionApps = (sortFn) => [...storeApps].sort(sortFn).slice(0, 4);
+  const sectionApps = (sortFn) => [...storeApps].sort(sortFn).slice(0, 6);
   const newest = sectionApps((a, b) => b.id.localeCompare(a.id));
   const topRated = sectionApps((a, b) => b.rating - a.rating);
-  const mostUsed = sectionApps((a, b) => (b.rating + parseFloat(a.cost === "Free" ? 0 : 1)) - (a.rating + 1));
+  const mostUsed = sectionApps((a, b) => (b.subscribers || 0) - (a.subscribers || 0));
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
@@ -69,56 +75,34 @@ export const AppStore = () => {
       </header>
 
       {/* Hero rotating */}
-      <section className="relative h-96 overflow-hidden" data-testid="hero-section">
-        {HERO_SLIDES.map((s, i) => (
-          <div key={i} className={`absolute inset-0 bg-gradient-to-br ${s.color} flex items-center transition-opacity duration-700 ${i === slide ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-            {/* Slide 1: developer layout (split white/illustration) */}
-            {s.id === "developer" ? (
-              <div className="w-full h-full grid grid-cols-1 md:grid-cols-2">
-                <div className="bg-white p-8 md:p-12 flex flex-col justify-center">
-                  <span className="text-3xl font-bold tracking-tighter bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">bdapps</span>
-                  <h1 className="text-3xl md:text-5xl tracking-tighter font-bold leading-tight mt-3 text-slate-900" style={{ fontFamily: "'Cabinet Grotesk', serif" }}>{s.title}</h1>
-                  <p className="text-slate-500 mt-3">{s.subtitle}</p>
+      <section className="relative h-[420px] overflow-hidden" data-testid="hero-section">
+        {HERO_SLIDES.map((s, i) => {
+          const Scene = HERO_SCENES[s.scene];
+          return (
+            <div key={i} className={`absolute inset-0 bg-gradient-to-br ${s.color} flex items-center transition-opacity duration-700 ${i === slide ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+              <div className="max-w-[1400px] w-full mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div className="text-white order-2 md:order-1">
+                  <p className="text-[10px] uppercase tracking-[0.2em] font-bold mb-3 opacity-80">Featured · {i + 1} of {HERO_SLIDES.length}</p>
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tighter font-bold leading-[1.05]" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{s.title}</h1>
+                  <p className="text-base md:text-lg mt-4 opacity-90 max-w-xl leading-relaxed">{s.subtitle}</p>
+                  {s.overlay && <p className="mt-4 inline-block bg-white/15 backdrop-blur px-3 py-1.5 rounded-full text-xs font-bold border border-white/20">{s.overlay}</p>}
+                  <div className="mt-6 flex gap-2 flex-wrap">
+                    <Button onClick={() => navigate("/digital")} className="bg-white text-slate-900 hover:bg-slate-100 rounded-full font-bold px-6 h-11">Start Building →</Button>
+                    <Button onClick={() => setOtpOpen(true)} variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white rounded-full font-bold px-6 h-11">Browse Apps</Button>
+                  </div>
                 </div>
-                <div className={`relative bg-gradient-to-br ${s.color} flex items-center justify-center overflow-hidden p-6`}>
-                  {/* Geometric shapes */}
-                  <div className="absolute top-8 left-12 w-6 h-6 bg-yellow-300 rounded"></div>
-                  <div className="absolute top-20 right-20 text-2xl">💰</div>
-                  <div className="absolute bottom-24 left-16 text-2xl">📊</div>
-                  <div className="absolute top-32 right-32 text-2xl">📍</div>
-                  <div className="absolute bottom-12 right-12 text-3xl">💻</div>
-                  {/* Phone mockup */}
-                  <div className="relative bg-slate-950 border-4 border-slate-800 rounded-3xl w-32 h-56 shadow-2xl z-10">
-                    <div className="absolute top-1 left-1/2 -translate-x-1/2 w-14 h-2 bg-slate-950 rounded-full"></div>
-                    <div className="m-2 mt-4 bg-gradient-to-br from-purple-500 to-fuchsia-600 rounded-2xl h-44 flex flex-col items-center justify-center text-white text-3xl">📱</div>
-                  </div>
-                  {/* Bold overlay banner */}
-                  <div className="absolute bottom-6 left-6 right-12 bg-purple-700 text-white p-3 rounded shadow-lg">
-                    <div className="font-bold text-sm leading-tight" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{s.overlay}</div>
-                  </div>
-                  <div className="absolute right-0 top-0 bottom-0 w-2 bg-red-600"></div>
+                <div className="order-1 md:order-2 h-56 md:h-80 lg:h-96 w-full">
+                  {Scene && <Scene />}
                 </div>
               </div>
-            ) : (
-              <div className="max-w-[1400px] w-full mx-auto px-8 text-white flex items-center justify-between gap-6">
-                <div className="max-w-2xl">
-                  <p className="text-xs uppercase tracking-widest font-bold mb-3 opacity-80">Featured · {i + 1} of {HERO_SLIDES.length}</p>
-                  <h1 className="text-4xl md:text-5xl tracking-tighter font-bold" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{s.title}</h1>
-                  <p className="text-lg mt-3 opacity-90">{s.subtitle}</p>
-                  {s.overlay && <p className="mt-4 inline-block bg-white/20 backdrop-blur px-3 py-1.5 rounded text-sm font-bold">{s.overlay}</p>}
-                  {s.id === "builder" && <Button onClick={() => navigate("/digital")} className="mt-4 bg-white text-slate-900 hover:bg-slate-100 rounded-full">Start Building →</Button>}
-                </div>
-                <div className="hidden md:block text-9xl drop-shadow-2xl">{s.emoji}</div>
-              </div>
-            )}
-          </div>
-        ))}
-        <div className="absolute bottom-4 right-8 flex gap-1.5 z-10">
+            </div>
+          );
+        })}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
           {HERO_SLIDES.map((_, i) => <button key={i} onClick={() => setSlide(i)} data-testid={`slide-${i}`} className={`h-2 rounded-full transition-all ${i === slide ? "w-8 bg-white" : "w-2 bg-white/50"}`}></button>)}
         </div>
-        {/* Prev/Next */}
-        <button onClick={() => setSlide((slide - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)} data-testid="hero-prev" className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center text-white z-10"><ChevronLeft size={20} /></button>
-        <button onClick={() => setSlide((slide + 1) % HERO_SLIDES.length)} data-testid="hero-next" className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center text-white z-10"><ChevronRight size={20} /></button>
+        <button onClick={() => setSlide((slide - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)} data-testid="hero-prev" className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center text-white z-10"><ChevronLeft size={20} /></button>
+        <button onClick={() => setSlide((slide + 1) % HERO_SLIDES.length)} data-testid="hero-next" className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur w-10 h-10 rounded-full flex items-center justify-center text-white z-10"><ChevronRight size={20} /></button>
       </section>
 
       {/* Search + Nav */}
@@ -152,11 +136,11 @@ export const AppStore = () => {
       </div>
 
       {/* Sections */}
-      <main className="max-w-[1400px] mx-auto px-4 lg:px-8 pb-16 space-y-10">
+      <main className="max-w-[1400px] mx-auto px-4 lg:px-8 pb-16 space-y-12">
         {(activeTab === "all" || search || category) ? (
           <section>
             <h2 className="text-2xl tracking-tight font-bold mb-4" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{search ? "Results" : category || "All Apps"}</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {filtered.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}
               {filtered.length === 0 && <p className="col-span-full text-slate-500">No apps found.</p>}
             </div>
@@ -173,9 +157,19 @@ export const AppStore = () => {
                   <h2 className="text-2xl tracking-tight font-bold" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{sec.label}</h2>
                   <button onClick={() => setActiveTab("all")} data-testid={`see-more-${sec.key}`} className="text-sm text-[#e11d48] font-medium hover:underline">See More →</button>
                 </div>
-                <div className="flex gap-4 overflow-x-auto pb-2">{sec.apps.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}</div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">{sec.apps.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}</div>
               </section>
             ))}
+            {/* All apps section below */}
+            <section>
+              <div className="flex justify-between items-end mb-4">
+                <h2 className="text-2xl tracking-tight font-bold" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>Browse All Apps</h2>
+                <span className="text-xs text-slate-500 font-bold">{storeApps.length} apps</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {storeApps.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}
+              </div>
+            </section>
           </>
         )}
       </main>
@@ -317,7 +311,9 @@ export const AppStoreDetail = () => {
       <main className="max-w-5xl mx-auto px-4 lg:px-8 py-6 lg:py-10 space-y-10">
         {/* Hero */}
         <div className="flex flex-col sm:flex-row gap-6 items-start">
-          <div className={`text-7xl bg-gradient-to-br ${app.iconGradient || "from-slate-100 to-slate-300"} rounded-3xl w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center flex-shrink-0 shadow-lg`}>{app.icon}</div>
+          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl overflow-hidden shadow-lg flex-shrink-0">
+            <AppArt id={app.artId} initials={app.name?.[0]} />
+          </div>
           <div className="flex-1 min-w-0 space-y-3">
             <div>
               <h1 className="text-3xl md:text-4xl tracking-tighter font-bold leading-tight" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{app.name}</h1>
@@ -355,23 +351,18 @@ export const AppStoreDetail = () => {
             {screenshots.map((bg, i) => (
               app.type === "android" ? (
                 <div key={i} className="shrink-0 snap-start" data-testid={`screenshot-${i}`}>
-                  {/* Phone frame */}
                   <div className="bg-slate-950 rounded-[1.75rem] p-1.5 border-4 border-slate-800 shadow-xl">
-                    <div className={`w-44 h-80 rounded-2xl bg-gradient-to-br ${bg} relative overflow-hidden`}>
-                      <div className="absolute top-0 left-0 right-0 h-5 flex items-center justify-between px-3 text-[8px] text-white font-bold"><span>9:41</span><span>📶 🔋</span></div>
-                      <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-950 rounded-full"></div>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                        <div className="text-4xl mb-2">{app.icon}</div>
-                        <div className="text-sm font-bold">{app.name}</div>
-                        <div className="text-[9px] opacity-80 mt-1">Screen {i + 1}</div>
-                      </div>
-                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 bg-white rounded-full"></div>
+                    <div className="w-44 h-80 rounded-2xl relative overflow-hidden bg-white">
+                      <AppArt id={app.artId} initials={app.name?.[0]} />
+                      <div className="absolute top-0 left-0 right-0 h-5 flex items-center justify-between px-3 text-[8px] text-white font-bold z-10"><span>9:41</span><span>📶 🔋</span></div>
+                      <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-slate-950 rounded-full z-20"></div>
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 bg-white rounded-full z-10"></div>
+                      <div className="absolute bottom-8 left-0 right-0 text-center text-[10px] text-white font-bold drop-shadow-lg z-10">Screen {i + 1}</div>
                     </div>
                   </div>
                 </div>
               ) : app.type === "web" ? (
                 <div key={i} className="shrink-0 snap-start" data-testid={`screenshot-${i}`}>
-                  {/* Browser chrome */}
                   <div className="bg-slate-200 rounded-lg overflow-hidden shadow-xl w-80">
                     <div className="bg-slate-100 px-3 py-1.5 flex items-center gap-1.5 border-b border-slate-300">
                       <div className="w-2 h-2 rounded-full bg-rose-400"></div>
@@ -379,19 +370,17 @@ export const AppStoreDetail = () => {
                       <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
                       <div className="ml-2 bg-white text-[10px] text-slate-500 px-2 py-0.5 rounded flex-1 truncate">https://{app.slug || "app"}.bdapps.app</div>
                     </div>
-                    <div className={`h-56 bg-gradient-to-br ${bg} flex flex-col items-center justify-center text-white`}>
-                      <div className="text-5xl mb-2">{app.icon}</div>
-                      <div className="text-sm font-bold">{app.name}</div>
-                      <div className="text-[10px] opacity-80 mt-1">Page {i + 1}</div>
+                    <div className="h-56 relative overflow-hidden bg-white">
+                      <AppArt id={app.artId} initials={app.name?.[0]} />
+                      <div className="absolute bottom-2 left-0 right-0 text-center text-[10px] text-white font-bold drop-shadow-lg">Page {i + 1}</div>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div key={i} className="shrink-0 snap-start" data-testid={`screenshot-${i}`}>
-                  <div className={`w-44 h-80 rounded-2xl bg-gradient-to-br ${bg} flex flex-col items-center justify-center text-white shadow-xl relative`}>
-                    <div className="text-5xl mb-2">{app.icon}</div>
-                    <div className="text-sm font-bold px-3 text-center">{app.name}</div>
-                    <div className="text-[10px] opacity-80 mt-1">Service preview</div>
+                  <div className="w-44 h-80 rounded-2xl relative overflow-hidden shadow-xl bg-white">
+                    <AppArt id={app.artId} initials={app.name?.[0]} />
+                    <div className="absolute bottom-3 left-0 right-0 text-center text-[10px] text-white font-bold drop-shadow-lg">Service preview {i + 1}</div>
                   </div>
                 </div>
               )
@@ -464,7 +453,7 @@ export const AppStoreDetail = () => {
         {fromDev.length > 0 && (
           <section>
             <h3 className="text-xl font-bold tracking-tight mb-4" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>More from {app.developer}</h3>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">{fromDev.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}</div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">{fromDev.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}</div>
           </section>
         )}
       </main>

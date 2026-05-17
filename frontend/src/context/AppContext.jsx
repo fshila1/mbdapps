@@ -39,7 +39,12 @@ export const AppProvider = ({ children }) => {
   const [buildFiles, setBuildFiles] = useState(() => safeParse("bdapps_buildfiles", seedBuildFiles));
   const [ads, setAds] = useState(() => safeParse("bdapps_ads", seedAds));
   const [subscriptions] = useState(seedSubscriptions);
-  const [storeApps, setStoreApps] = useState(() => safeParse("bdapps_store", seedAppStore));
+  const [storeApps, setStoreApps] = useState(() => {
+    // Force-refresh seed if artId field missing (migration to new SVG art)
+    const existing = safeParse("bdapps_store_v3", null);
+    if (!existing || !existing[0]?.artId) return seedAppStore;
+    return existing;
+  });
   const [storeLayout, setStoreLayout] = useState(() => safeParse("bdapps_layout", { hero: "Discover Apps Built for Bangladesh", sub: "Subscribe via SMS in 1 step" }));
   const [appStoreUser, setAppStoreUser] = useState(() => safeParse("bdapps_storeuser", null));
   const [pendingTemplate, setPendingTemplate] = useState(null);
@@ -51,7 +56,7 @@ export const AppProvider = ({ children }) => {
     return [
       { id: "APP-ROBIMART", name: "RobiMart BD", templateId: "web-ecom", templateType: "web", kind: "ecommerce", slug: "robimart-bd", status: "Live", icon: "🛒", color: "#ea580c", iconGradient: "from-orange-500 to-red-600", templateName: "E-Commerce Store", stats: { orders: 248, revenue: 184500, customers: 189, products: 8 }, launchedAt: new Date(now - 21 * 86400000).toISOString(), lastUpdated: new Date(now - 2 * 3600 * 1000).toISOString(), submittedAt: new Date(now - 23 * 86400000).toISOString(), version: "2.1.0" },
       { id: "APP-MEDILIFE", name: "Medilife Clinic", templateId: "web-health", templateType: "web", kind: "health", slug: "medilife-clinic", status: "Live", icon: "⚕️", color: "#0d9488", iconGradient: "from-teal-500 to-emerald-700", templateName: "Health & Wellness Clinic", stats: { appointments: 84, patients: 284, doctors: 4, visitors: 3200, rating: 4.6 }, launchedAt: new Date(now - 12 * 86400000).toISOString(), lastUpdated: new Date(now - 1 * 3600 * 1000).toISOString(), submittedAt: new Date(now - 14 * 86400000).toISOString(), version: "1.2.0" },
-      { id: "APP-EDUPATH", name: "EduPath BD", templateId: "web-edu", templateType: "web", kind: "education", slug: "edupath-bd", status: "Pending Review", icon: "📚", color: "#6366f1", iconGradient: "from-indigo-500 to-purple-700", templateName: "Online Learning Platform", stats: { visitors: 0, students: 0, courses: 6 }, launchedAt: new Date(now - 2 * 86400000).toISOString(), lastUpdated: new Date(now - 1 * 86400000).toISOString(), submittedAt: new Date(now - 2 * 86400000).toISOString(), version: "1.0.0", rejectionReason: null },
+      { id: "APP-EDUPATH", name: "EduPath BD", templateId: "web-edu", templateType: "web", kind: "education", slug: "edupath-bd", status: "Live", icon: "📚", color: "#6366f1", iconGradient: "from-indigo-500 to-purple-700", templateName: "Online Learning Platform", stats: { visitors: 8240, students: 1840, courses: 6, revenue: 92000 }, launchedAt: new Date(now - 9 * 86400000).toISOString(), lastUpdated: new Date(now - 1 * 86400000).toISOString(), submittedAt: new Date(now - 11 * 86400000).toISOString(), version: "1.0.0", rejectionReason: null },
       { id: "APP-DESHIFOOD", name: "DeshiFood", templateId: "and-food", templateType: "android", kind: "restaurant", slug: "deshifood", status: "Live", icon: "🍽", color: "#dc2626", iconGradient: "from-red-500 to-rose-600", templateName: "Food Delivery App", stats: { downloads: 8400, rating: 4.7, reviews: 284, orders: 1284 }, launchedAt: new Date(now - 28 * 86400000).toISOString(), lastUpdated: new Date(now - 2 * 3600 * 1000).toISOString(), submittedAt: new Date(now - 30 * 86400000).toISOString(), version: "1.4.2" },
       { id: "APP-FITBD", name: "FitBD", templateId: "and-fitness", templateType: "android", kind: "fitness", slug: "fitbd", status: "Live", icon: "💪", color: "#16a34a", iconGradient: "from-green-500 to-lime-600", templateName: "Fitness Tracker App", stats: { downloads: 3100, rating: 4.5, reviews: 98 }, launchedAt: new Date(now - 14 * 86400000).toISOString(), lastUpdated: new Date(now - 4 * 3600 * 1000).toISOString(), submittedAt: new Date(now - 16 * 86400000).toISOString(), version: "1.1.0", rejectionReason: null },
       { id: "APP-SHOPLOCAL", name: "ShopLocal BD", templateId: "and-marketplace", templateType: "android", kind: "ecommerce", slug: "shoplocal-bd", status: "Pending Review", icon: "🏪", color: "#f59e0b", iconGradient: "from-amber-500 to-orange-600", templateName: "Local Marketplace App", stats: { downloads: 0 }, launchedAt: new Date(now - 1 * 86400000).toISOString(), lastUpdated: new Date(now - 1 * 86400000).toISOString(), submittedAt: new Date(now - 1 * 86400000).toISOString(), version: "1.0.0", rejectionReason: null },
@@ -79,12 +84,19 @@ export const AppProvider = ({ children }) => {
     },
   });
 
-  const [myApps, setMyApps] = useState(() => safeParse("bdapps_myapps_v2", seedMyApps()));
+  const [myApps, setMyApps] = useState(() => {
+    const existing = safeParse("bdapps_myapps_v3", null);
+    if (!existing) return seedMyApps();
+    // Migration: ensure EduPath exists & is Live (added in Feb 19, 2026 sprint)
+    const hasEdu = existing.some((a) => a.id === "APP-EDUPATH");
+    if (!hasEdu) return [...seedMyApps().filter((a) => a.id === "APP-EDUPATH"), ...existing];
+    return existing;
+  });
   const [appContent, setAppContent] = useState(() => safeParse("bdapps_appcontent_v2", seedAppContent()));
   const [mediaLibrary, setMediaLibrary] = useState(() => safeParse("bdapps_media", []));
   const [cmsCollections, setCmsCollections] = useState(() => safeParse("bdapps_cms_v2", seedCmsCollections()));
 
-  useEffect(() => localStorage.setItem("bdapps_myapps_v2", JSON.stringify(myApps)), [myApps]);
+  useEffect(() => localStorage.setItem("bdapps_myapps_v3", JSON.stringify(myApps)), [myApps]);
   useEffect(() => localStorage.setItem("bdapps_appcontent_v2", JSON.stringify(appContent)), [appContent]);
   useEffect(() => localStorage.setItem("bdapps_media", JSON.stringify(mediaLibrary)), [mediaLibrary]);
   useEffect(() => localStorage.setItem("bdapps_cms_v2", JSON.stringify(cmsCollections)), [cmsCollections]);
@@ -239,7 +251,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => localStorage.setItem("bdapps_apps", JSON.stringify(apps)), [apps]);
   useEffect(() => localStorage.setItem("bdapps_liteapps", JSON.stringify(liteApps)), [liteApps]);
   useEffect(() => localStorage.setItem("bdapps_ads", JSON.stringify(ads)), [ads]);
-  useEffect(() => localStorage.setItem("bdapps_store", JSON.stringify(storeApps)), [storeApps]);
+  useEffect(() => localStorage.setItem("bdapps_store_v3", JSON.stringify(storeApps)), [storeApps]);
   useEffect(() => localStorage.setItem("bdapps_layout", JSON.stringify(storeLayout)), [storeLayout]);
   useEffect(() => localStorage.setItem("bdapps_buildfiles", JSON.stringify(buildFiles)), [buildFiles]);
   useEffect(() => {
