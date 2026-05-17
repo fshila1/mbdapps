@@ -154,6 +154,22 @@ const AppBuilder = ({ template, type, designId, customization, content, onBack }
       )}
 
       {celebration && (
+        <div data-testid="submitted-for-review" className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 max-w-3xl mx-auto text-center">
+          <div className="text-3xl">📋</div>
+          <h2 className="text-xl font-bold tracking-tight mt-1">Submitted for Review</h2>
+          <p className="text-sm text-slate-700 mt-1">Your {type === "android" ? "Android app" : type === "web" ? "web app" : "service"} has been submitted to BDApps admin for review. This typically takes 24–48 hours.</p>
+          <div className="mt-3 bg-white border border-slate-200 rounded-lg p-3 text-sm text-left max-w-md mx-auto">
+            <div className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-1.5">While you wait:</div>
+            <ul className="space-y-1 text-xs">
+              <li>✓ Your app is visible in <b>My Apps</b> as <span className="text-amber-700 font-bold">Pending Review</span></li>
+              <li>✓ You can manage content in the CMS</li>
+              <li>✓ Preview link is active for sharing</li>
+              {type === "android" && <li>✓ APK is in <b>Build Files</b> awaiting admin approval</li>}
+            </ul>
+          </div>
+        </div>
+      )}
+      {celebration && (
         <div data-testid="celebration-screen" className="bg-gradient-to-br from-emerald-50 to-amber-50 border border-emerald-200 rounded-2xl p-6 text-center relative overflow-hidden">
           <div className="w-20 h-20 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-4xl text-emerald-600 animate-pulse">✓</div>
           <h1 className="text-3xl font-bold tracking-tight mt-3">🎉 Your App is Ready to Launch!</h1>

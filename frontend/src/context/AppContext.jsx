@@ -45,58 +45,47 @@ export const AppProvider = ({ children }) => {
   const [pendingTemplate, setPendingTemplate] = useState(null);
 
   // ============ CONTENT MANAGEMENT LAYER ============
-  // Seed 3 mock launched apps with realistic content
+  // Seed 4 mock launched apps with realistic content + statuses showcasing approval flow
   const seedMyApps = () => {
     const now = Date.now();
-    const make = (id, name, templateId, type, status, stats) => ({
-      id, name, templateId, templateType: type,
-      kind: getKindFor(templateId),
-      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      status, icon: { "web-ecom": "🛒", "web-food": "🍽", "web-health": "🏥" }[templateId] || "📱",
-      color: { "web-ecom": "#ea580c", "web-food": "#dc2626", "web-health": "#0d9488" }[templateId] || "#0f172a",
-      stats,
-      launchedAt: new Date(now - 30 * 86400000).toISOString(),
-      lastUpdated: new Date(now - 2 * 3600 * 1000).toISOString(),
-    });
     return [
-      make("APP-ROBIMART", "RobiMart BD", "web-ecom", "web", "Live", { orders: 248, revenue: 184500, customers: 189, products: 8 }),
-      make("APP-DESHISPICE", "Deshi Spice Kitchen", "and-food", "android", "Live", { orders: 1284, revenue: 504600, customers: 412, products: 6 }),
-      make("APP-MEDILIFE", "Medilife Clinic", "web-health", "web", "In Review", { appointments: 94, patients: 284, doctors: 4 }),
+      { id: "APP-ROBIMART", name: "RobiMart BD", templateId: "web-ecom", templateType: "web", kind: "ecommerce", slug: "robimart-bd", status: "Live", icon: "🛒", color: "#ea580c", iconGradient: "from-orange-500 to-red-600", stats: { orders: 248, revenue: 184500, customers: 189, products: 8 }, launchedAt: new Date(now - 14 * 86400000).toISOString(), lastUpdated: new Date(now - 2 * 3600 * 1000).toISOString(), submittedAt: new Date(now - 16 * 86400000).toISOString(), version: "2.1.0" },
+      { id: "APP-MEDILIFE", name: "Medilife Clinic", templateId: "web-health", templateType: "web", kind: "health", slug: "medilife-clinic", status: "Pending Review", icon: "⚕️", color: "#0d9488", iconGradient: "from-teal-500 to-emerald-700", stats: { appointments: 0, patients: 0, doctors: 4 }, launchedAt: new Date(now - 2 * 86400000).toISOString(), lastUpdated: new Date(now - 1 * 3600 * 1000).toISOString(), submittedAt: new Date(now - 2 * 86400000).toISOString(), version: "1.0.0", rejectionReason: null },
+      { id: "APP-DESHIFOOD", name: "DeshiFood", templateId: "and-food", templateType: "android", kind: "restaurant", slug: "deshifood", status: "Live", icon: "🍽", color: "#dc2626", iconGradient: "from-red-500 to-rose-600", stats: { downloads: 8400, rating: 4.7, reviews: 284, orders: 1284 }, launchedAt: new Date(now - 21 * 86400000).toISOString(), lastUpdated: new Date(now - 2 * 3600 * 1000).toISOString(), submittedAt: new Date(now - 23 * 86400000).toISOString(), version: "1.4.2" },
+      { id: "APP-FITBD", name: "FitBD", templateId: "and-fitness", templateType: "android", kind: "fitness", slug: "fitbd", status: "Pending Review", icon: "💪", color: "#16a34a", iconGradient: "from-green-500 to-lime-600", stats: { downloads: 0 }, launchedAt: new Date(now - 1 * 86400000).toISOString(), lastUpdated: new Date(now - 1 * 86400000).toISOString(), submittedAt: new Date(now - 1 * 86400000).toISOString(), version: "1.0.0", rejectionReason: null },
     ];
   };
 
   const seedAppContent = () => {
     const out = {};
-    [["APP-ROBIMART","web-ecom"],["APP-DESHISPICE","web-food"],["APP-MEDILIFE","web-health"]].forEach(([id, tid]) => {
+    [["APP-ROBIMART","web-ecom"],["APP-DESHIFOOD","web-food"],["APP-MEDILIFE","web-health"]].forEach(([id, tid]) => {
       const content = SAMPLE_CONTENT[tid]();
       out[id] = content;
     });
     return out;
   };
 
-  const seedCmsCollections = () => {
-    return {
-      orders: { "APP-ROBIMART": sampleOrders("ecommerce"), "APP-DESHISPICE": sampleOrders("restaurant") },
-      appointments: { "APP-MEDILIFE": sampleAppointments() },
-      reviews: { "APP-ROBIMART": sampleReviews(), "APP-DESHISPICE": sampleReviews(), "APP-MEDILIFE": sampleReviews() },
-      customers: { "APP-ROBIMART": sampleCustomers(), "APP-DESHISPICE": sampleCustomers(), "APP-MEDILIFE": sampleCustomers() },
-      activity: {
-        "APP-ROBIMART": sampleActivity("ecommerce"),
-        "APP-DESHISPICE": sampleActivity("restaurant"),
-        "APP-MEDILIFE": sampleActivity("health"),
-      },
-    };
-  };
+  const seedCmsCollections = () => ({
+    orders: { "APP-ROBIMART": sampleOrders("ecommerce"), "APP-DESHIFOOD": sampleOrders("restaurant") },
+    appointments: { "APP-MEDILIFE": sampleAppointments() },
+    reviews: { "APP-ROBIMART": sampleReviews(), "APP-DESHIFOOD": sampleReviews(), "APP-MEDILIFE": sampleReviews() },
+    customers: { "APP-ROBIMART": sampleCustomers(), "APP-DESHIFOOD": sampleCustomers(), "APP-MEDILIFE": sampleCustomers() },
+    activity: {
+      "APP-ROBIMART": sampleActivity("ecommerce"),
+      "APP-DESHIFOOD": sampleActivity("restaurant"),
+      "APP-MEDILIFE": sampleActivity("health"),
+    },
+  });
 
-  const [myApps, setMyApps] = useState(() => safeParse("bdapps_myapps", seedMyApps()));
-  const [appContent, setAppContent] = useState(() => safeParse("bdapps_appcontent", seedAppContent()));
+  const [myApps, setMyApps] = useState(() => safeParse("bdapps_myapps_v2", seedMyApps()));
+  const [appContent, setAppContent] = useState(() => safeParse("bdapps_appcontent_v2", seedAppContent()));
   const [mediaLibrary, setMediaLibrary] = useState(() => safeParse("bdapps_media", []));
-  const [cmsCollections, setCmsCollections] = useState(() => safeParse("bdapps_cms", seedCmsCollections()));
+  const [cmsCollections, setCmsCollections] = useState(() => safeParse("bdapps_cms_v2", seedCmsCollections()));
 
-  useEffect(() => localStorage.setItem("bdapps_myapps", JSON.stringify(myApps)), [myApps]);
-  useEffect(() => localStorage.setItem("bdapps_appcontent", JSON.stringify(appContent)), [appContent]);
+  useEffect(() => localStorage.setItem("bdapps_myapps_v2", JSON.stringify(myApps)), [myApps]);
+  useEffect(() => localStorage.setItem("bdapps_appcontent_v2", JSON.stringify(appContent)), [appContent]);
   useEffect(() => localStorage.setItem("bdapps_media", JSON.stringify(mediaLibrary)), [mediaLibrary]);
-  useEffect(() => localStorage.setItem("bdapps_cms", JSON.stringify(cmsCollections)), [cmsCollections]);
+  useEffect(() => localStorage.setItem("bdapps_cms_v2", JSON.stringify(cmsCollections)), [cmsCollections]);
 
   const touchApp = (appId) => setMyApps((p) => p.map((a) => a.id === appId ? { ...a, lastUpdated: new Date().toISOString() } : a));
 
@@ -218,6 +207,27 @@ export const AppProvider = ({ children }) => {
     setAppContent((p) => { const c = { ...p }; delete c[appId]; return c; });
   };
 
+  // ============ APP APPROVAL FLOW ============
+  const [appNotifs, setAppNotifs] = useState(() => safeParse("bdapps_appnotifs", []));
+  useEffect(() => localStorage.setItem("bdapps_appnotifs", JSON.stringify(appNotifs)), [appNotifs]);
+
+  const pushNotif = (notif) => setAppNotifs((p) => [{ id: `N-${Date.now()}`, time: new Date().toISOString(), read: false, ...notif }, ...p].slice(0, 30));
+  const markNotifsRead = () => setAppNotifs((p) => p.map((n) => ({ ...n, read: true })));
+
+  const approveMyApp = (appId) => {
+    const app = myApps.find((a) => a.id === appId);
+    setMyApps((p) => p.map((a) => a.id === appId ? { ...a, status: "Live", rejectionReason: null, lastUpdated: new Date().toISOString() } : a));
+    pushNotif({ type: "approval", title: "App Approved 🎉", body: `Your app ${app?.name} has been approved and is now live on BDApps App Store!`, appId });
+  };
+  const rejectMyApp = (appId, reason) => {
+    const app = myApps.find((a) => a.id === appId);
+    setMyApps((p) => p.map((a) => a.id === appId ? { ...a, status: "Rejected", rejectionReason: reason, lastUpdated: new Date().toISOString() } : a));
+    pushNotif({ type: "rejection", title: "App Rejected ❌", body: `Your app ${app?.name} was rejected. Reason: ${reason}. Review and resubmit.`, appId });
+  };
+  const resubmitMyApp = (appId) => {
+    setMyApps((p) => p.map((a) => a.id === appId ? { ...a, status: "Pending Review", rejectionReason: null, submittedAt: new Date().toISOString() } : a));
+  };
+
   // Approximate storage usage from media library data URLs
   const computeStorageBytes = () => mediaLibrary.reduce((sum, m) => sum + (m.size || (m.dataUrl ? m.dataUrl.length * 0.75 : 0)), 0);
 
@@ -311,6 +321,8 @@ export const AppProvider = ({ children }) => {
     cmsCollections, updateOrderStatus, updateAppointmentStatus, addAppointment,
     replyReview, removeReview, approveReview, addCmsActivity,
     mediaLibrary, addMediaFile, removeMediaFile, renameMediaFile, computeStorageBytes,
+    appNotifs, pushNotif, markNotifsRead,
+    approveMyApp, rejectMyApp, resubmitMyApp,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

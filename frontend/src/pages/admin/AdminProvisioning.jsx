@@ -11,7 +11,68 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from ".
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
 import { ALL_STATUSES } from "../../mocks/data";
 import { toast } from "sonner";
-import { Download, Check, X, Trash2 } from "lucide-react";
+import { Download, Check, X, Trash2, ExternalLink } from "lucide-react";
+
+const WebAppApproval = () => {
+  const { myApps, approveMyApp, rejectMyApp } = useApp();
+  const [filterType, setFilterType] = useState("all");
+  const [rejecting, setRejecting] = useState(null);
+  const [reason, setReason] = useState("");
+
+  const pending = myApps.filter((a) => (a.status === "Pending Review" || a.status === "Live" || a.status === "Rejected") && (filterType === "all" || a.templateType === filterType));
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Label className="text-xs">Filter:</Label>
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger className="w-40" data-testid="webapp-filter"><SelectValue /></SelectTrigger>
+          <SelectContent><SelectItem value="all">All Apps</SelectItem><SelectItem value="web">Web Apps</SelectItem><SelectItem value="android">Android Apps</SelectItem></SelectContent>
+        </Select>
+        <span className="ml-auto text-xs text-slate-500">{pending.filter((a) => a.status === "Pending Review").length} pending review</span>
+      </div>
+      <div className="bg-white border border-slate-200 rounded-md overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="text-left p-3">App</th><th className="text-left p-3">Developer</th><th className="text-left p-3">Template</th><th className="text-left p-3">Submitted</th><th className="text-left p-3">Status</th><th className="text-left p-3">Actions</th></tr></thead>
+          <tbody>
+            {pending.map((a) => (
+              <tr key={a.id} className="border-t border-slate-100" data-testid={`webapp-row-${a.id}`}>
+                <td className="p-3">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${a.iconGradient} flex items-center justify-center text-xl text-white`}>{a.icon}</div>
+                    <div><div className="font-bold">{a.name}</div><div className="text-[10px] text-slate-500">{a.id} · v{a.version}</div></div>
+                  </div>
+                </td>
+                <td className="p-3 text-xs">Rafiul Karim</td>
+                <td className="p-3 text-xs"><span className="bg-slate-100 px-2 py-0.5 rounded font-bold">{a.templateType?.toUpperCase()}</span> {a.kind}</td>
+                <td className="p-3 text-xs text-slate-500">{new Date(a.submittedAt || a.launchedAt).toLocaleDateString()}</td>
+                <td className="p-3"><span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${a.status === "Live" ? "bg-emerald-100 text-emerald-700" : a.status === "Rejected" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-700"}`}>{a.status}</span></td>
+                <td className="p-3 space-x-1">
+                  <Button size="sm" variant="outline" onClick={() => window.open(`/apps/${a.slug}`, "_blank")} data-testid={`webapp-view-${a.id}`}><ExternalLink size={12} /></Button>
+                  {a.status === "Pending Review" && <>
+                    <Button size="sm" variant="outline" className="text-emerald-600" onClick={() => { approveMyApp(a.id); toast.success(`✓ Approved · ${a.name} is now live!`); }} data-testid={`webapp-approve-${a.id}`}><Check size={12} /></Button>
+                    <Button size="sm" variant="outline" className="text-rose-600" onClick={() => { setRejecting(a); setReason(""); }} data-testid={`webapp-reject-${a.id}`}><X size={12} /></Button>
+                  </>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <Dialog open={!!rejecting} onOpenChange={(o) => !o && setRejecting(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Reject {rejecting?.name}?</DialogTitle></DialogHeader>
+          <Label>Rejection Reason *</Label>
+          <Textarea data-testid="reject-reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Content quality below threshold..." />
+          <DialogFooter>
+            <Button data-testid="confirm-reject" onClick={() => { if (!reason) return toast.error("Reason required"); rejectMyApp(rejecting.id, reason); toast.success(`Rejected ${rejecting.name}`); setRejecting(null); }} className="bg-rose-600 hover:bg-rose-700">Reject App</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
 
 const TRANSITIONS = {
   "Pending Approval": ["Active Production", "Limited Production", "Scheduled Active Production", "Rejected"],
@@ -56,7 +117,12 @@ const AdminProvisioning = () => {
         </div>
 
         <Tabs defaultValue="apps">
-          <TabsList><TabsTrigger value="apps">Apps</TabsTrigger><TabsTrigger value="builds">Build Files</TabsTrigger></TabsList>
+          <TabsList><TabsTrigger value="apps">Apps</TabsTrigger><TabsTrigger value="webapps" data-testid="tab-webapps">Web Apps</TabsTrigger><TabsTrigger value="builds">Build Files</TabsTrigger></TabsList>
+
+          <TabsContent value="webapps" className="pt-6 space-y-4">
+            <p className="text-sm text-slate-600">Review web & android apps submitted via the Digital Builder.</p>
+            <WebAppApproval />
+          </TabsContent>
 
           <TabsContent value="apps" className="pt-6 space-y-4">
             <Select value={filter} onValueChange={setFilter}><SelectTrigger className="w-60" data-testid="admin-filter-status"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="any">Any Status</SelectItem>{ALL_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select>

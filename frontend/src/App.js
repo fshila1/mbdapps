@@ -35,6 +35,8 @@ import MediaLibrary from "./pages/cms/MediaLibrary";
 import Settings from "./pages/cms/Settings";
 import CmsReports from "./pages/cms/Reports";
 import GenericSection from "./pages/cms/GenericSection";
+import RobiMart from "./pages/apps/RobiMart";
+import DeshiFood from "./pages/apps/DeshiFood";
 
 function App() {
   return (
@@ -89,6 +91,12 @@ function App() {
           <Route path="/appstore" element={<AppStore />} />
           <Route path="/appstore/:id" element={<AppStoreDetail />} />
           <Route path="/api-docs" element={<ApiDocs />} />
+
+          {/* Showpiece launched apps */}
+          <Route path="/apps/robimart-bd" element={<RobiMart />} />
+          <Route path="/apps/deshifood" element={<DeshiFood />} />
+          <Route path="/apps/medilife-clinic" element={<RobiMart />} />
+          <Route path="/apps/fitbd" element={<DeshiFood />} />
 
           {/* Admin */}
           <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />

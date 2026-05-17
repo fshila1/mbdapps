@@ -25,9 +25,10 @@ const NOTIFS = [
 ];
 
 const Layout = ({ children, subnav = null }) => {
-  const { user, logout } = useApp();
+  const { user, logout, appNotifs, markNotifsRead } = useApp();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const unread = (appNotifs || []).filter((n) => !n.read).length;
 
   const onLogout = () => {
     logout();
@@ -52,17 +53,24 @@ const Layout = ({ children, subnav = null }) => {
             <div className="flex items-center gap-2">
               {user && (
                 <>
-                  <DropdownMenu>
+                  <DropdownMenu onOpenChange={(o) => o && unread > 0 && markNotifsRead()}>
                     <DropdownMenuTrigger asChild>
                       <button data-testid="notification-bell" className="relative p-2 hover:bg-slate-100 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
                         <Bell size={18} />
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#e11d48] rounded-full"></span>
+                        {unread > 0 && <span data-testid="notif-badge" className="absolute top-0.5 right-0.5 bg-[#e11d48] text-white text-[9px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{unread}</span>}
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-80">
-                      <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                      <DropdownMenuLabel>Notifications {unread > 0 && <span className="text-[#e11d48]">({unread} new)</span>}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      {NOTIFS.map((n, i) => (
+                      {(appNotifs || []).slice(0, 5).map((n) => (
+                        <DropdownMenuItem key={n.id} className="flex flex-col items-start gap-0.5 py-2" onClick={() => n.appId && navigate(`/my-apps`)}>
+                          <div className="font-medium text-sm">{n.title}</div>
+                          <div className="text-xs text-slate-500">{n.body}</div>
+                          <div className="text-xs text-slate-400">{new Date(n.time).toLocaleString()}</div>
+                        </DropdownMenuItem>
+                      ))}
+                      {(!appNotifs || appNotifs.length === 0) && NOTIFS.map((n, i) => (
                         <DropdownMenuItem key={i} className="flex flex-col items-start gap-0.5 py-2">
                           <div className="font-medium text-sm">{n.title}</div>
                           <div className="text-xs text-slate-500">{n.body}</div>

@@ -203,20 +203,25 @@ export const seedSubscriptions = [
 export const VALID_OPERATOR_PREFIXES = ["018", "016", "019"];
 
 export const seedAppStore = [
-  { id: "AS-01", name: "Cricket Live", developer: "BD Sports", rating: 4.8, category: "Entertainment", icon: "🏏", cost: "Tk 2/day", description: "Real-time cricket scores via SMS.", instructions: "Send CRIC to 21333 to subscribe." },
-  { id: "AS-02", name: "Daily Hadith", developer: "Islamic Foundation BD", rating: 4.9, category: "Utilities", icon: "📖", cost: "Tk 1/day", description: "Authentic daily hadith reminders.", instructions: "Send HADITH to 21333." },
-  { id: "AS-03", name: "Health Tips Pro", developer: "MedBangla", rating: 4.5, category: "Health", icon: "💚", cost: "Free", description: "Daily wellness tips curated by doctors.", instructions: "Send HEALTH to 21333." },
-  { id: "AS-04", name: "Stock Brief BD", developer: "FinHub", rating: 4.3, category: "Finance", icon: "📈", cost: "Tk 5/day", description: "DSE stock summaries every evening.", instructions: "Send STK to 21333." },
-  { id: "AS-05", name: "Bangla Quiz", developer: "EduPlay", rating: 4.6, category: "Games", icon: "🎮", cost: "Tk 1/day", description: "Win Tk100 every week!", instructions: "Send QUIZ to 21333." },
-  { id: "AS-06", name: "Weather Today", developer: "MetBD", rating: 4.4, category: "Utilities", icon: "🌤️", cost: "Free", description: "City-wise weather alerts.", instructions: "Send WTHR to 21333." },
-  { id: "AS-07", name: "Movie Buff", developer: "Cineplex", rating: 4.2, category: "Entertainment", icon: "🎬", cost: "Tk 3/day", description: "Latest movie news & showtimes.", instructions: "Send MOVIE to 21333." },
-  { id: "AS-08", name: "Salah Times", developer: "Islamic Foundation BD", rating: 4.9, category: "Utilities", icon: "🕌", cost: "Free", description: "5x daily prayer times.", instructions: "Send SALAH to 21333." },
+  // Lite / Pro apps (Subscribe CTA)
+  { id: "AS-WEATHER", name: "Weather Alert BD", developer: "WeatherTech BD", rating: 4.7, subscribers: 84200, category: "Alert Service", icon: "🌤", iconGradient: "from-sky-400 to-blue-600", type: "lite", cost: "Tk 1/day", description: "Real-time weather alerts for all 64 districts of Bangladesh. Get rain warnings, temperature updates, and cyclone alerts.", instructions: "Send WTHR to 21333" },
+  { id: "AS-HADITH", name: "Daily Hadith", developer: "Islamic Digital BD", rating: 4.9, subscribers: 214000, category: "Islamic", icon: "🕌", iconGradient: "from-emerald-600 to-green-800", type: "lite", cost: "Tk 1/day", description: "Authentic daily Hadith from Sahih Bukhari and Muslim with Bangla translation.", instructions: "Send HADITH to 21333" },
+  { id: "AS-CRICKET", name: "Cricket Score Alert", developer: "SportsBD", rating: 4.8, subscribers: 184000, category: "Sports", icon: "🏏", iconGradient: "from-green-700 to-teal-900", type: "lite", cost: "Tk 2/day", description: "Live cricket score alerts for all Bangladesh matches — international and BPL.", instructions: "Send CRIC to 21333" },
+  { id: "AS-HEALTH", name: "Daily Health Tips", developer: "HealthBD", rating: 4.6, subscribers: 62400, category: "Health", icon: "💊", iconGradient: "from-teal-400 to-cyan-600", type: "lite", cost: "Free", description: "Curated wellness tips by doctors. Diet, exercise, mental health.", instructions: "Send HEALTH to 21333" },
+  { id: "AS-PRAYER", name: "Prayer Time Alert", developer: "Islamic Digital BD", rating: 4.9, subscribers: 320000, category: "Islamic", icon: "🕋", iconGradient: "from-green-800 to-emerald-950", type: "lite", cost: "Free", description: "Five-times daily prayer time alerts based on your district.", instructions: "Send SALAH to 21333" },
+  { id: "AS-STOCK", name: "Stock Market Brief", developer: "FinanceBD", rating: 4.5, subscribers: 28400, category: "Finance", icon: "📈", iconGradient: "from-slate-700 to-blue-900", type: "lite", cost: "Tk 5/day", description: "DSE & CSE market summaries with top gainers/losers.", instructions: "Send STK to 21333" },
+  // Web apps (Visit Site CTA)
+  { id: "AS-ROBIMART", name: "RobiMart BD", developer: "Rafiul Karim", rating: 4.8, subscribers: 12400, category: "E-Commerce", icon: "🛒", iconGradient: "from-orange-500 to-red-600", type: "web", cost: "Free", slug: "robimart-bd", description: "Full online store with electronics, fashion, home & living, sports, beauty, and books. Cash on delivery and bKash supported across Bangladesh.", instructions: "Visit robimart-bd.bdapps.app" },
+  // Android apps (Download CTA)
+  { id: "AS-DESHIFOOD", name: "DeshiFood", developer: "Rafiul Karim", rating: 4.7, subscribers: 8400, category: "Food & Dining", icon: "🍽", iconGradient: "from-red-500 to-rose-600", type: "android", cost: "Free", slug: "deshifood", description: "Order from top Dhaka restaurants — Kacchi Bhai, Pizza Hut, Haji Biriyani and more. Live order tracking and bKash/Nagad payments.", instructions: "Install from BDApps Store" },
 ];
 
+export const CATEGORIES = ["SMS Services","Entertainment","Health","Education","Finance","Sports","Islamic","Travel","Food","Productivity","E-Commerce","Food & Dining"];
+
 export const HERO_SLIDES = [
-  { title: "Discover Apps Built for Bangladesh", subtitle: "Curated by Robi BDapps", color: "from-rose-600 to-rose-800" },
-  { title: "Subscribe with a Single SMS", subtitle: "No app store. No data charges.", color: "from-slate-900 to-slate-700" },
-  { title: "Win Big with Daily Quiz", subtitle: "Tk 100 weekly prize", color: "from-amber-600 to-rose-600" },
+  { id: "developer", title: "Your One-Stop Appstore For Every Service", subtitle: "Browse. Discover. Subscribe.", overlay: "Largest Apps DEVELOPER community in Bangladesh", color: "from-violet-200 via-purple-300 to-fuchsia-400", emoji: "📱" },
+  { id: "subscribers", title: "10 Million+ Active Subscribers", subtitle: "Connect your service to Robi's massive network", overlay: "5,000+ Apps · 10M+ Users · BDT 2B+ Revenue", color: "from-rose-700 via-red-700 to-rose-900", emoji: "🚀" },
+  { id: "builder", title: "Build Your App in Minutes — No Code Required", subtitle: "Web apps, Android apps, telecom services — all from one platform", overlay: "Start Building →", color: "from-slate-900 via-blue-900 to-red-900", emoji: "⚡" },
 ];
 
 export const LITE_TEMPLATES = [
@@ -239,7 +244,7 @@ export const PROVISIONING_TEMPLATES = [
     flow: ["Subscribe via keyword", "CaaS charging", "Premium content delivered", "Daily rebill"], useCase: "Music, video clips, exclusive content." },
 ];
 
-export const CATEGORIES = ["Games", "Entertainment", "Health", "Finance", "Utilities"];
+export const CATEGORIES_LEGACY = ["Games", "Entertainment", "Health", "Finance", "Utilities"];
 
 export const seedMessageHistory = [
   { date: daysAgo(0), app: "Cricket Live Updates", from: "21333", to: "+8801711234567", message: "BD 245/4 in 40 ov", status: "Delivered" },
