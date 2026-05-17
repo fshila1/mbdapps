@@ -8,6 +8,7 @@ const WhatsNext = ({ type }) => {
 
   const steps = [
     { id: "generated", label: `${type === "web" ? "Web" : "Android"} app generated`, done: true, to: null },
+    { id: "myapps", label: "Add or update your content anytime", to: "/my-apps", cta: "Go to My Apps" },
     { id: "lite", label: "Publish your SMS service in BDapps Lite", to: "/lite", cta: "Go to BDapps Lite" },
     { id: "provisioning", label: "Configure API in Provisioning", to: "/provisioning", cta: "Go to Provisioning" },
     { id: "appstore", label: "List on BDapps App Store", to: "/app-store", cta: "Go to App Store" },

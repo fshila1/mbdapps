@@ -16,9 +16,9 @@ import { useApp } from "../../context/AppContext";
 import WhatsNext from "./WhatsNext";
 import Confetti from "./Confetti";
 
-const AppBuilder = ({ template, type, designId, customization, onBack }) => {
+const AppBuilder = ({ template, type, designId, customization, content, onBack }) => {
   const navigate = useNavigate();
-  const { addBuildFile } = useApp();
+  const { addBuildFile, addMyApp } = useApp();
   const { saveApp } = useGeneratedApps();
   const [generating, setGenerating] = useState(true);
   const [loadingPhase, setLoadingPhase] = useState(true);
@@ -96,8 +96,19 @@ const AppBuilder = ({ template, type, designId, customization, onBack }) => {
       setCelebration(true);
       try {
         saveApp({ id: `${template.id}-${Date.now()}`, templateId: template.id, type, name: cfg.appName, tagline: cfg.tagline, color: cfg.primary, icon: template.icon, designId, customization: { ...customization, ...cfg }, createdAt: new Date().toISOString() });
+        // Push to My Apps with the content collected in Step 4
+        const newApp = addMyApp({
+          name: cfg.appName,
+          templateId: template.id,
+          type,
+          slug: cfg.domain?.subdomain,
+          icon: template.icon,
+          color: cfg.primary,
+        }, content);
+        // store reference for "Manage Content" CTA
+        window.__lastLaunchedAppId = newApp?.id;
       } catch { /* noop */ }
-      toast.success("🎉 Your app is ready to launch!");
+      toast.success("🎉 Your app is ready to launch! Content stored in BDApps Cloud DB.");
     }, 1800);
   };
 
@@ -129,6 +140,19 @@ const AppBuilder = ({ template, type, designId, customization, onBack }) => {
 
       {celebration && <Confetti onDone={() => {}} />}
 
+      {/* Content Applied banner */}
+      {!celebration && content && type !== "pro" && (
+        <div data-testid="content-applied-banner" className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 text-sm flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2 text-emerald-800"><span className="w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] flex items-center justify-center font-bold">✓</span>
+            <b>Your content is live in the preview</b>
+            <span className="text-xs text-emerald-700">
+              {(content.products?.length || content.menuItems?.length || content.doctors?.length || content.courses?.length || content.properties?.length || content.packages?.length || content.campaigns?.length || 0)} items · {content.banners?.length || 0} banners · {content.categories?.length || 0} categories
+            </span>
+          </div>
+          <button data-testid="content-edit-link" onClick={onBack} className="text-xs text-emerald-700 hover:underline font-bold">← Edit Content</button>
+        </div>
+      )}
+
       {celebration && (
         <div data-testid="celebration-screen" className="bg-gradient-to-br from-emerald-50 to-amber-50 border border-emerald-200 rounded-2xl p-6 text-center relative overflow-hidden">
           <div className="w-20 h-20 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-4xl text-emerald-600 animate-pulse">✓</div>
@@ -146,6 +170,15 @@ const AppBuilder = ({ template, type, designId, customization, onBack }) => {
             <Button data-testid="action-share" variant="outline" onClick={() => copyLink(`https://${cfg.domain.subdomain}.bdapps.app`, "🔗 Preview link copied")} className="gap-1"><Share2 size={13} /> Share</Button>
             <Button data-testid="action-analytics" variant="outline" onClick={() => navigate("/reports")} className="gap-1 text-purple-700 border-purple-200"><BarChart3 size={13} /> Analytics</Button>
           </div>
+          {window.__lastLaunchedAppId && (
+            <div className="mt-4 max-w-3xl mx-auto bg-white border-2 border-emerald-300 rounded-xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+              <div className="text-left">
+                <div className="text-xs uppercase tracking-widest font-bold text-emerald-700">🚀 Launch isn't the end — it's the start</div>
+                <div className="text-sm mt-0.5">Manage your app content forever from your <b>My Apps</b> dashboard. Add products, update prices, view orders — no code needed.</div>
+              </div>
+              <Button data-testid="action-manage-content" onClick={() => navigate(`/my-apps/${window.__lastLaunchedAppId}/content`)} className="bg-emerald-600 hover:bg-emerald-700 gap-1 whitespace-nowrap">✏ Manage Content</Button>
+            </div>
+          )}
         </div>
       )}
 

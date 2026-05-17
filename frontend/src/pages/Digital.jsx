@@ -10,6 +10,7 @@ import TemplateGallery from "../components/digital/TemplateGallery";
 import DesignChooserModal from "../components/digital/DesignChooserModal";
 import AppBuilder from "../components/digital/AppBuilder";
 import CustomizationForm from "../components/digital/CustomizationForm";
+import ContentManager from "../components/digital/ContentManager";
 import LivePreviewModal from "../components/digital/LivePreviewModal";
 import DemoTour from "../components/digital/DemoTour";
 import { PRO_TEMPLATES, WEB_TEMPLATES, ANDROID_TEMPLATES, ALL_CATEGORIES_PRO, ALL_CATEGORIES_WEB, ALL_CATEGORIES_ANDROID } from "../mocks/builderTemplates";
@@ -20,21 +21,22 @@ const TAB_META = {
   android: { icon: "📱", label: "Android App Builder", tagline: "Ship your Android app today — no developers needed" },
 };
 
-const STEP_LABELS = ["Choose Template", "Design Style", "Customize", "Preview & Launch"];
+const STEP_LABELS = ["Choose Template", "Design Style", "Customize", "Add Your Content", "Preview & Launch"];
 
 const Digital = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState("pro");
-  // Flow state: null = gallery, otherwise { template, type, designId?, customization? }
+  // Flow state: null = gallery, otherwise { template, type, designId?, customization?, content? }
   const [chooser, setChooser] = useState(null);
   const [customizing, setCustomizing] = useState(null);
+  const [contentStep, setContentStep] = useState(null);
   const [builderState, setBuilderState] = useState(null);
   const [livePreview, setLivePreview] = useState(null);
   const [tourOpen, setTourOpen] = useState(false);
   const [welcomeStep, setWelcomeStep] = useState(localStorage.getItem("bdapps-digital-welcomed") ? -1 : 0);
 
-  // current creation step (0..3) — null means in gallery
-  const currentStep = builderState ? 3 : customizing ? 2 : chooser ? 1 : null;
+  // current creation step (0..4) — null means in gallery
+  const currentStep = builderState ? 4 : contentStep ? 3 : customizing ? 2 : chooser ? 1 : null;
   const inFlow = currentStep !== null;
 
   const dismissWelcome = () => { localStorage.setItem("bdapps-digital-welcomed", "1"); setWelcomeStep(-1); };
@@ -45,8 +47,18 @@ const Digital = () => {
     setChooser(null);
   };
   const onCustomized = (customization) => {
-    setBuilderState({ template: customizing.template, type: customizing.type, designId: customizing.designId, customization });
+    // Pro app builder: skip content step (telecom templates don't need it)
+    if (customizing.type === "pro") {
+      setBuilderState({ template: customizing.template, type: customizing.type, designId: customizing.designId, customization, content: null });
+      setCustomizing(null);
+      return;
+    }
+    setContentStep({ template: customizing.template, type: customizing.type, designId: customizing.designId, customization });
     setCustomizing(null);
+  };
+  const onContentDone = (content) => {
+    setBuilderState({ ...contentStep, content });
+    setContentStep(null);
   };
   const backFromBuilder = () => { setBuilderState(null); navigate("/digital"); };
 
@@ -82,7 +94,7 @@ const Digital = () => {
                     </span>
                     <span className="hidden sm:inline">{label}</span>
                   </div>
-                  {i < 3 && <div className="flex-1 h-px bg-slate-200"></div>}
+                  {i < 4 && <div className="flex-1 h-px bg-slate-200"></div>}
                 </React.Fragment>
               ))}
             </div>
@@ -92,9 +104,17 @@ const Digital = () => {
         {/* Generated apps shelf — visible only on gallery */}
         {!inFlow && <MyGeneratedAppsShelf />}
 
-        {/* If in builder step 4, render AppBuilder full-width */}
+        {/* If in builder step 5, render AppBuilder full-width */}
         {builderState ? (
-          <AppBuilder template={builderState.template} type={builderState.type} designId={builderState.designId} customization={builderState.customization} onBack={backFromBuilder} />
+          <AppBuilder template={builderState.template} type={builderState.type} designId={builderState.designId} customization={builderState.customization} content={builderState.content} onBack={backFromBuilder} />
+        ) : contentStep ? (
+          /* Step 4 — Content Manager */
+          <ContentManager
+            template={contentStep.template}
+            initial={null}
+            onBack={() => { setCustomizing({ template: contentStep.template, type: contentStep.type, designId: contentStep.designId }); setContentStep(null); }}
+            onContinue={onContentDone}
+          />
         ) : customizing ? (
           /* Step 3 */
           <div>

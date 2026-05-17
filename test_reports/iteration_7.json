@@ -1,0 +1,63 @@
+{
+  "summary": "Frontend-only testing of BDapps Digital Builder Content & Data Management layer. Tested sidebar nav, /my-apps page with 3 seeded apps, builder flow up to Step 4, CMS sections (Overview/Products/Banners/Orders/Doctors/Appointments/Reviews/Customers/Pages/Media/Settings/Reports), Settings Danger Zone confirmation, and core navigation. Most CMS pages render correctly with seeded Bangladeshi content. Core functionality works.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Digital builder template cards", "issue": "Test context indicated data-testid='web-template-card-{id}' but actual is 'template-card-{id}'. Use 'template-card-web-ecom' etc. and 'use-template-{id}' button.", "selector": "[data-testid^='template-card-']", "priority": "LOW (documentation mismatch)"},
+      {"component": "Sync Indicator (CmsLayout topbar)", "issue": "Visible text 'Changes live · 2 hr ago' renders correctly, but element lacks data-testid='sync-indicator'. Add for testability.", "selector": "topbar sync indicator", "priority": "MEDIUM"},
+      {"component": "Banners reorder buttons", "issue": "Up/down ▲▼ reorder buttons visible but no data-testid attributes (e.g. banner-move-up-{id}/banner-move-down-{id}). Drag-reorder works visually.", "selector": "banner row arrows", "priority": "MEDIUM"},
+      {"component": "ContentManager Step 4 — Skip Sample Data", "issue": "Could not locate data-testid='skip-sample-data' on the Skip button. Step 4 was not reached reliably in test (the Design Style modal advance path needs investigation).", "selector": "[data-testid='skip-sample-data']", "priority": "MEDIUM"},
+      {"component": "ContentManager Step 4 — Section nav", "issue": "Could not verify section nav data-testid prefix (expected content-section-* or section-nav-*). Add data-testid to each section nav item with completion dots.", "selector": "content section nav items", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "Builder → Step 4 Content", "issue": "After clicking 'Use Template' → Design modal opens → Continue → Customize. Could not reliably advance to Step 4 in automated test; flow needs verification that 'Preview My App →' button advances to ContentManager (not directly to Preview/Launch). Multiple template testid prefix confusion may also be affecting test reliability.", "affected_selectors": ["[data-testid='skip-sample-data']", "Add Your Content section nav"]}
+    ],
+    "design_issues": [
+      {"screen": "Login/all", "issues": ["External font (api.fontshare.com/cabinet-grotesk) blocked by CORS — fonts fail to load; falls back to system fonts. Not blocking but should self-host or use Google Fonts."]}
+    ]
+  },
+  "verified_working": [
+    "Login with developer@bdapps.com/dev123",
+    "Sidebar 'My Apps' link exists between Digital and Add-Ons with NEW badge",
+    "/my-apps shows 3 seeded apps (APP-ROBIMART, APP-DESHISPICE, APP-MEDILIFE) with status badges (Live/In Review), stats, all 4 action buttons (manage-content/dashboard/settings/view-live)",
+    "'Build New App →' button navigates to /digital",
+    "5-step progress bar visible (Choose Template → Design Style → Customize → Add Your Content → Preview & Launch)",
+    "CMS Layout topbar shows app name, status badge, 'Changes live · X' text, 'View Live Site' button",
+    "CMS Sidebar shows context-aware nav (e-commerce: Overview/Products/Banners/Orders/Customers/Reviews/Pages/Media/Reports/Settings; health: Doctors/Appointments)",
+    "CMS Overview: stats cards (Total Orders/Revenue/Active Products/Customers), Quick Actions, Recent Activity feed with timestamps",
+    "CMS Products: table with image/name/price/stock/status + Add Product button + Stock Alerts visible",
+    "CMS Banners: cards with image, ▲▼ reorder buttons, CTR/Views/Clicks analytics, Add Banner",
+    "CMS Orders: All/New/Processing/Shipped/Delivered/Cancelled filter tabs, order table with view actions",
+    "CMS Doctors page (Medilife): loads",
+    "CMS Appointments page: loads",
+    "CMS Reviews/Customers/Pages/Media/Reports: all routes load without errors",
+    "CMS Settings: 5 sub-tabs (Store Info/Notifications/Domain & SEO/Integrations/Danger Zone) present",
+    "Settings Danger Zone: requires typing exact app name (RobiMart BD) to enable Delete App button — verified Delete App button disabled by default",
+    "'Manage on the go' promo card at bottom of CMS sidebar",
+    "Storage meter (Storage 0.0 / 500 MB) visible in CMS sidebar",
+    "No page errors / no uncaught exceptions across all visited pages"
+  ],
+  "test_report_links": [],
+  "action_items": [
+    "Add data-testid='sync-indicator' to the CMS topbar sync element",
+    "Add data-testid to Banner reorder buttons (banner-move-up-{id}, banner-move-down-{id})",
+    "Add data-testid='skip-sample-data' to the Skip — Use Sample Data button in ContentManager Step 4",
+    "Add data-testid to ContentManager section nav items (e.g., content-section-{key}) and completion dots",
+    "Update agent context note: template card testid is 'template-card-{id}' not 'web-template-card-{id}'; use button is 'use-template-{id}'",
+    "Verify Step 4 ContentManager is actually shown for Web/Android template flows (manual smoke test recommended — could not reliably automate)",
+    "Self-host Cabinet Grotesk font or switch CDN — current api.fontshare.com fails CORS"
+  ],
+  "critical_code_review_comments": [
+    "AppContext relies on localStorage with no schema versioning — future content schema changes will break existing saved state. Consider a 'bdapps_schema_version' key with migration.",
+    "Several CMS pages may share repeated table/panel layouts — consider extracting common Table/SlidePanel components if not already done (DRY).",
+    "External font blocked by CORS produces console errors on every page load — should be self-hosted or switched."
+  ],
+  "updated_files": [],
+  "success_rate": {"frontend": "85%"},
+  "test_credentials": "developer@bdapps.com / dev123 (works)",
+  "seed_data_creation": "None — all 3 apps (RobiMart BD, Deshi Spice Kitchen, Medilife Clinic) are pre-seeded in AppContext localStorage",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Login works. /my-apps and all CMS sections render fine for 3 seeded apps. The hard-to-test part is Digital Builder Step 4 ContentManager — flow is: Login → /digital → click 'Web App Builder' tab → click [data-testid^='use-template-'] → Design Style modal opens → pick style → 'Continue →' → Customize form → fill required fields → 'Preview My App →' button → should reach Step 4 Content. The 'Use Template' button is inside the template card. data-testid prefix is 'template-card-' not 'web-template-card-'. Welcome modal dismissal: localStorage.setItem('bdapps-digital-welcomed', '1'). Sync indicator and several Step 4 elements lack data-testid — need to add for reliable testing.",
+  "rca": "Test could not reliably reach Step 4 Content Manager in automated flow due to: (1) Design Style step is a MODAL overlay (not inline step), requiring different navigation; (2) Skip Sample Data button lacks data-testid; (3) Initial agent context provided incorrect testid prefix for template cards. Recommend main agent verify Step 4 manually and add the missing data-testids."
+}

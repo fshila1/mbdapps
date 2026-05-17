@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, ServerCog, Sparkles, Store, BarChart3, Layers, Users, ShieldCheck, Settings2, LogOut, X } from "lucide-react";
+import { LayoutDashboard, ServerCog, Sparkles, Store, BarChart3, Layers, Users, ShieldCheck, Settings2, LogOut, X, FolderOpen } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
 const DEV_LINKS = [
@@ -10,6 +10,7 @@ const DEV_LINKS = [
   { to: "/appstore", label: "App Store", icon: Store },
   { to: "/reports", label: "Reports", icon: BarChart3 },
   { to: "/digital", label: "Digital", icon: Layers, accent: true },
+  { to: "/my-apps", label: "My Apps", icon: FolderOpen, accent: true },
   { to: "/add-ons", label: "Add-Ons", icon: Sparkles, accent: true },
 ];
 

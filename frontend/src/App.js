@@ -20,6 +20,21 @@ import UserManagement from "./pages/admin/UserManagement";
 import AdminProvisioning from "./pages/admin/AdminProvisioning";
 import AppStoreAdmin from "./pages/admin/AppStoreAdmin";
 import TapAdmin from "./pages/admin/TapAdmin";
+import MyApps from "./pages/MyApps";
+import CmsLayout from "./pages/cms/CmsLayout";
+import Overview from "./pages/cms/Overview";
+import Products from "./pages/cms/Products";
+import Banners from "./pages/cms/Banners";
+import Orders from "./pages/cms/Orders";
+import Doctors from "./pages/cms/Doctors";
+import Appointments from "./pages/cms/Appointments";
+import Reviews from "./pages/cms/Reviews";
+import Customers from "./pages/cms/Customers";
+import Pages from "./pages/cms/Pages";
+import MediaLibrary from "./pages/cms/MediaLibrary";
+import Settings from "./pages/cms/Settings";
+import CmsReports from "./pages/cms/Reports";
+import GenericSection from "./pages/cms/GenericSection";
 
 function App() {
   return (
@@ -38,6 +53,37 @@ function App() {
           <Route path="/digital" element={<ProtectedRoute role="developer"><Digital /></ProtectedRoute>} />
           <Route path="/add-ons" element={<ProtectedRoute role="developer"><AddOns /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+
+          {/* My Apps & CMS */}
+          <Route path="/my-apps" element={<ProtectedRoute role="developer"><MyApps /></ProtectedRoute>} />
+          <Route path="/my-apps/:appId/content" element={<ProtectedRoute role="developer"><CmsLayout /></ProtectedRoute>}>
+            <Route index element={<Overview />} />
+            <Route path="overview" element={<Overview />} />
+            <Route path="products" element={<Products />} />
+            <Route path="menu" element={<Products />} />
+            <Route path="banners" element={<Banners />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="doctors" element={<Doctors />} />
+            <Route path="appointments" element={<Appointments />} />
+            <Route path="reviews" element={<Reviews />} />
+            <Route path="customers" element={<Customers />} />
+            <Route path="patients" element={<Customers />} />
+            <Route path="pages" element={<Pages />} />
+            <Route path="media" element={<MediaLibrary />} />
+            <Route path="reports" element={<CmsReports />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="courses" element={<GenericSection sectionParam="courses" />} />
+            <Route path="instructors" element={<GenericSection sectionParam="instructors" />} />
+            <Route path="properties" element={<GenericSection sectionParam="properties" />} />
+            <Route path="agents" element={<GenericSection sectionParam="agents" />} />
+            <Route path="leads" element={<GenericSection sectionParam="leads" />} />
+            <Route path="packages" element={<GenericSection sectionParam="packages" />} />
+            <Route path="destinations" element={<GenericSection sectionParam="destinations" />} />
+            <Route path="campaigns" element={<GenericSection sectionParam="campaigns" />} />
+            <Route path="team" element={<GenericSection sectionParam="team" />} />
+            <Route path="pricing" element={<GenericSection sectionParam="pricing" />} />
+            <Route path="students" element={<GenericSection sectionParam="students" />} />
+          </Route>
 
           {/* App Store - public */}
           <Route path="/appstore" element={<AppStore />} />
