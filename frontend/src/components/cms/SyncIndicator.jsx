@@ -18,15 +18,15 @@ const SyncIndicator = ({ lastSync, saving }) => {
 
   if (saving) {
     return (
-      <div data-testid="sync-saving" className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+      <div data-testid="sync-indicator" className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+        <span data-testid="sync-saving" className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
         Saving changes...
       </div>
     );
   }
   return (
-    <div data-testid="sync-live" className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full" key={tick}>
-      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+    <div data-testid="sync-indicator" className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full" key={tick}>
+      <span data-testid="sync-live" className="w-2 h-2 rounded-full bg-emerald-500"></span>
       Changes live · {ago(lastSync)}
     </div>
   );

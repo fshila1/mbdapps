@@ -368,7 +368,7 @@ const ContentManager = ({ template, onBack, onContinue, initial }) => {
               </button>
             ))}
             <div className="pt-3">
-              <Button onClick={fillSample} data-testid="content-fill-sample" variant="outline" className="w-full gap-1 text-xs"><Sparkles size={12} /> Skip — Use Sample Data</Button>
+              <Button onClick={fillSample} data-testid="skip-sample-data" variant="outline" className="w-full gap-1 text-xs"><Sparkles size={12} /> Skip — Use Sample Data</Button>
             </div>
           </aside>
 

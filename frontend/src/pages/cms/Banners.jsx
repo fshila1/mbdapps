@@ -61,9 +61,9 @@ const Banners = () => {
             return (
               <div key={b.id} data-testid={`banner-card-${b.id}`} className="bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col sm:flex-row">
                 <div className="flex flex-col items-center justify-center px-2 py-3 bg-slate-50 sm:w-10">
-                  <button onClick={() => move(i, -1)} data-testid={`banner-up-${i}`} className="p-1 hover:bg-slate-200 rounded text-xs">▲</button>
+                  <button onClick={() => move(i, -1)} data-testid={`banner-move-up-${b.id}`} className="p-1 hover:bg-slate-200 rounded text-xs">▲</button>
                   <GripVertical size={14} className="text-slate-400 my-1" />
-                  <button onClick={() => move(i, 1)} data-testid={`banner-down-${i}`} className="p-1 hover:bg-slate-200 rounded text-xs">▼</button>
+                  <button onClick={() => move(i, 1)} data-testid={`banner-move-down-${b.id}`} className="p-1 hover:bg-slate-200 rounded text-xs">▼</button>
                 </div>
                 <div className="w-full sm:w-40 h-24 sm:h-auto flex-shrink-0" style={{ background: b.image ? `url(${b.image}) center/cover` : `linear-gradient(135deg, ${app.color}, ${b.color || "#f59e0b"})` }} />
                 <div className="flex-1 p-3 min-w-0">

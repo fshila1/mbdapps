@@ -29,7 +29,64 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 - Data-testid on every interactive element
 - Mock data persisted across reloads via localStorage
 
-## What's Been Implemented (Feb 6, 2026 — initial; Feb 10, 2026 — fixes; Feb 11, 2026 — Web/Android Builders; Feb 14, 2026 — Lucrative No-Code overhaul + bug fixes)
+## What's Been Implemented (Feb 6, 2026 — initial; Feb 10, 2026 — fixes; Feb 11, 2026 — Web/Android Builders; Feb 14, 2026 — Lucrative No-Code overhaul + bug fixes; Feb 17, 2026 — Content & Data Management Layer)
+
+### Iteration 7 — Content & Data Management Layer (Feb 17, 2026)
+Massive sprint adding TWO new content layers to the Digital Builder:
+
+**Pre-Launch Content Manager (Step 4):**
+- Updated Digital Builder flow from 4 → 5 steps (Template → Design → Customize → **Add Your Content** → Preview & Launch)
+- New `ContentManager.jsx` with left sidebar (section nav + completion dots ✓/⚠/○), middle form area, right mini preview
+- Per-template section editors: Banners, Categories, Products (E-Com), Menu Items (Restaurant), Doctors (Health), Courses (Education), Properties (Real Estate), Tour Packages (Travel), Campaigns (NGO), Pricing Plans (SaaS), Instructors, Agents, Destinations, Team, Testimonials, Areas, Services, Store Info
+- Shared `ImageDropzone` (base64 FileReader, max 5MB, JPG/PNG/WebP) with Replace/Remove overlay
+- "Skip — Use Sample Data" populates realistic Bangladeshi mock content (RobiMart BD, Deshi Spice Kitchen, Medilife Clinic, BD Learning Hub, etc.)
+- Minimum-content validation modal with "Continue Anyway" / "Go Back & Add Content"
+- BDApps Cloud Storage info banner with progress meter at top of Step 4
+- Pro template flows correctly skip Content step (telecom templates don't need it)
+- Generated apps automatically pushed to `myApps` array via `addMyApp(content)`
+
+**Post-Launch CMS Dashboard:**
+- New "My Apps" link in Developer sidebar between Digital and Add-Ons
+- `/my-apps` page with 3 seeded apps (RobiMart BD · E-Commerce · Live · 248 orders / Deshi Spice Kitchen · Android Restaurant · Live · 1,284 orders / Medilife Clinic · Web Health · In Review · 94 appointments)
+- Each app card: status badge (Live/In Review/Draft/Featured), 3 stats, action buttons (Manage Content / Dashboard / Settings / View Live)
+- `/my-apps/:appId/content/*` nested routes with `CmsLayout`:
+  - Sticky topbar: back to My Apps, app name+kind, status badge, **🟢 Changes live · X ago** sync indicator (toggles to "Saving changes..." during saves), View Live Site button
+  - Per-kind sidebar nav (CMS_NAV_BY_KIND): different sections for E-Commerce / Restaurant / Health / Education / Real Estate / Travel / NGO / SaaS
+  - **Storage Meter** (compact) at sidebar bottom, "Manage on the go" Play Store promo card
+- Sections built:
+  - **Overview**: 4 stat cards (per-kind labels), Recent Activity feed with timestamps, Quick Actions grid
+  - **Products / Menu Items**: filter tabs (All/Active/Draft/Out of Stock/On Sale), search, Add/Edit slide-in panel, Stock Alerts, CSV Import/Export toasts, restaurant items have Availability toggle (Sold Out indicator)
+  - **Banners**: card list with image thumbnails, ▲▼ reorder buttons, CTR/Views/Clicks analytics per banner, slide-in editor
+  - **Orders**: filter tabs (All/New/Processing/Shipped/Delivered/Cancelled), analytics strip (today/week/avg/pending), order detail panel with customer info + items + 4-step status timeline + Update Status / Print Invoice / Contact Customer (SMS via BDApps compose) / Issue Refund
+  - **Appointments** (Health): Calendar view + List view toggle, calendar with appointment count badges per day, list table with Confirm/Complete/Remind/Cancel actions, Doctor Schedule Manager (weekly availability grid), Add Appointment panel with doctor/date/time-slot picker
+  - **Doctors**: card grid with photo/specialty/days, edit panel with day multi-checkbox + time pickers + slot duration dropdown
+  - **Reviews**: avg rating + 5-star breakdown bars, filter tabs (All/5★/4★/3★/2★/1★/Pending/Flagged), Approve/Reply/Flag/Delete per review, reply composer
+  - **Customers / Patients**: searchable table, profile slide-in with SMS via BDApps compose, Export CSV
+  - **Pages**: page tabs (About/Contact/Privacy/Terms/FAQ + Add Custom), block-based editor (text/image/divider), Contact special config (email/phone/address/map URL/show form), Save & Publish
+  - **Media Library**: drag-and-drop upload (base64), folder tabs, search, copy URL/rename/delete, storage meter that grows with uploads
+  - **Settings** (5 sub-tabs): Store Info, Notifications (email/SMS/WhatsApp toggles + low-stock threshold + appointment SMS confirms), Domain & SEO (custom domain + DNS verify toast + SEO title/desc/keywords + Favicon/OG image upload), Integrations (SSL Commerz/Robi Billing/GA/FB Pixel/WhatsApp/Push status cards with Connect/Disconnect/Upgrade-to-Add-On buttons), Danger Zone (Unpublish/Export All Data/Delete App — typing exact app name to confirm)
+  - **Reports**: date range picker, 4 stat cards, Recharts bar chart of weekly revenue, performance tables per app kind (Product/Doctor/Course), CSV/PDF export toasts
+- Generic Section component handles Courses/Properties/Packages/Campaigns/Pricing/Instructors/Agents/Destinations/Team via SCHEMAS map
+- All saves go through `triggerSave()` → 600ms loading state → toast "✓ Changes live on your site"
+- All saves push to `cmsActivity` feed which updates Overview's Recent Activity in real-time
+
+**Context API extensions:**
+- `myApps`, `addMyApp`, `updateMyApp`, `removeMyApp` (localStorage `bdapps_myapps`)
+- `appContent[appId]`, `updateAppContent(appId, section, items)`, `replaceAppContent` (localStorage `bdapps_appcontent`)
+- `cmsCollections` (orders/appointments/reviews/customers/activity keyed by appId, localStorage `bdapps_cms`)
+- `mediaLibrary`, `addMediaFile`, `removeMediaFile`, `renameMediaFile`, `computeStorageBytes` (localStorage `bdapps_media`)
+- `updateOrderStatus`, `updateAppointmentStatus`, `addAppointment`, `replyReview`, `removeReview`, `approveReview`, `addCmsActivity`
+
+**Files added:**
+- `/src/mocks/contentSeeds.js` (SAMPLE_CONTENT, sampleOrders, sampleAppointments, sampleReviews, sampleCustomers, sampleActivity, TEMPLATE_KIND, getKindFor)
+- `/src/components/cms/{ImageDropzone,SyncIndicator,StorageMeter,navConfig}.{jsx,js}`
+- `/src/components/digital/ContentManager.jsx`
+- `/src/pages/MyApps.jsx`
+- `/src/pages/cms/{CmsLayout,Overview,Products,Banners,Orders,Doctors,Appointments,Reviews,Customers,Pages,MediaLibrary,Settings,Reports,GenericSection,_shared}.jsx`
+
+**Testing:** Iteration 7 testing report at `/app/test_reports/iteration_7.json` — 85% pass rate. Added data-testid="sync-indicator", "banner-move-up-{id}/banner-move-down-{id}", "skip-sample-data" per testing-agent feedback.
+
+
 
 ### Iteration 6 — Lucrative No-Code Builder finalisation (Feb 14, 2026)
 - **Fixed compile blocker** in `UniversalAndroidPreview.jsx`: extracted hook-using inline `render`/`content` arrow functions (Payment / OTP / Lesson / Workout / Fare screens) into capitalised React components (PaymentScreen, OtpScreen, LessonScreen, WorkoutScreen, FareScreen) so `react-hooks/rules-of-hooks` no longer flags them.
