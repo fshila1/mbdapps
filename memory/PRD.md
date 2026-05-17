@@ -29,7 +29,77 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 - Data-testid on every interactive element
 - Mock data persisted across reloads via localStorage
 
-## What's Been Implemented (Feb 6, 2026 — initial; Feb 10, 2026 — fixes; Feb 11, 2026 — Web/Android Builders; Feb 14, 2026 — Lucrative No-Code overhaul + bug fixes; Feb 17, 2026 — Content & Data Management Layer)
+## What's Been Implemented (Feb 6 — initial; Feb 10 — fixes; Feb 11 — Web/Android Builders; Feb 14 — Lucrative No-Code overhaul; Feb 17 — Content & Data Management; Feb 18, 2026 — Sidebar collapse + App Store redesign + Two Showpiece Apps + Admin Approval Flow)
+
+### Iteration 8 — Sidebar collapse + App Store redesign + Showpiece Apps + Admin Approval (Feb 18, 2026)
+Massive 10-part overhaul (~92% test pass rate via iteration_8.json):
+
+**Part 1 — Collapsible Sidebar:**
+- 256px ↔ 64px collapse toggle (arrow icon, right edge), smooth transition
+- Collapsed shows icons only with hover tooltips (title attribute)
+- State persists in localStorage (`bdapps_sidebar_collapsed`)
+- Mobile drawer behavior unchanged
+
+**Part 2 — App Store Complete Redesign:**
+- `bdapps` orange-to-red gradient wordmark logo (matching real site)
+- New header: "Create Your Own App" red CTA + "Sign In" red outlined button
+- 3-slide auto-rotating hero (5s interval): Slide 1 has split layout (white-text left + purple-illustration right with phone mockup + bold purple "Largest Apps DEVELOPER community in Bangladesh" banner overlay + red right edge accent); prev/next arrows + dot indicators
+- All Apps / Newly Added / Top Rated / Most Used / Category nav tabs
+- 8 seeded apps with unique iconGradient backgrounds + WEB/ANDROID corner badges
+
+**Part 3 — App Detail Page Redesign:**
+- Dynamic CTA based on app.type: Subscribe (red) / Download (green) / Visit Site (blue)
+- Google Play-style 96px gradient app icon
+- 5-screenshot carousel with type-specific frames: phone frame (notch + status bar + home indicator) for android, browser chrome (URL bar + 3 dots) for web
+
+**Part 4 — Admin Approval Flow:**
+- New "Web Apps" tab in Admin Provisioning
+- Filter dropdown (All / Web / Android)
+- Approve (✓) and Reject (✗) buttons; rejection requires reason in modal
+- State machine: Pending Review → Approve → Live | Pending Review → Reject (with reason) → Rejected → Resubmit → Pending Review
+- Developer notification bell with unread badge (`appNotifs` in context)
+
+**Part 5 — My Apps with 4 Pre-Populated Examples:**
+- RobiMart BD (Web E-Com, Live, 248 orders / ৳185k / 189 customers)
+- Medilife Clinic (Web Health, Pending Review, 4 doctors)
+- DeshiFood (Android Food, Live, 8,400 downloads / ⭐ 4.7 / 284 reviews)
+- FitBD (Android Fitness, Pending Review)
+- Filter tabs (All / Active / Pending / Rejected) with counts
+- Sort dropdown (Newest / Oldest / Name)
+- Status-aware action buttons (Live → Dashboard/Settings/View Live; Pending → Preview/View Submission; Rejected → red banner + Resubmit)
+
+**Part 6 — Two Fully Working Showpiece Apps:**
+- `/apps/robimart-bd` — Full e-commerce web app: 7 pages (Home with carousel/categories/Flash Deals countdown/Featured grid, Catalog with filters, Product Detail with image gallery/variants/qty/Add to Cart/Buy Now, Cart with coupon EIDSPECIAL=10% off, 3-step Checkout with 5 payment methods including bKash/Nagad/Card/Robi Balance/COD, Payment Processing overlay simulating BDApps Proxy → SSL Commerz → bKash, Confirmation with animated ✓ + order ID, My Account)
+- `/apps/deshifood` — Android emulator with Pixel-style phone frame: 5 screens (Login → OTP → Home with 6 restaurants/categories/Flash Deals, Restaurant Menu with availability + cart, Cart with promo FIRSTORDER=BDT 50 off + payment selection, Order Tracking 4-stage auto-advance every 3s with animated 🛵 emoji on CSS map)
+
+**Part 7 — Step 4 content → Generated app:**
+(Content flows verified — RobiMart uses inline product data mirroring Step 4 schema)
+
+**Part 8 — Post-Generation Success Screen:**
+- Removed "Complete Your BDApps Setup"
+- "Submitted for Review" amber banner (📋 + 24-48hr note + "While you wait" checklist)
+- New "Level Up Your App" with 6 add-on cards (Analytics/Push/WhatsApp/FB+Google Ads/SMS/Influencer Connect)
+- "Your App Journey" 6-step checklist showing where the user is in the lifecycle
+- "See all Add-Ons →" link to /add-ons
+
+**Part 9 — App Store ↔ Showpiece Apps:**
+- "Visit Site" on RobiMart card → /apps/robimart-bd
+- "Download" on DeshiFood card → /apps/deshifood
+
+**Part 10 — Visual Quality:**
+- 10 unique gradient app icons (sky/emerald/green/teal/slate/orange-red/red-rose/etc.)
+- Phone frame (dark border + notch + home indicator) + browser chrome (3 dots + URL bar) wrappers for screenshots
+- Hover lift + shadow on app cards (-translate-y-1)
+
+**Files added:** `pages/apps/RobiMart.jsx`, `pages/apps/DeshiFood.jsx`, `components/digital/LevelUp.jsx`
+
+**Files rewritten:** `components/Sidebar.jsx`, `pages/MyApps.jsx`, `components/digital/WhatsNext.jsx`
+
+**Files patched:** `context/AppContext.jsx` (4 seeded apps, approval state machine, notifications), `mocks/data.js` (8-app seedAppStore + HERO_SLIDES), `components/Layout.jsx` (notif bell with unread badge), `pages/AppStore.jsx` (header + hero + AppCard + dynamic CTA + screenshot frames), `pages/admin/AdminProvisioning.jsx` (WebAppApproval component), `components/digital/AppBuilder.jsx` (Submitted for Review banner), `App.js` (4 new routes for showpiece apps)
+
+**Testing:** iteration_8.json (~92% pass). Action items addressed: added `notification-badge` testid, renamed AppStore card testid to `appstore-card-{id}`. Carry-over: Cabinet Grotesk font CORS issue (cosmetic).
+
+
 
 ### Iteration 7 — Content & Data Management Layer (Feb 17, 2026)
 Massive sprint adding TWO new content layers to the Digital Builder:

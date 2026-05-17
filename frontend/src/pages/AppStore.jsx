@@ -12,7 +12,7 @@ import { Search, Star, ChevronLeft, ChevronRight, Mail, Twitter, Facebook, Exter
 import { toast } from "sonner";
 
 const AppCard = ({ app, onClick }) => (
-  <button onClick={onClick} data-testid={`store-app-${app.id}`}
+  <button onClick={onClick} data-testid={`appstore-card-${app.id}`}
     className="text-left bg-white border border-slate-200 rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition-all w-40 flex-shrink-0 group">
     <div className={`aspect-square w-full bg-gradient-to-br ${app.iconGradient || "from-slate-500 to-slate-700"} flex items-center justify-center text-6xl shadow-inner relative`}>
       <span className="drop-shadow-md">{app.icon}</span>
