@@ -17,10 +17,10 @@ const DeveloperDashboard = () => {
   const totalSubs = apps.filter((a) => a.status === "Active Production").length * 24000 + 12500;
 
   const quickStats = [
-    { label: "Live Apps", value: liveApps.length, icon: Globe, accent: "emerald" },
-    { label: "Pending Review", value: pendingApps.length, icon: Smartphone, accent: "amber" },
-    { label: "Total Subscribers", value: totalSubs.toLocaleString(), icon: Users, accent: "indigo" },
-    { label: "Lifetime Revenue", value: `৳${(totalRevenue / 1000).toFixed(0)}k`, icon: DollarSign, accent: "rose" },
+    { key: "live-apps", label: "Live Apps", value: liveApps.length, icon: Globe, accent: "emerald" },
+    { key: "pending-review", label: "Pending Review", value: pendingApps.length, icon: Smartphone, accent: "amber" },
+    { key: "subscribers", label: "Total Subscribers", value: totalSubs.toLocaleString(), icon: Users, accent: "indigo" },
+    { key: "revenue", label: "Lifetime Revenue", value: `৳${(totalRevenue / 1000).toFixed(0)}k`, icon: DollarSign, accent: "rose" },
   ];
 
   return (
@@ -39,7 +39,7 @@ const DeveloperDashboard = () => {
         {/* Quick Stats */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {quickStats.map((s, i) => (
-            <div key={i} className="border border-slate-200 rounded-2xl p-4 bg-white relative overflow-hidden" data-testid={`quickstat-${i}`}>
+            <div key={s.key} className="border border-slate-200 rounded-2xl p-4 bg-white relative overflow-hidden" data-testid={`stat-${s.key}`}>
               <div className={`absolute -right-3 -top-3 w-16 h-16 rounded-full opacity-10 ${s.accent === "emerald" ? "bg-emerald-500" : s.accent === "amber" ? "bg-amber-500" : s.accent === "indigo" ? "bg-indigo-500" : "bg-rose-500"}`}></div>
               <s.icon size={18} className={s.accent === "emerald" ? "text-emerald-500" : s.accent === "amber" ? "text-amber-500" : s.accent === "indigo" ? "text-indigo-500" : "text-rose-500"} />
               <div className="text-xs uppercase tracking-widest text-slate-500 font-bold mt-3">{s.label}</div>

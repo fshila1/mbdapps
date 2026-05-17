@@ -29,7 +29,77 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 - Data-testid on every interactive element
 - Mock data persisted across reloads via localStorage
 
-## What's Been Implemented (Feb 6 — initial; Feb 10 — fixes; Feb 11 — Web/Android Builders; Feb 14 — Lucrative No-Code overhaul; Feb 17 — Content & Data Management; Feb 18, 2026 — Sidebar collapse + App Store redesign + Two Showpiece Apps + Admin Approval Flow)
+## What's Been Implemented (Feb 6 — initial; Feb 10 — fixes; Feb 11 — Web/Android Builders; Feb 14 — Lucrative No-Code overhaul; Feb 17 — Content & Data Management; Feb 18, 2026 — Sidebar collapse + App Store redesign + Two Showpiece Apps + Admin Approval Flow; Feb 19, 2026 — Rich SVG visual overhaul + EduPath BD + Dashboard Quick View)
+
+### Iteration 9 — Rich SVG Visual Overhaul + EduPath BD demo + Dashboard Quick View (Feb 19, 2026)
+11-part visual & UX refinement sprint (98% test pass per iteration_9.json):
+
+**Part 1 — TRUE Full-Bleed App Store Cards:**
+- Icon container: `aspect-square w-full overflow-hidden rounded-t-2xl` with zero internal padding
+- Rich SVG `<AppArt>` component renders absolute inset-0 inside the container (no emoji + flat color block)
+- WEB / ANDROID / SMS corner badges positioned absolutely
+
+**Part 2 — Rich SVG Illustration Library (`/components/illustrations/AppArt.jsx`):**
+- 16 layered scene illustrations (ecom shopping bag with sale tag + coins, food biriyani plate with steam, edu graduation cap + student head + book stack, health pulse heart + doctor + pill, fitness dumbbell + runner, weather sun+cloud+rain+thermometer, islamic mosque silhouette + crescent moon, cricket field + batsman + ball + trajectory, finance candle chart + coin stack, travel mountains + plane + map pin, music vinyl + notes, news folded newspaper, realestate house + for-sale sign + tree, ngo heart + people circle, saas dashboard with bars + line chart)
+- Each art is a hand-crafted SVG scene with characters, depth, lighting, no emojis
+
+**Part 3 — 3-Slide Hero Carousel with Rich Scenes (`/components/illustrations/HeroArt.jsx`):**
+- HeroDeveloperScene: dev person with glasses + smile at laptop with rainbow code, phone with app grid, coffee mug with "B" logo, floating stat badges (+248 sales / ★4.9 / ৳1.2M)
+- HeroSubscribersScene: stylised globe of Bangladesh with user pins, signal arcs, live subscriber counter card "10,482,914"
+- HeroBuilderScene: rocket launching into starfield, planet with ring, floating code blocks, clouds
+
+**Part 4 — 12 App Store Apps (3 Web / 3 Android / 6 SMS) with artId field:**
+RobiMart BD, EduPath BD, Medilife Clinic (web) · DeshiFood, FitBD, BPL Live (android) · Weather Alert BD, Daily Hadith, Daily Health Tips, Prayer Time Alert, Stock Market Brief, News Bangla 24x7 (SMS)
+
+**Part 5 — EduPath BD (NEW 3rd fully working demo app at `/apps/edupath-bd`):**
+- Home: gradient hero, Continue Learning (3 enrolled courses), Recommended (top 3)
+- Catalog: 6 courses (SSC Math, SSC Physics, HSC Chem, HSC Bio, English, ICT) with FREE/ENROLLED badges
+- Course detail: gradient hero, instructor info, 12-lesson curriculum (first 4 marked done)
+- Lesson player: video timeline auto-advances, "Take the Quiz" → 3-question quiz with correct/incorrect feedback → +50 XP completion screen
+- Leaderboard: top-3 podium (gold/silver/bronze) + rest of table with "You" (Demo Student) highlighted in indigo
+- 12-day streak + 8,940 points header chips
+
+**Part 6 — App Detail Page Visual Refresh:**
+- Hero icon uses AppArt SVG instead of emoji
+- Screenshots (5) inside phone-frame (android), browser-chrome (web), or naked SVG (lite) with overlay caption
+
+**Part 7 — My Apps seeded with exactly 6 apps:**
+- 3 Web: RobiMart BD (Live), Medilife Clinic (Live), EduPath BD (Live - now)
+- 3 Android: DeshiFood (Live), FitBD (Live), ShopLocal BD (Pending Review with amber banner)
+
+**Part 8 — Developer Dashboard Quick View:**
+- Welcome message with live counts ("You have N live apps, M pending review, X transactions")
+- 4 Quick Stats cards with colored accent ring + icon (data-testid stat-live-apps / stat-pending-review / stat-subscribers / stat-revenue)
+- "My Apps" Quick View section with 6 inline app cards (icon + name + type + status + stat) linking directly to /my-apps/:id/content
+- Reordered Modules grid: Digital Builder + My Apps first (the build flow), then telecom modules
+
+**Part 9 — localStorage migration (v2 → v3):**
+- `bdapps_store_v3` for store apps (forces seed refresh due to new artId field)
+- `bdapps_myapps_v3` with migration that auto-injects EduPath if user had old v2 data
+
+**Part 10 — "Complete Your BDApps Setup" removal verified:**
+- Globally absent from /dashboard, /digital, /add-ons, /provisioning, /lite, /reports and all /admin/* routes
+- Post-generation flow uses LevelUp panel (6 Add-Ons + App Journey checklist) only
+
+**Part 11 — Sidebar collapse persistence:**
+- `useSidebarCollapsed` hook reads/writes `bdapps_sidebar_collapsed` localStorage
+- Verified across full reload via testing agent
+
+**Files added:**
+- `/src/components/illustrations/AppArt.jsx` (SVG component library)
+- `/src/components/illustrations/HeroArt.jsx` (3 hero scenes)
+- `/src/pages/apps/EduPath.jsx` (fully interactive education demo app)
+
+**Files patched:**
+- `/src/pages/AppStore.jsx` (full-bleed AppCard with AppArt, new hero rendering, 6-col grid, AppArt in detail hero + screenshots)
+- `/src/pages/DeveloperDashboard.jsx` (Quick Stats + My Apps Quick View; reordered modules)
+- `/src/mocks/data.js` (12 store apps with artId; 3 hero slides with scene field)
+- `/src/context/AppContext.jsx` (v3 localStorage migration; EduPath status flipped to Live)
+- `/src/App.js` (new /apps/edupath-bd + /apps/shoplocal-bd routes)
+
+**Testing:** iteration_9.json — ~98% pass. No functional bugs. Carry-over: Cabinet Grotesk CORS font fallback (cosmetic).
+
+
 
 ### Iteration 8 — Sidebar collapse + App Store redesign + Showpiece Apps + Admin Approval (Feb 18, 2026)
 Massive 10-part overhaul (~92% test pass rate via iteration_8.json):
