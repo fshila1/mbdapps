@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { ChevronLeft, Trophy, Flame, Award, Check, X as XIcon } from "lucide-react";
 import APIMonitor from "../../components/APIMonitor";
 import { requestOTP, verifyOTP, userSubscription, sendSMS, directDebit } from "../../services/BDAppsAPI";
+import { useDemoLocale, LangToggle } from "../../services/demoI18n";
 
 const QUESTIONS = {
   "Bangladesh GK": [
@@ -50,6 +51,8 @@ const LEADERBOARD = [
 
 const QuizBD = () => {
   const navigate = useNavigate();
+  const { locale, setLocale, t } = useDemoLocale("quiz");
+  const bn = locale === "bn";
   const [page, setPage] = useState("landing");
   const [phone, setPhone] = useState("");
   const [otpRef, setOtpRef] = useState("");
@@ -152,10 +155,12 @@ const QuizBD = () => {
     <div className="min-h-screen bg-purple-50" data-testid="quizbd-app">
       <header className="bg-gradient-to-r from-purple-700 to-indigo-800 text-white shadow-lg sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="text-xs opacity-80 flex items-center gap-1"><ChevronLeft size={14} /> Back</button>
-          <div className="font-bold text-xl">🧠 QuizBD</div>
-          {registered && <div className="text-xs">{points} pts · 🔥 {streak}</div>}
-          {!registered && <div className="text-xs opacity-70">Sign In</div>}
+          <button onClick={() => navigate(-1)} className="text-xs opacity-80 flex items-center gap-1"><ChevronLeft size={14} /> {t.back}</button>
+          <div className="font-bold text-xl flex items-center gap-1.5" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>🧠 {t.title}</div>
+          <div className="flex items-center gap-3">
+            <LangToggle locale={locale} setLocale={setLocale} />
+            {registered && <div className="text-xs hidden sm:block">{points} {t.pts} · 🔥 {streak}</div>}
+          </div>
         </div>
       </header>
 
@@ -163,26 +168,26 @@ const QuizBD = () => {
         <section className="bg-gradient-to-br from-purple-700 via-indigo-700 to-purple-900 text-white">
           <div className="max-w-6xl mx-auto px-4 py-12 text-center">
             <div className="text-6xl mb-3">🧠</div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Daily Quiz — Test Your Knowledge!</h1>
-            <p className="mt-3 opacity-90">Win prizes, top the leaderboard, get smarter every day</p>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.heroTitle}</h1>
+            <p className="mt-3 opacity-90" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.heroSub}</p>
             <div className="mt-6 flex flex-wrap gap-6 justify-center text-sm">
-              <div><b>1,84,000+</b><br /><span className="opacity-70">Subscribers</span></div>
-              <div><b>2M+</b><br /><span className="opacity-70">Questions Answered</span></div>
-              <div><b>BDT 50,000</b><br /><span className="opacity-70">Prizes / Month</span></div>
+              <div><b>{bn ? "১,৮৪,০০০+" : "1,84,000+"}</b><br /><span className="opacity-70" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.subscribers}</span></div>
+              <div><b>{bn ? "২০ লাখ+" : "2M+"}</b><br /><span className="opacity-70" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.qAnswered}</span></div>
+              <div><b>{bn ? "৫০,০০০ টাকা" : "BDT 50,000"}</b><br /><span className="opacity-70" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.monthlyPrize}</span></div>
             </div>
             <div className="mt-8 max-w-md mx-auto bg-white text-slate-900 rounded-2xl p-6 text-left">
-              <h3 className="font-bold">Subscribe to play</h3>
-              <p className="text-xs text-slate-500 mt-1">SMS: text QUIZ to 16222, or enter phone below</p>
+              <h3 className="font-bold" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.subTitle}</h3>
+              <p className="text-xs text-slate-500 mt-1" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.subSub}</p>
               {!otpSent ? (
                 <>
-                  <input data-testid="quiz-phone" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="Mobile (e.g. 1711234567)" className="w-full border border-slate-200 rounded-lg px-3 py-2.5 mt-3 text-sm" maxLength={11} />
-                  <button onClick={handleSendOtp} disabled={busy} data-testid="quiz-send-otp" className="w-full mt-2 bg-gradient-to-r from-purple-600 to-indigo-700 text-white rounded-lg py-2.5 font-bold disabled:opacity-50">{busy ? "Sending..." : "Send OTP"}</button>
+                  <input data-testid="quiz-phone" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} placeholder={bn ? "মোবাইল (যেমন ১৭১১২৩৪৫৬৭)" : "Mobile (e.g. 1711234567)"} className="w-full border border-slate-200 rounded-lg px-3 py-2.5 mt-3 text-sm" maxLength={11} />
+                  <button onClick={handleSendOtp} disabled={busy} data-testid="quiz-send-otp" className="w-full mt-2 bg-gradient-to-r from-purple-600 to-indigo-700 text-white rounded-lg py-2.5 font-bold disabled:opacity-50">{busy ? t.sending : t.sendOtp}</button>
                 </>
               ) : (
                 <>
-                  <input data-testid="quiz-otp" value={otpInput} onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ""))} placeholder="6-digit OTP" className="w-full border border-slate-200 rounded-lg px-3 py-2.5 mt-3 text-center font-mono text-lg tracking-widest" maxLength={6} />
-                  <p className="text-[10px] mt-1">Demo: <button className="text-purple-700 font-mono underline" onClick={() => setOtpInput(demoOtp)}>{demoOtp}</button></p>
-                  <button onClick={handleVerifyOtp} disabled={busy} data-testid="quiz-verify-otp" className="w-full mt-2 bg-gradient-to-r from-purple-600 to-indigo-700 text-white rounded-lg py-2.5 font-bold disabled:opacity-50">{busy ? "..." : "Verify & Play"}</button>
+                  <input data-testid="quiz-otp" value={otpInput} onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ""))} placeholder={t.otp} className="w-full border border-slate-200 rounded-lg px-3 py-2.5 mt-3 text-center font-mono text-lg tracking-widest" maxLength={6} />
+                  <p className="text-[10px] mt-1">{t.demoOtp}: <button className="text-purple-700 font-mono underline" onClick={() => setOtpInput(demoOtp)}>{demoOtp}</button></p>
+                  <button onClick={handleVerifyOtp} disabled={busy} data-testid="quiz-verify-otp" className="w-full mt-2 bg-gradient-to-r from-purple-600 to-indigo-700 text-white rounded-lg py-2.5 font-bold disabled:opacity-50">{busy ? "..." : t.verifyPlay}</button>
                 </>
               )}
             </div>
@@ -193,26 +198,26 @@ const QuizBD = () => {
       {page === "home" && (
         <div className="max-w-5xl mx-auto px-4 py-6 space-y-5">
           <div className="bg-white rounded-2xl shadow-sm border border-purple-100 p-4 flex flex-wrap items-center justify-around gap-3">
-            <div><div className="text-xs text-slate-500">Points</div><div className="font-bold text-2xl">{points}</div></div>
-            <div><div className="text-xs text-slate-500">Rank</div><div className="font-bold text-2xl">#247</div></div>
-            <div><div className="text-xs text-slate-500">Streak</div><div className="font-bold text-2xl flex items-center gap-1"><Flame size={20} className="text-orange-500" />{streak}</div></div>
+            <div><div className="text-xs text-slate-500" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.points}</div><div className="font-bold text-2xl">{points}</div></div>
+            <div><div className="text-xs text-slate-500" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.rank}</div><div className="font-bold text-2xl">#247</div></div>
+            <div><div className="text-xs text-slate-500" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.streak}</div><div className="font-bold text-2xl flex items-center gap-1"><Flame size={20} className="text-orange-500" />{streak}</div></div>
             {points >= 500 && (
-              <button onClick={claimPrize} disabled={busy} data-testid="quiz-claim-prize" className="bg-amber-500 hover:bg-amber-600 text-white rounded-lg px-4 py-2 text-xs font-bold">{busy ? "..." : "🎁 Claim BDT 5 Prize"}</button>
+              <button onClick={claimPrize} disabled={busy} data-testid="quiz-claim-prize" className="bg-amber-500 hover:bg-amber-600 text-white rounded-lg px-4 py-2 text-xs font-bold">{busy ? t.claiming : t.claimPrize}</button>
             )}
           </div>
 
-          <h2 className="font-bold text-xl">Pick a Category</h2>
+          <h2 className="font-bold text-xl" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.pickCategory}</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {Object.keys(QUESTIONS).map((cat) => (
               <button key={cat} data-testid={`quiz-cat-${cat.split(" ")[0].toLowerCase()}`} onClick={() => startQuiz(cat)} className="bg-white rounded-2xl border border-purple-100 p-5 text-left hover:border-purple-400 hover:shadow-md transition-all">
                 <div className="text-3xl mb-2">{cat.startsWith("Bangladesh") ? "🇧🇩" : cat.startsWith("Islam") ? "🕌" : cat.startsWith("Science") ? "🔬" : cat.startsWith("Sports") ? "⚽" : "🎬"}</div>
-                <div className="font-bold">{cat}</div>
-                <div className="text-xs text-slate-500 mt-1">{QUESTIONS[cat].length} questions · {QUESTIONS[cat].length * 10} pts</div>
+                <div className="font-bold" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.categories[cat]}</div>
+                <div className="text-xs text-slate-500 mt-1" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{QUESTIONS[cat].length} {t.questions} · {QUESTIONS[cat].length * 10} {t.pts}</div>
               </button>
             ))}
           </div>
 
-          <h2 className="font-bold text-xl mt-6">Leaderboard</h2>
+          <h2 className="font-bold text-xl mt-6" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.leaderboard}</h2>
           <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
             {LEADERBOARD.map((u) => (
               <div key={u.rank} data-testid={`quiz-leader-${u.rank}`} className={`px-4 py-3 flex items-center gap-3 border-b last:border-b-0 ${u.me ? "bg-purple-50" : ""}`}>
@@ -234,11 +239,11 @@ const QuizBD = () => {
       {page === "quiz" && quizCat && (
         <div className="max-w-2xl mx-auto px-4 py-6">
           <div className="flex items-center justify-between text-sm mb-4">
-            <div className="font-bold">{quizCat}</div>
+            <div className="font-bold" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.categories[quizCat]}</div>
             <div className="text-rose-600 font-mono">⏱ {fmt(timeLeft)}</div>
           </div>
           <div className="bg-white rounded-2xl shadow-md border border-purple-100 p-6">
-            <div className="text-xs text-slate-500 mb-2">Question {qIdx + 1} of {QUESTIONS[quizCat].length}</div>
+            <div className="text-xs text-slate-500 mb-2" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.question} {qIdx + 1} {t.of} {QUESTIONS[quizCat].length}</div>
             <div className="h-1.5 bg-slate-100 rounded-full mb-5"><div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${((qIdx + 1) / QUESTIONS[quizCat].length) * 100}%` }}></div></div>
             <h2 className="font-bold text-lg" data-testid="quiz-question">{QUESTIONS[quizCat][qIdx].q}</h2>
             <div className="mt-5 space-y-2">
@@ -266,16 +271,16 @@ const QuizBD = () => {
       {page === "results" && (
         <div className="max-w-md mx-auto px-4 py-10 text-center" data-testid="quiz-results">
           <div className="text-6xl mb-3">🎉</div>
-          <h1 className="text-3xl font-bold">Quiz Complete!</h1>
+          <h1 className="text-3xl font-bold" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.quizComplete}</h1>
           <div className="bg-white rounded-2xl shadow-md border border-purple-100 p-6 mt-5">
             <div className="text-5xl font-bold text-purple-700">{score} / {QUESTIONS[quizCat].length}</div>
-            <div className="mt-1 text-sm text-slate-500">Correct Answers</div>
-            <div className="mt-4 text-lg font-bold text-emerald-600">+{score * 10} points earned</div>
-            <div className="text-xs text-slate-500 mt-1">Total: {points} pts</div>
+            <div className="mt-1 text-sm text-slate-500" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.correctAnswers}</div>
+            <div className="mt-4 text-lg font-bold text-emerald-600" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>+{score * 10} {t.pointsEarned}</div>
+            <div className="text-xs text-slate-500 mt-1" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.total}: {points} {t.pts}</div>
           </div>
           <div className="mt-4 flex gap-2">
-            <button onClick={() => setPage("home")} data-testid="quiz-back-home" className="flex-1 border border-slate-200 rounded-lg py-2.5 font-bold text-sm">Back to Home</button>
-            <button onClick={() => startQuiz(quizCat)} className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-700 text-white rounded-lg py-2.5 font-bold text-sm">Play Again</button>
+            <button onClick={() => setPage("home")} data-testid="quiz-back-home" className="flex-1 border border-slate-200 rounded-lg py-2.5 font-bold text-sm" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.backHome}</button>
+            <button onClick={() => startQuiz(quizCat)} className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-700 text-white rounded-lg py-2.5 font-bold text-sm" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.playAgain}</button>
           </div>
         </div>
       )}

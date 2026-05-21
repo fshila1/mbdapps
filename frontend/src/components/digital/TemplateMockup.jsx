@@ -147,6 +147,96 @@ const WEB_MINI = {
       </div>
     </div>
   ),
+  // ───── BondoBD Matrimony — rich Bangla mini-mockup ─────
+  "web-bondobd": (tpl) => (
+    <div className="h-full flex bg-rose-50/60">
+      <div className="flex-1 p-1 pr-0.5">
+        <div className="text-[3.5px] font-bold inline-block bg-rose-100 text-rose-700 px-1 rounded-full" style={{ fontFamily: "'Tiro Bangla', serif" }}>পরিবার-কেন্দ্রিক</div>
+        <div className="text-[7px] font-black leading-tight mt-0.5" style={{ color: "#0f172a", fontFamily: "'Tiro Bangla', serif" }}>বাংলাদেশের</div>
+        <div className="text-[7px] font-black leading-tight" style={{ color: tpl.palette.primary, fontFamily: "'Tiro Bangla', serif" }}>ম্যাট্রিমনি</div>
+        <div className="text-[4px] text-slate-500 mt-0.5">খুঁজে পান আপনার জীবন সঙ্গী</div>
+        <div className="flex items-center gap-0.5 mt-1">
+          {["#fbbf24", "#f97316", "#ec4899"].map((c, i) => <div key={i} className="w-2 h-2 rounded-full border border-white -ml-0.5 first:ml-0" style={{ background: c }}></div>)}
+          <div className="text-[4px] font-bold ml-0.5" style={{ color: tpl.palette.primary }}>৫৪৩+ আজ</div>
+        </div>
+      </div>
+      <div className="flex-1 p-0.5">
+        <div className="bg-white rounded shadow-sm border border-slate-200 p-1 h-full">
+          <div className="text-[4px] font-bold text-center" style={{ color: "#0f172a" }}>লগইন করুন</div>
+          <div className="text-[3px] text-center text-slate-400">নাম্বার দিন</div>
+          <div className="mt-1 bg-rose-50 border border-rose-300 rounded h-2.5 flex items-center px-0.5 text-[4px] font-mono">+88 01XX</div>
+          <div className="mt-1 h-2.5 rounded flex items-center justify-center text-[4px] font-bold text-white" style={{ background: tpl.palette.primary }}>শুরু করুন →</div>
+          <div className="mt-1 text-[3px] text-slate-400 text-center leading-tight">৪ টাকা/দিন +VAT</div>
+        </div>
+      </div>
+    </div>
+  ),
+  // ───── NewsNow BD — rich Bangla news portal mini-mockup ─────
+  "web-newsnow": (tpl) => (
+    <div className="h-full flex flex-col bg-orange-50/30">
+      <div className="h-4 flex items-center justify-center gap-1" style={{ background: tpl.palette.primary }}>
+        <div className="w-2 h-2 rounded-sm flex items-center justify-center text-[4px] font-bold" style={{ background: "#d97706", color: "white", fontFamily: "'Tiro Bangla', serif" }}>আ</div>
+        <div className="text-[5px] text-white font-black" style={{ fontFamily: "'Tiro Bangla', serif" }}>আলোকবার্তা</div>
+      </div>
+      <div className="h-1.5 bg-rose-100 flex items-center px-1 text-[3px] text-rose-700 font-bold">● ৬৪ জেলার আপডেট</div>
+      <div className="flex-1 flex gap-0.5 px-0.5 py-0.5">
+        <div className="flex-1">
+          <div className="text-[3.5px] font-bold mt-0.5" style={{ color: "#d97706", fontFamily: "'Tiro Bangla', serif" }}>স্বাগতম</div>
+          <div className="text-[5px] font-black leading-tight" style={{ fontFamily: "'Tiro Bangla', serif" }}>দেশ-বিদেশের সকল খবর</div>
+          <div className="text-[5px] font-black leading-tight" style={{ fontFamily: "'Tiro Bangla', serif" }}>এক জায়গায়</div>
+          <div className="mt-1 space-y-0.5">
+            {["প্রথম আলো, ডেইলি স্টার", "রাজনীতি, খেলাধুলা", "২৪ ঘণ্টা আপডেট"].map((t, i) => (
+              <div key={i} className="flex items-center gap-0.5 text-[3px] text-slate-700"><div className="w-1 h-1 rounded-full" style={{ background: tpl.palette.primary }}></div>{t}</div>
+            ))}
+          </div>
+        </div>
+        <div className="w-1/2 rounded p-0.5" style={{ background: tpl.palette.primary }}>
+          <div className="text-[3.5px] text-amber-300 font-bold" style={{ fontFamily: "'Tiro Bangla', serif" }}>● লাইভ প্রিভিউ</div>
+          <div className="mt-0.5 space-y-0.5">
+            {[{ tag: "রাজনীতি", color: "#fecaca" }, { tag: "অর্থনীতি", color: "#bbf7d0" }, { tag: "খেলাধুলা", color: "#fde68a" }].map((it, i) => (
+              <div key={i} className="bg-white rounded p-0.5">
+                <span className="text-[3px] px-0.5 rounded font-bold" style={{ background: it.color, color: "#0f172a" }}>{it.tag}</span>
+                <div className="h-0.5 rounded mt-0.5 bg-slate-300"></div>
+                <div className="h-0.5 rounded mt-0.5 bg-slate-200 w-2/3"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  ),
+  // ───── QuizBD Web — rich quiz mini-mockup ─────
+  "web-quizbd": (tpl) => (
+    <div className="h-full flex flex-col" style={{ background: `linear-gradient(135deg, ${tpl.palette.primary}, ${tpl.palette.accent})` }}>
+      <div className="h-3 flex items-center justify-between px-1.5">
+        <div className="text-[5px] text-white font-bold">🧠 QuizBD</div>
+        <div className="text-[4px] text-amber-300">⚡ 840 pts</div>
+      </div>
+      <div className="flex-1 p-1">
+        <div className="bg-white rounded shadow p-1">
+          <div className="flex items-center justify-between text-[3px] text-slate-400">
+            <span>Q 3 / 10</span>
+            <span className="font-mono">⏱ 9:42</span>
+          </div>
+          <div className="h-0.5 bg-slate-100 rounded mt-0.5"><div className="h-full rounded" style={{ width: "30%", background: tpl.palette.primary }}></div></div>
+          <div className="text-[4px] font-bold mt-1" style={{ color: "#0f172a", fontFamily: "'Tiro Bangla', serif" }}>বাংলাদেশের জাতীয় ফুল?</div>
+          <div className="mt-1 space-y-0.5">
+            {[{ l: "A", t: "শাপলা", correct: true }, { l: "B", t: "গোলাপ" }, { l: "C", t: "পদ্ম" }, { l: "D", t: "অর্কিড" }].map((o) => (
+              <div key={o.l} className={`flex items-center gap-0.5 rounded px-0.5 py-0.5 border ${o.correct ? "bg-emerald-50 border-emerald-400" : "bg-slate-50 border-slate-200"}`}>
+                <div className={`w-1.5 h-1.5 rounded-full flex items-center justify-center text-[3px] font-bold ${o.correct ? "bg-emerald-500 text-white" : "bg-white border border-slate-300 text-slate-500"}`}>{o.l}</div>
+                <div className="text-[3.5px]" style={{ fontFamily: "'Tiro Bangla', serif" }}>{o.t}</div>
+                {o.correct && <div className="ml-auto text-[3.5px] text-emerald-600">✓ +10</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-0.5 flex items-center justify-between text-[3px] text-white/90">
+          <span>🥇 Karim · 4,280</span>
+          <span>🔥 7-day streak</span>
+        </div>
+      </div>
+    </div>
+  ),
 };
 
 // Pro templates use a telecom-themed mini-mockup

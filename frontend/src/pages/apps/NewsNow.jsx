@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { ChevronLeft, Bell, Search, Bookmark, Share2 } from "lucide-react";
 import APIMonitor from "../../components/APIMonitor";
 import { requestOTP, verifyOTP, userSubscription, sendSMS, notifySubscribers } from "../../services/BDAppsAPI";
+import { useDemoLocale, LangToggle } from "../../services/demoI18n";
 
 const CATEGORIES = ["Bangladesh", "Technology", "Business", "Sports", "International"];
 const CAT_COLORS = {
@@ -39,7 +40,10 @@ const ARTICLES = [
 
 const NewsNow = () => {
   const navigate = useNavigate();
+  const { locale, setLocale, t } = useDemoLocale("news");
+  const bn = locale === "bn";
   const [page, setPage] = useState("home"); // home, article, category, account
+  const [showHero, setShowHero] = useState(true); // toggle the welcome hero with OTP
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [selectedCat, setSelectedCat] = useState(null);
   const [bookmarks, setBookmarks] = useState([]);
@@ -94,23 +98,94 @@ const NewsNow = () => {
 
   return (
     <div className="min-h-screen bg-slate-50" data-testid="newsnow-app">
-      <header className="bg-gradient-to-r from-slate-800 to-slate-900 text-white sticky top-0 z-30">
+      <header className="bg-gradient-to-r from-slate-900 to-blue-950 text-white sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="text-xs opacity-70 flex items-center gap-1"><ChevronLeft size={14} /> Back</button>
-          <div className="font-bold text-xl">📰 NewsNow BD</div>
+          <button onClick={() => navigate(-1)} className="text-xs opacity-70 flex items-center gap-1"><ChevronLeft size={14} /> {t.back}</button>
+          <div className="font-black text-xl flex items-center gap-2" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "serif" }}>
+            <div className="w-8 h-8 rounded-md bg-amber-500 flex items-center justify-center text-white font-black" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "serif" }}>{bn ? "আ" : "A"}</div>
+            <div>
+              <div className="leading-none">{t.title}</div>
+              <div className="text-[9px] uppercase tracking-wider opacity-60 font-sans">{t.subtitle}</div>
+            </div>
+          </div>
           <div className="flex items-center gap-3">
-            <Search size={16} className="opacity-70" />
-            <Bell size={16} className="opacity-70" />
+            <LangToggle locale={locale} setLocale={setLocale} />
+            <Search size={16} className="opacity-70 hidden sm:block" />
+            <Bell size={16} className="opacity-70 hidden sm:block" />
           </div>
         </div>
         {/* breaking ticker */}
         <div className="bg-red-600 text-white text-xs py-1.5 overflow-hidden whitespace-nowrap">
-          <div className="inline-block animate-marquee" style={{ animation: "marquee 60s linear infinite" }}>
-            🔴 BREAKING: {breaking} · {breaking}
+          <div className="inline-block" style={{ animation: "marquee 60s linear infinite" }}>
+            🔴 {t.breaking}: {breaking} · {breaking}
           </div>
         </div>
         <style>{`@keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }`}</style>
       </header>
+
+      {page === "home" && showHero && !subscribed && (
+        <section className="relative overflow-hidden border-b border-slate-200" style={{ background: "linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%)" }}>
+          <div className="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-12 gap-6 items-start">
+            <div className="md:col-span-5">
+              <div className="text-amber-600 font-bold text-sm uppercase tracking-wider" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.welcome}</div>
+              <h1 className="text-4xl md:text-5xl font-black leading-[1.05] mt-2 text-slate-900" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "serif" }}>{t.mainTitle1}<br /><span className="text-amber-600">{t.mainTitle2}</span></h1>
+              <p className="mt-3 text-sm text-slate-600 max-w-md" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.mainSub}</p>
+              <ul className="mt-4 space-y-2 text-sm">
+                {[t.feature1, t.feature2, t.feature3].map((f, i) => (
+                  <li key={i} className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 shrink-0"></div><span style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }} className="text-slate-700">{f}</span></li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="md:col-span-4">
+              <div className="bg-white rounded-2xl shadow-xl border-2 border-amber-200 p-5">
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.mobile}</div>
+                {!otpSent ? (
+                  <>
+                    <div className="relative mt-2">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-600 font-mono text-sm">+88</span>
+                      <input data-testid="newsnow-hero-phone" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="01XXXXXXXXX" className="w-full border-2 border-amber-200 rounded-lg pl-12 pr-3 py-3 text-sm font-mono focus:border-amber-500 outline-none" maxLength={11} />
+                    </div>
+                    <button onClick={handleSendOtp} disabled={busy} data-testid="newsnow-hero-send" className="w-full mt-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg py-3 font-bold disabled:opacity-50 text-sm">{busy ? t.sending : t.sendOtp}</button>
+                    <p className="text-[10px] text-slate-400 mt-2 text-center" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.chargeNotice}</p>
+                  </>
+                ) : (
+                  <>
+                    <input data-testid="newsnow-hero-otp" value={otpInput} onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ""))} placeholder={t.otpHint} className="w-full mt-2 border-2 border-amber-200 rounded-lg px-3 py-3 text-center font-mono text-lg tracking-widest focus:border-amber-500 outline-none" maxLength={6} />
+                    <p className="text-[10px] mt-1 text-slate-500">{t.demoOtp}: <button className="text-amber-700 font-mono underline" onClick={() => setOtpInput(demoOtp)}>{demoOtp}</button></p>
+                    <button onClick={handleVerifyAndSub} disabled={busy} data-testid="newsnow-hero-verify" className="w-full mt-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg py-3 font-bold text-sm disabled:opacity-50">{busy ? t.sending : t.verify}</button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="md:col-span-3">
+              <div className="rounded-2xl p-3 bg-gradient-to-br from-slate-800 to-blue-950 text-white shadow-xl">
+                <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold"><span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>{t.livePreview}</div>
+                <div className="mt-2 space-y-2">
+                  {[
+                    { cat: t.categoryColors.Bangladesh, color: "bg-rose-200 text-rose-900", title: ARTICLES[0].title },
+                    { cat: t.categoryColors.Business, color: "bg-emerald-200 text-emerald-900", title: ARTICLES[6].title },
+                    { cat: t.categoryColors.Sports, color: "bg-amber-200 text-amber-900", title: ARTICLES[9].title },
+                  ].map((it, i) => (
+                    <div key={i} className="bg-white/95 rounded-lg p-2 text-slate-900">
+                      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${it.color}`}>{it.cat}</span>
+                      <div className="text-[11px] font-bold mt-1 leading-snug line-clamp-2" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{it.title}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ───── DUPLICATE-PROOF DUMMY (keeps original-section anchor working) ───── */}
+      {false && (
+        <header className="hidden">
+          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between"></div>
+        </header>
+      )}
 
       {page === "home" && (
         <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">

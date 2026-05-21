@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Heart, Search, Lock, ChevronLeft, MapPin, GraduationCap, Briefcase } from "lucide-react";
 import APIMonitor from "../../components/APIMonitor";
 import { requestOTP, verifyOTP, userSubscription, sendSMS, queryBalance, directDebit, getBaseSize } from "../../services/BDAppsAPI";
+import { useDemoLocale, LangToggle } from "../../services/demoI18n";
 
 const PROFILES = [
   { id: 1, name: "Rahima", age: 26, religion: "Islam", district: "Dhaka", education: "Masters", profession: "Software Engineer", height: "5'4\"", about: "Family-oriented, loves reading and traveling.", phone: "01711234567", initial: "R", grad: "from-pink-400 to-rose-500" },
@@ -16,6 +17,8 @@ const PROFILES = [
 
 const BondoBD = () => {
   const navigate = useNavigate();
+  const { locale, setLocale, t } = useDemoLocale("bondo");
+  const bn = locale === "bn";
   const [page, setPage] = useState("landing"); // landing, browse, detail, account
   const [registered, setRegistered] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -109,16 +112,22 @@ const BondoBD = () => {
   return (
     <div className="min-h-screen bg-pink-50" data-testid="bondobd-app">
       {/* Top nav */}
-      <header className="bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-lg sticky top-0 z-30">
+      <header className="bg-gradient-to-r from-rose-700 via-rose-800 to-slate-900 text-white shadow-lg sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="text-xs opacity-80 hover:opacity-100 flex items-center gap-1"><ChevronLeft size={14} /> Back</button>
-          <div className="font-bold text-xl tracking-tight" style={{ fontFamily: "serif" }}>💍 BondoBD</div>
-          <div className="text-xs opacity-90">{registered ? `Welcome, Md. Rafiul` : "Sign In"}</div>
+          <button onClick={() => navigate(-1)} className="text-xs opacity-80 hover:opacity-100 flex items-center gap-1"><ChevronLeft size={14} /> {t.back}</button>
+          <div className="font-bold text-xl tracking-tight flex items-center gap-2" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "serif" }}>
+            <div className="w-7 h-7 rounded bg-gradient-to-br from-amber-400 to-rose-500 flex items-center justify-center text-white text-sm">💍</div>
+            BondoBD
+          </div>
+          <div className="flex items-center gap-3">
+            <LangToggle locale={locale} setLocale={setLocale} />
+            <div className="text-xs opacity-90 hidden sm:block">{registered ? `Welcome, Md. Rafiul` : ""}</div>
+          </div>
         </div>
         {registered && (
           <nav className="max-w-6xl mx-auto px-4 flex gap-2 -mb-px overflow-x-auto">
             {["browse", "account"].map((p) => (
-              <button key={p} data-testid={`bondo-nav-${p}`} onClick={() => setPage(p)} className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border-b-2 ${page === p ? "border-white" : "border-transparent opacity-70 hover:opacity-100"}`}>{p === "browse" ? "Browse Profiles" : "My Account"}</button>
+              <button key={p} data-testid={`bondo-nav-${p}`} onClick={() => setPage(p)} className={`px-3 py-2 text-xs font-bold uppercase tracking-wider border-b-2 ${page === p ? "border-white" : "border-transparent opacity-70 hover:opacity-100"}`}>{p === "browse" ? t.browseProfiles : t.myAccount}</button>
             ))}
           </nav>
         )}
@@ -126,53 +135,114 @@ const BondoBD = () => {
 
       {page === "landing" && !registered && (
         <>
-          <section className="bg-gradient-to-br from-pink-500 via-rose-500 to-rose-700 text-white">
-            <div className="max-w-6xl mx-auto px-4 py-12 grid md:grid-cols-2 gap-8 items-center">
+          <section className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #fff1f2 0%, #fffbeb 100%)" }}>
+            <div className="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-2 gap-8 items-center">
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold leading-tight" style={{ fontFamily: "serif" }}>Find Your Life Partner</h1>
-                <p className="mt-3 text-white/90 text-lg">Bangladesh's most trusted matrimony service. Join {memberCount.toLocaleString()}+ families.</p>
-                <div className="mt-4 flex gap-6 text-sm">
-                  <div><b>2,40,000+</b><br /><span className="opacity-70">Profiles</span></div>
-                  <div><b>84,000+</b><br /><span className="opacity-70">Marriages</span></div>
-                  <div><b>15+ Years</b><br /><span className="opacity-70">Trusted</span></div>
+                <span className="inline-block bg-rose-100 text-rose-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.tagline}</span>
+                <h1 className="text-4xl md:text-5xl font-black leading-[1.05] mt-3" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "serif" }}>
+                  <span className="text-slate-900">{t.heroLine1}</span><br />
+                  <span className="text-rose-600">{t.heroLine2}</span>
+                </h1>
+                <p className="mt-3 text-slate-600 text-lg" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.subtitle}</p>
+
+                {/* Stats avatars row */}
+                <div className="mt-5 flex items-center gap-3">
+                  <div className="flex -space-x-2">
+                    {[["#fbbf24", "R"], ["#f97316", "S"], ["#ec4899", "N"], ["#8b5cf6", "T"]].map(([c, l], i) => (
+                      <div key={i} className="w-9 h-9 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold shadow" style={{ background: c }}>{l}</div>
+                    ))}
+                  </div>
+                  <div className="text-xs">
+                    <div className="font-bold text-rose-600 text-base">{bn ? "৫৪৩+" : "543+"}</div>
+                    <div className="text-slate-500">{t.joinedToday}</div>
+                  </div>
                 </div>
-                <div className="mt-6 flex gap-2 flex-wrap">
-                  <button onClick={() => document.getElementById("register-form").scrollIntoView({ behavior: "smooth" })} data-testid="bondo-cta-register" className="bg-white text-rose-700 font-bold rounded-full px-6 h-12">Register Free</button>
+
+                <div className="mt-6 grid grid-cols-3 gap-3 text-sm">
+                  <div className="bg-white border border-rose-100 rounded-xl p-3">
+                    <div className="font-bold text-rose-600 text-lg">{bn ? "২,৪০,০০০+" : "2,40,000+"}</div>
+                    <div className="text-[11px] text-slate-500" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.stats.profiles}</div>
+                  </div>
+                  <div className="bg-white border border-rose-100 rounded-xl p-3">
+                    <div className="font-bold text-rose-600 text-lg">{bn ? "৮৪,০০০+" : "84,000+"}</div>
+                    <div className="text-[11px] text-slate-500" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.stats.marriages}</div>
+                  </div>
+                  <div className="bg-white border border-rose-100 rounded-xl p-3">
+                    <div className="font-bold text-rose-600 text-lg">{bn ? "১৫+" : "15+"}</div>
+                    <div className="text-[11px] text-slate-500" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.stats.trusted}</div>
+                  </div>
                 </div>
               </div>
-              <div className="hidden md:block">
-                <svg viewBox="0 0 400 300" className="w-full">
-                  <circle cx="140" cy="140" r="60" fill="#fff" opacity="0.2" />
-                  <circle cx="260" cy="140" r="60" fill="#fff" opacity="0.2" />
-                  <circle cx="140" cy="120" r="34" fill="#fde68a" />
-                  <path d="M120 130 Q140 110 160 130" fill="#7c2d12" />
-                  <circle cx="260" cy="120" r="34" fill="#fef3c7" />
-                  <path d="M240 110 Q260 90 280 110" fill="#7c2d12" />
-                  <circle cx="200" cy="220" r="20" fill="#fff" stroke="#fde68a" strokeWidth="4" />
-                  <text x="200" y="226" fontSize="22" textAnchor="middle">💞</text>
-                </svg>
+
+              {/* Right side: OTP card */}
+              <div id="register-form">
+                <div className="bg-white rounded-2xl shadow-2xl border border-rose-100 p-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 -mr-12 -mt-12 rounded-full bg-rose-100 opacity-60"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 -ml-8 -mb-8 rounded-full bg-amber-100 opacity-60"></div>
+                  <div className="relative">
+                    <h3 className="font-bold text-xl text-slate-900" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "serif" }}>{t.loginTitle}</h3>
+                    <p className="text-xs text-slate-500 mt-1" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.loginSubtitle}</p>
+                    {!otpSent ? (
+                      <div className="space-y-3 mt-4">
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-rose-500 font-mono text-sm">+88</span>
+                          <input data-testid="bondo-phone" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="01XXXXXXXXX" className="w-full border-2 border-rose-200 rounded-lg pl-12 pr-3 py-3 text-sm font-mono focus:border-rose-500 outline-none" maxLength={11} />
+                        </div>
+                        <button data-testid="bondo-send-otp" onClick={handleSendOtp} disabled={busy} className="w-full bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white rounded-lg py-3 font-bold disabled:opacity-50 text-sm">
+                          {busy ? t.sending : t.sendOtp}
+                        </button>
+                        <p className="text-[10px] text-slate-400 text-center" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.chargedFromRobi} · 4৳/day +VAT</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 mt-4">
+                        <p className="text-xs text-slate-500">OTP sent to 01{phone.slice(-9)}</p>
+                        <input data-testid="bondo-otp" value={otpInput} onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ""))} placeholder={t.otpHint} className="w-full border-2 border-rose-200 rounded-lg px-3 py-3 text-center font-mono text-lg tracking-widest focus:border-rose-500 outline-none" maxLength={6} />
+                        <p className="text-[10px] text-slate-400">{t.demoOtp}: <button onClick={() => setOtpInput(demoOtp)} className="font-mono text-rose-600 underline">{demoOtp}</button></p>
+                        <button data-testid="bondo-verify-otp" onClick={handleVerifyOtp} disabled={busy} className="w-full bg-gradient-to-r from-rose-600 to-rose-700 text-white rounded-lg py-3 font-bold disabled:opacity-50">{busy ? t.verifying : t.verifyOtp}</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </section>
 
-          <div id="register-form" className="max-w-md mx-auto p-6 -mt-8 relative">
-            <div className="bg-white rounded-2xl shadow-xl border border-pink-200 p-6">
-              <h3 className="font-bold text-lg mb-3" style={{ fontFamily: "serif" }}>Register Free</h3>
-              {!otpSent ? (
-                <div className="space-y-3">
-                  <input data-testid="bondo-phone" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="Mobile Number (e.g. 1711234567)" className="w-full border border-pink-200 rounded-lg px-3 py-2.5 text-sm" maxLength={11} />
-                  <button data-testid="bondo-send-otp" onClick={handleSendOtp} disabled={busy} className="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-lg py-2.5 font-bold disabled:opacity-50">{busy ? "Sending OTP..." : "Send OTP via Robi"}</button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-xs text-slate-500">OTP sent to 01{phone.slice(-9)}</p>
-                  <input data-testid="bondo-otp" value={otpInput} onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ""))} placeholder="Enter 6-digit OTP" className="w-full border border-pink-200 rounded-lg px-3 py-2.5 text-center font-mono text-lg tracking-widest" maxLength={6} />
-                  <p className="text-[10px] text-slate-400">Demo OTP: <button onClick={() => setOtpInput(demoOtp)} className="font-mono text-rose-600 underline">{demoOtp}</button></p>
-                  <button data-testid="bondo-verify-otp" onClick={handleVerifyOtp} disabled={busy} className="w-full bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-lg py-2.5 font-bold disabled:opacity-50">{busy ? "Verifying..." : "Verify & Subscribe"}</button>
-                </div>
-              )}
+          {/* Success stories section */}
+          <section className="bg-slate-50 border-t border-rose-100 py-12">
+            <div className="max-w-6xl mx-auto px-4">
+              <h2 className="text-3xl font-bold text-slate-900" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "serif" }}>{t.successStories}</h2>
+              <p className="text-sm text-slate-500 mt-1 max-w-2xl" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.successSub}</p>
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { c1: "#fda4af", c2: "#fcd34d", names: bn ? "রাহিমা ও করিম" : "Rahima & Karim", loc: bn ? "ঢাকা" : "Dhaka" },
+                  { c1: "#fcd34d", c2: "#fda4af", names: bn ? "সাদিয়া ও তানভীর" : "Sadia & Tanvir", loc: bn ? "চট্টগ্রাম" : "Chittagong" },
+                  { c1: "#a5b4fc", c2: "#fda4af", names: bn ? "নুসরাত ও রফিক" : "Nusrat & Rafiq", loc: bn ? "সিলেট" : "Sylhet" },
+                ].map((s, i) => (
+                  <div key={i} className="relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group cursor-pointer">
+                    <div className="aspect-video relative" style={{ background: `linear-gradient(135deg, ${s.c1}, ${s.c2})` }}>
+                      <svg viewBox="0 0 200 110" className="absolute inset-0 w-full h-full">
+                        <circle cx="70" cy="55" r="22" fill="rgba(255,255,255,0.4)" />
+                        <circle cx="130" cy="55" r="22" fill="rgba(255,255,255,0.4)" />
+                        <circle cx="70" cy="48" r="12" fill="#fef3c7" />
+                        <circle cx="130" cy="48" r="12" fill="#fde68a" />
+                        <path d="M48 90 Q70 65 92 90 Z" fill="rgba(255,255,255,0.5)" />
+                        <path d="M108 90 Q130 65 152 90 Z" fill="rgba(255,255,255,0.5)" />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                          <div className="w-0 h-0 border-l-[14px] border-l-rose-600 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-white">
+                      <div className="font-bold text-slate-900" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{s.names}</div>
+                      <div className="text-xs text-slate-500" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>📍 {s.loc} · 2025</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          </section>
         </>
       )}
 

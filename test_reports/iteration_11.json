@@ -1,0 +1,52 @@
+{
+  "summary": "Frontend-only verification of iteration 11 incremental work: (1) Bangla+English language toggle on all 3 demo apps (BondoBD/NewsNow/QuizBD), (2) Web Builder template reorder + QuizBD as new web template, (3) Rich Bangla CSS mini-previews in template cards. ALL 14 targeted checks PASSED. No regression from iteration 10.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "All pages", "issues": ["Carry-over from iter 10: api.fontshare.com CORS-blocked for Cabinet Grotesk font — falls back to system fonts, cosmetic only"]}
+    ]
+  },
+  "verified_working": [
+    "Web App Builder tab (/digital → Web App Builder): First 3 cards in exact spec order — template-card-web-bondobd → template-card-web-newsnow → template-card-web-quizbd. Ratings 4.9 / 4.8 / 4.7 all rendered.",
+    "Rich Bangla CSS mini-previews confirmed in all 3 cards (NOT plain gradient). Bangla character counts: BondoBD=97 chars (পরিবার-কেন্দ্রিক, বাংলাদেশের, ম্যাট্রিমনি, +88 01XX, ৪ টাকা/দিন +VAT), NewsNow=135 chars (আ logo, আলোকবার্তা, ● ৬৪ জেলার আপডেট, স্বাগতম, দেশ-বিদেশের সকল খবর, রাজনীতি/অর্থনীতি/খেলাধুলা), QuizBD=39 chars (বাংলাদেশের জাতীয় ফুল? + শাপলা/গোলাপ/পদ্ম/অর্কিড options + leaderboard).",
+    "QuizBD web template card is clickable (template-card-web-quizbd) — confirmed via Playwright click action.",
+    "BondoBD /apps/bondobd: Default Bangla landing renders 'বাংলাদেশের সবচেয়ে বড় ম্যাট্রিমনি'. data-testid='lang-bn' and data-testid='lang-en' toggles both visible. Click EN → text switches to 'Bangladesh's Largest Matrimony'. Click বাংলা → switches back. Locale persists in localStorage key 'bdapps_locale_bondo' (verified value='bn').",
+    "NewsNow /apps/newsnow: Default Bangla landing shows 'আলোকবার্তা' + 'দেশ-বিদেশের সকল খবর'. EN toggle → 'Alokbarta' + 'All News In One Place'. Both confirmed.",
+    "QuizBD /apps/quizbd: Default Bangla shows 'প্রতিদিনের কুইজ — জ্ঞান যাচাই!' with Bangla numerals (১,৮৪,০০০+ subscribers, ৫০,০০০ taka). EN toggle → 'Daily Quiz — Test Your Knowledge!'.",
+    "QuizBD post-OTP home shows fully translated Bangla category cards: বাংলাদেশ সাধারণ জ্ঞান, ইসলাম ও ধর্ম, বিজ্ঞান ও প্রযুক্তি, খেলাধুলা, বিনোদন. Bangla leaderboard label লিডারবোর্ড, points label পয়েন্ট, streak label ধারা. Bangla CTA ৫ টাকা পুরস্কার নিন.",
+    "OTP flow no regression: phone 1711234567 + Send OTP → demo OTP visible → Verify → quiz home renders with 4 API calls registered on API Monitor badge (badge counter shows '4').",
+    "API Monitor toggle button visible bottom-right on all 3 demo apps (data-testid=api-monitor-toggle).",
+    "Other web templates (web-ecom, web-food, web-health, etc.) still render correctly after the reorder — no broken cards."
+  ],
+  "test_summary_table": {
+    "web_tab_first_3_order_correct": true,
+    "ratings_4.9_4.8_4.7_present": true,
+    "rich_bangla_mockups_all_3": true,
+    "quizbd_web_card_clickable": true,
+    "bondobd_default_bangla": true,
+    "bondobd_lang_toggles_present": true,
+    "bondobd_en_switch_works": true,
+    "bondobd_bn_switchback_works": true,
+    "bondobd_locale_persisted": true,
+    "newsnow_default_bangla": true,
+    "newsnow_en_switch_works": true,
+    "quizbd_default_bangla": true,
+    "quizbd_en_switch_works": true,
+    "quizbd_post_otp_bn_categories": true
+  },
+  "test_report_links": ["/app/test_reports/iteration_11.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "demoI18n.jsx is clean and tightly scoped (~280 lines). One minor: in LangToggle the inactive button uses `text-${color}` interpolated Tailwind class which is unsafe with JIT — works because callers pass 'white' (already in safelist by default). Consider explicit conditional classNames if other colors are ever passed.",
+    "STRINGS object is single source of truth — good. No business logic concerns."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "100% (14/14 checks)"},
+  "test_credentials": "developer@bdapps.com / dev123 (used for /digital access)",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iteration 11 layered bilingual i18n on top of iteration 10's BDApps demo apps. The i18n hook lives at /app/frontend/src/services/demoI18n.jsx (useDemoLocale + LangToggle). Default locale is 'bn' for all 3 demo apps. localStorage keys: bdapps_locale_bondo, bdapps_locale_news, bdapps_locale_quiz. The Web template list (builderTemplates.js WEB_TEMPLATES) is sorted with web-bondobd→web-newsnow→web-quizbd first. Rich CSS mockups live in /app/frontend/src/components/digital/TemplateMockup.jsx for the keys web-bondobd, web-newsnow, web-quizbd. To re-test: login as developer@bdapps.com/dev123, go to /digital, click [data-testid=tab-web], inspect first 3 [data-testid^=template-card-web-] cards. Demo apps tested directly via /apps/bondobd, /apps/newsnow, /apps/quizbd — no auth required for those."
+}
