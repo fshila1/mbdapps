@@ -38,6 +38,10 @@ import GenericSection from "./pages/cms/GenericSection";
 import RobiMart from "./pages/apps/RobiMart";
 import DeshiFood from "./pages/apps/DeshiFood";
 import EduPath from "./pages/apps/EduPath";
+import BondoBD from "./pages/apps/BondoBD";
+import QuizBD from "./pages/apps/QuizBD";
+import NewsNow from "./pages/apps/NewsNow";
+import FitBD from "./pages/apps/FitBD";
 
 function App() {
   return (
@@ -98,8 +102,14 @@ function App() {
           <Route path="/apps/deshifood" element={<DeshiFood />} />
           <Route path="/apps/edupath-bd" element={<EduPath />} />
           <Route path="/apps/medilife-clinic" element={<RobiMart />} />
-          <Route path="/apps/fitbd" element={<DeshiFood />} />
+          <Route path="/apps/fitbd" element={<FitBD />} />
+          <Route path="/apps/fitbd-web" element={<FitBD />} />
           <Route path="/apps/shoplocal-bd" element={<RobiMart />} />
+          <Route path="/apps/bondobd" element={<BondoBD />} />
+          <Route path="/apps/bondobd-android" element={<BondoBD />} />
+          <Route path="/apps/quizbd" element={<QuizBD />} />
+          <Route path="/apps/newsnow" element={<NewsNow />} />
+          <Route path="/apps/newsnow-bd" element={<NewsNow />} />
 
           {/* Admin */}
           <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
