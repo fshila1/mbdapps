@@ -29,6 +29,84 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 - Data-testid on every interactive element
 - Mock data persisted across reloads via localStorage
 
+## What's Been Implemented (Feb 6 — initial; Feb 10 — fixes; Feb 11 — Web/Android Builders; Feb 14 — Lucrative No-Code overhaul; Feb 17 — Content & Data Management; Feb 18, 2026 — Sidebar collapse + App Store redesign + Two Showpiece Apps + Admin Approval Flow; Feb 19, 2026 — Rich SVG visual overhaul + EduPath BD + Dashboard Quick View; Feb 21, 2026 — 4 New BDApps Demo Apps + BDApps API Simulation Layer)
+
+### Iteration 10 — 4 New Demo Apps + BDApps API Simulation Layer (Feb 21, 2026)
+**100% test pass per iteration_10.json.** Built BondoBD (Matrimony), QuizBD (Entertainment), NewsNow BD (News), FitBD (Fitness) as fully working interactive demos with footprint continuity across Template Gallery → Customize → My Apps → App Store → Working Demo. Every OTP, SMS, Subscription and CaaS call routes through a centralized simulation layer and surfaces in a floating "API Monitor" panel.
+
+**Part 1 — BDApps API Simulation Layer (`/src/services/BDAppsAPI.js`):**
+- Centralised service mirroring real Robi BDApps swagger API
+- Endpoints: `requestOTP`, `verifyOTP`, `userSubscription`, `getSubscriberStatus`, `getBaseSize`, `notifySubscribers`, `sendSMS`, `queryBalance`, `directDebit`, `getTransactionLogs`
+- Realistic 500-1500ms latency simulation, in-memory state for subscribers/OTP store/SMS logs/transactions
+- Status codes match real spec (S1000 success, E1850 invalid OTP, E1851 expired OTP, E1854 not found, E4012 insufficient balance)
+- Pub/sub `subscribeMonitor` for the API Monitor component to listen to all API activity in real time
+- `_demo_otp` field exposed in OTP response strictly for demo auto-fill (clearly marked)
+
+**Part 2 — Floating API Monitor (`/src/components/APIMonitor.jsx`):**
+- 56px circular toggle bottom-right (z-80), shows badge count + pulses green on new activity
+- Click opens 360×480 dark panel (z-81) with: filter chips (All/OTP/SMS/Subscription/CaaS), demo-mode banner, real-time log list, expandable Request/Response JSON per entry showing exact swagger schemas with applicationId, statusCode, elapsedMs
+- Auto-attached to all 4 new demo app pages
+
+**Part 3 — BondoBD (`/apps/bondobd`) — Matrimony Service:**
+- Rose-pink gradient landing "Find Your Life Partner" with live member count from `getBaseSize()`
+- OTP flow: requestOTP → demo OTP inline link → verifyOTP + userSubscription + welcome sendSMS
+- 6 realistic Bangladeshi profiles (Rahima/Sadia/Nusrat/Karim/Tanvir/Rafiq) with district/education/profession
+- Profile detail with LOCKED contact section (Phone/WhatsApp/Email blurred)
+- Subscribe modal → queryBalance → directDebit BDT 49 → confirmation sendSMS → contact unlocks
+- Express interest → sendSMS to profile owner; My Account page with Unsubscribe → userSubscription UNSUB
+
+**Part 4 — QuizBD (`/apps/quizbd`) — Knowledge Quiz:**
+- Purple gradient landing with stats "1,84,000+ Subscribers"
+- OTP subscription with welcome SMS broadcast
+- 5 categories × 4 questions each (Bangladesh GK, Islam, Science, Sports, Entertainment) = 20 questions
+- Active quiz with progress bar + 10:00 countdown timer, color-reveal feedback (green correct / red wrong) + auto-advance
+- Results screen with score + points earned + result SMS via sendSMS
+- Leaderboard with 7 players, "Rafiul Karim (YOU)" highlighted in purple at #3
+- Prize Claim (when points ≥500): negative directDebit simulates BDT 5 credit
+
+**Part 5 — NewsNow BD (`/apps/newsnow`) — Daily News:**
+- Dark slate header with red breaking-news ticker (CSS marquee animation)
+- 15 articles across Bangladesh / Technology / Business / Sports / International (3 each)
+- Hero featured article + horizontal category sections
+- Article detail with full body, bookmark toggle, share buttons
+- SMS subscribe modal → OTP → userSubscription + welcome sendSMS
+- "Broadcast News Alert" demo button → notifySubscribers shows sentCount > 184k in monitor
+
+**Part 6 — FitBD (`/apps/fitbd`) — Fitness Tracker (Android Emulator):**
+- Pixel-style phone frame (360×720), splash auto-advances to login (1.8s)
+- Lime-emerald OTP login + welcome SMS
+- Home dashboard with 4 stat circles (kcal/steps/water/active), Today's Workout card, Daily Health Tip
+- 3 workout plans: Beginner (free), Intermediate HIIT (locked BDT 29), Advanced (locked BDT 49)
+- Active workout: exercise icon + reps + 3-set tracker + rest timer countdown (45s/60s) + Next Set button → Workout Complete with sendSMS summary
+- Nutrition log: 10 Bangladeshi foods (Khichuri/Rice/Dal/Chicken Curry/Fish Fry/Roti/Egg/Banana/Mango/Dahi) with search + add to Breakfast/Lunch/Dinner/Snacks + calorie progress bar
+- Water tracker 8-glass tap-to-fill
+- Premium unlock: queryBalance + directDebit + confirmation sendSMS → plan unlocks
+
+**Part 7 — Footprint Continuity:**
+- 3 new Pro Builder templates (BondoBD/QuizBD/NewsNow)
+- 2 new Web Builder templates (BondoBD/NewsNow)
+- 4 new Android Builder templates (BondoBD/QuizBD/NewsNow/FitBD)
+- 4 new App Store entries (AS-BONDOBD/QUIZBD/NEWSNOW/FITBDPRO) with detail-page CTAs routing to working demos
+- 4 new My Apps entries (3 Live + 1 Pending Review) with subscriber counts + revenue, Open App buttons routing to demos
+
+**Files added:**
+- `/src/services/BDAppsAPI.js`
+- `/src/components/APIMonitor.jsx`
+- `/src/pages/apps/BondoBD.jsx`
+- `/src/pages/apps/QuizBD.jsx`
+- `/src/pages/apps/NewsNow.jsx`
+- `/src/pages/apps/FitBD.jsx`
+
+**Files patched:**
+- `/src/App.js` (8 new routes: bondobd + android, quizbd, newsnow + bd alias, fitbd + web alias)
+- `/src/mocks/data.js` (4 new seedAppStore entries with proper iconGradient + slug + CTA-routing fields; CATEGORIES extended)
+- `/src/mocks/builderTemplates.js` (3 Pro + 2 Web + 4 Android new templates)
+- `/src/context/AppContext.jsx` (seedMyApps adds 4 new apps with subscriber counts + revenue; localStorage migrated to v4: bdapps_myapps_v4 + bdapps_store_v4)
+
+**Testing:** iteration_10.json — 100% pass. No functional bugs. Carry-over: Cabinet Grotesk CORS font (cosmetic).
+
+
+
 ## What's Been Implemented (Feb 6 — initial; Feb 10 — fixes; Feb 11 — Web/Android Builders; Feb 14 — Lucrative No-Code overhaul; Feb 17 — Content & Data Management; Feb 18, 2026 — Sidebar collapse + App Store redesign + Two Showpiece Apps + Admin Approval Flow; Feb 19, 2026 — Rich SVG visual overhaul + EduPath BD + Dashboard Quick View)
 
 ### Iteration 9 — Rich SVG Visual Overhaul + EduPath BD demo + Dashboard Quick View (Feb 19, 2026)
