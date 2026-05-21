@@ -29,6 +29,38 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 - Data-testid on every interactive element
 - Mock data persisted across reloads via localStorage
 
+## What's Been Implemented (Feb 6 — initial; Feb 10 — fixes; Feb 11 — Web/Android Builders; Feb 14 — Lucrative No-Code overhaul; Feb 17 — Content & Data Management; Feb 18, 2026 — Sidebar collapse + App Store redesign + Two Showpiece Apps + Admin Approval Flow; Feb 19, 2026 — Rich SVG visual overhaul + EduPath BD + Dashboard Quick View; Feb 21, 2026 — 4 New BDApps Demo Apps + BDApps API Simulation Layer; Feb 21, 2026 (iteration 11) — Bilingual বাংলা/EN demo apps + Web Builder template reorder + Rich Bangla template-card previews)
+
+### Iteration 11 — Bilingual demo apps + Rich Web template previews (Feb 21, 2026)
+**100% test pass per iteration_11.json (14/14 checks).** Made the 3 BDApps demo apps (BondoBD / NewsNow / QuizBD) authentic-Bangladeshi-looking with a Bangla + English language toggle, reordered the Web App Builder so the BDApps demo templates appear first, and replaced their plain mini-mockups with rich Bangla CSS previews matching real Bangladeshi product references (Biye.bd / Alokbarta).
+
+**Files added:**
+- `/src/services/demoI18n.jsx` — tiny i18n hook `useDemoLocale(app)` returning `{ locale, setLocale, t }` + reusable `<LangToggle>` component. STRINGS object holds full Bangla + English translations for bondo / news / quiz scopes. Locale persists per app via `localStorage` keys `bdapps_locale_*`. Default locale is `bn`.
+
+**Files patched:**
+- `/src/pages/apps/BondoBD.jsx` — completely redesigned landing matching the Biye.bd reference: dark rose+navy gradient header with avatar logo, left-side hero ("বাংলাদেশের সবচেয়ে বড় ম্যাট্রিমনি") + stat-avatar row + 3 stat tiles, right-side OTP card with +88 prefix, scrolling Success Stories section with 3 couple-silhouette video tiles. Full bilingual support.
+- `/src/pages/apps/NewsNow.jsx` — added a welcome Hero section matching the Alokbarta reference: navy-blue header with amber "আ" rounded-square logo + Bangla "আলোকবার্তা" + uppercase "BANGLADESH NEWS" subtitle, red breaking-news ticker, Bangla welcome hero ("দেশ-বিদেশের সকল খবর এক জায়গায়") + checked feature list + central OTP card with amber CTA + right sidebar "লাইভ সংবাদ প্রিভিউ" panel with category-color-coded news items. Full bilingual support.
+- `/src/pages/apps/QuizBD.jsx` — fully bilingual: hero, home/category cards, leaderboard labels, active quiz screen, results page (e.g. ১,৮৪,০০০+ সাবস্ক্রাইবার, বাংলাদেশ সাধারণ জ্ঞান, প্রতিদিনের কুইজ).
+- `/src/mocks/builderTemplates.js` — `WEB_TEMPLATES` reordered: web-bondobd → web-newsnow → web-quizbd FIRST, then E-Commerce/Food/Health/Edu/Realestate/Travel/NGO/SaaS. Added new `web-quizbd` (previously only Pro/Android). Each new template carries the canonical rose / slate-amber / purple palette + apis array. `ALL_CATEGORIES_WEB` extended with `Subscription Service`, `Media`, `Content Service`.
+- `/src/components/digital/TemplateMockup.jsx` — added 3 NEW rich mini-mockups for `web-bondobd`, `web-newsnow`, `web-quizbd`. Each renders authentic Bangla CSS art:
+  - **BondoBD card**: Rose split-pane with Bangla hero text + small +88 mock OTP card with "শুরু করুন →" CTA + 4-day BDT pricing footnote.
+  - **NewsNow card**: Navy navbar with the amber "আ" logo, red live-pulse strip ("● ৬৪ জেলার আপডেট"), left Bangla content + right "● লাইভ প্রিভিউ" sidebar with category-color-tagged article cards (রাজনীতি, অর্থনীতি, খেলাধুলা).
+  - **QuizBD card**: Purple gradient with mini quiz card showing Bangla question "বাংলাদেশের জাতীয় ফুল?", 4 ABCD option rows, green-highlighted "শাপলা ✓ +10" correct answer + leaderboard / streak footer.
+- `/public/index.html` — added `Hind Siliguri` + `Tiro Bangla` Google Fonts so Bangla copy renders correctly.
+
+**Testing:** iteration_11.json — 14/14 checks pass:
+- Web tab first-3 order correct ✓
+- Rich Bangla mockups all 3 cards ✓
+- QuizBD web card clickable ✓
+- All 3 apps default to Bangla ✓
+- Lang toggle (lang-bn / lang-en) switches text on all 3 apps ✓
+- Locale persisted via localStorage ✓
+- Quiz post-OTP home shows Bangla category cards ✓
+- OTP flow still works with API Monitor showing 4 calls ✓
+- No regression to iteration 10 flows ✓
+
+
+
 ## What's Been Implemented (Feb 6 — initial; Feb 10 — fixes; Feb 11 — Web/Android Builders; Feb 14 — Lucrative No-Code overhaul; Feb 17 — Content & Data Management; Feb 18, 2026 — Sidebar collapse + App Store redesign + Two Showpiece Apps + Admin Approval Flow; Feb 19, 2026 — Rich SVG visual overhaul + EduPath BD + Dashboard Quick View; Feb 21, 2026 — 4 New BDApps Demo Apps + BDApps API Simulation Layer)
 
 ### Iteration 10 — 4 New Demo Apps + BDApps API Simulation Layer (Feb 21, 2026)
