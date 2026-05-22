@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import { Button } from "../components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
@@ -15,16 +16,15 @@ import LivePreviewModal from "../components/digital/LivePreviewModal";
 import DemoTour from "../components/digital/DemoTour";
 import { PRO_TEMPLATES, WEB_TEMPLATES, ANDROID_TEMPLATES, ALL_CATEGORIES_PRO, ALL_CATEGORIES_WEB, ALL_CATEGORIES_ANDROID } from "../mocks/builderTemplates";
 
-const TAB_META = {
-  pro:     { icon: "⚡", label: "Pro App Builder",     tagline: "Build telecom-powered services using Robi's network" },
-  web:     { icon: "🌐", label: "Web App Builder",     tagline: "Launch a professional web app in minutes — no code required" },
-  android: { icon: "📱", label: "Android App Builder", tagline: "Ship your Android app today — no developers needed" },
-};
-
-const STEP_LABELS = ["Choose Template", "Design Style", "Customize", "Add Your Content", "Preview & Launch"];
-
 const Digital = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const TAB_META = {
+    pro:     { icon: "⚡", label: t("digital.proBuilder"),     tagline: t("digital.proHeader") },
+    web:     { icon: "🌐", label: t("digital.webBuilder"),     tagline: t("digital.webHeader") },
+    android: { icon: "📱", label: t("digital.androidBuilder"), tagline: t("digital.androidHeader") },
+  };
+  const STEP_LABELS = [t("digital.step1"), t("digital.step2"), t("digital.step3"), t("digital.step4"), t("digital.step5")];
   const [tab, setTab] = useState("pro");
   // Flow state: null = gallery, otherwise { template, type, designId?, customization?, content? }
   const [chooser, setChooser] = useState(null);
@@ -71,13 +71,13 @@ const Digital = () => {
         {/* Header */}
         <div className="flex items-end justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Digital App Builder</h1>
-            <p className="text-sm text-slate-600 mt-1">No-code platform · Build complete apps in under 5 minutes · No developers needed</p>
+            <h1 className="text-4xl font-bold tracking-tight">{t("digital.title")}</h1>
+            <p className="text-sm text-slate-600 mt-1">{t("digital.subtitle")}</p>
           </div>
           <div className="flex gap-2">
-            <Button data-testid="demo-tour-btn" variant="outline" onClick={() => setTourOpen(true)} className="gap-1"><PlayCircle size={14} /> Demo Tour</Button>
+            <Button data-testid="demo-tour-btn" variant="outline" onClick={() => setTourOpen(true)} className="gap-1"><PlayCircle size={14} /> {t("digital.demoTour")}</Button>
             <Button data-testid="addons-btn" onClick={() => navigate("/add-ons")} className="bg-gradient-to-r from-amber-500 to-rose-500 hover:opacity-90 gap-1 text-white">
-              <Sparkles size={14} /> Browse Add-Ons
+              <Sparkles size={14} /> {t("digital.browseAddOns")}
             </Button>
           </div>
         </div>

@@ -8,6 +8,8 @@ import {
 } from "../components/ui/dropdown-menu";
 import { Badge } from "../components/ui/badge";
 import Sidebar from "./Sidebar";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 export const Logo = ({ className = "" }) => (
   <Link to="/" data-testid="bdapps-logo" className={`flex items-center gap-2 ${className}`}>
@@ -26,6 +28,7 @@ const NOTIFS = [
 
 const Layout = ({ children, subnav = null }) => {
   const { user, logout, appNotifs, markNotifsRead } = useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const unread = (appNotifs || []).filter((n) => !n.read).length;
@@ -51,6 +54,7 @@ const Layout = ({ children, subnav = null }) => {
             </div>
 
             <div className="flex items-center gap-2">
+              <LanguageSwitcher />
               {user && (
                 <>
                   <DropdownMenu onOpenChange={(o) => o && unread > 0 && markNotifsRead()}>
@@ -61,7 +65,7 @@ const Layout = ({ children, subnav = null }) => {
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-80">
-                      <DropdownMenuLabel>Notifications {unread > 0 && <span className="text-[#e11d48]">({unread} new)</span>}</DropdownMenuLabel>
+                      <DropdownMenuLabel>{t("common.notifications")} {unread > 0 && <span className="text-[#e11d48]">({unread} {t("common.new").toLowerCase()})</span>}</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       {(appNotifs || []).slice(0, 5).map((n) => (
                         <DropdownMenuItem key={n.id} className="flex flex-col items-start gap-0.5 py-2" onClick={() => n.appId && navigate(`/my-apps`)}>
@@ -99,7 +103,7 @@ const Layout = ({ children, subnav = null }) => {
                       <Badge className="ml-2 my-1 bg-slate-100 text-[#0f172a] hover:bg-slate-100">{user.role}</Badge>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem data-testid="logout-button" onClick={onLogout} className="text-[#e11d48]">
-                        <LogOut size={14} className="mr-2" /> Logout
+                        <LogOut size={14} className="mr-2" /> {t("common.logout")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

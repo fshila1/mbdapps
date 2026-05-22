@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useApp } from "../context/AppContext";
 import { HERO_SLIDES, CATEGORIES } from "../mocks/data";
 import { Button } from "../components/ui/button";
@@ -36,6 +37,7 @@ const AppCard = ({ app, onClick }) => (
 
 export const AppStore = () => {
   const { storeApps, storeLayout, appStoreUser, setAppStoreUser } = useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [slide, setSlide] = useState(0);
   const [search, setSearch] = useState("");
@@ -109,17 +111,17 @@ export const AppStore = () => {
       <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-6 flex flex-col md:flex-row gap-3 md:items-center">
         <div className="relative flex-1 max-w-md">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <Input data-testid="store-search" placeholder="Search apps..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          <Input data-testid="store-search" placeholder={t("appstore.searchApps")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         <div className="flex gap-1 overflow-x-auto">
-          {["all", "newly", "top", "most"].map((t) => (
-            <button key={t} onClick={() => setActiveTab(t)} data-testid={`tab-${t}`} className={`px-3 py-1.5 text-sm font-medium rounded-md whitespace-nowrap ${activeTab === t ? "bg-[#0f172a] text-white" : "hover:bg-slate-100"}`}>
-              {{ all: "All Apps", newly: "Newly Added", top: "Top Rated", most: "Most Used" }[t]}
+          {["all", "newly", "top", "most"].map((tabKey) => (
+            <button key={tabKey} onClick={() => setActiveTab(tabKey)} data-testid={`tab-${tabKey}`} className={`px-3 py-1.5 text-sm font-medium rounded-md whitespace-nowrap ${activeTab === tabKey ? "bg-[#0f172a] text-white" : "hover:bg-slate-100"}`}>
+              {{ all: t("appstore.allApps"), newly: t("appstore.newlyAdded"), top: t("appstore.topRated"), most: t("appstore.mostUsed") }[tabKey]}
             </button>
           ))}
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-40" data-testid="store-category"><SelectValue placeholder="Category" /></SelectTrigger>
-            <SelectContent><SelectItem value="all">All Categories</SelectItem>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+            <SelectTrigger className="w-40" data-testid="store-category"><SelectValue placeholder={t("appstore.category")} /></SelectTrigger>
+            <SelectContent><SelectItem value="all">{t("appstore.allCategories")}</SelectItem>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       </div>
@@ -131,7 +133,7 @@ export const AppStore = () => {
             <h3 className="font-bold tracking-tight text-xl" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{storeLayout.hero}</h3>
             <p className="text-sm opacity-80">{storeLayout.sub}</p>
           </div>
-          <Button onClick={() => navigate("/register")} className="bg-[#e11d48] hover:bg-[#be123c]">Become a Developer</Button>
+          <Button onClick={() => navigate("/register")} className="bg-[#e11d48] hover:bg-[#be123c]">{t("appstore.becomeDeveloper")}</Button>
         </div>
       </div>
 
@@ -139,23 +141,23 @@ export const AppStore = () => {
       <main className="max-w-[1400px] mx-auto px-4 lg:px-8 pb-16 space-y-12">
         {(activeTab === "all" || search || category) ? (
           <section>
-            <h2 className="text-2xl tracking-tight font-bold mb-4" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{search ? "Results" : category || "All Apps"}</h2>
+            <h2 className="text-2xl tracking-tight font-bold mb-4" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{search ? t("appstore.results") : category || t("appstore.allApps")}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {filtered.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}
-              {filtered.length === 0 && <p className="col-span-full text-slate-500">No apps found.</p>}
+              {filtered.length === 0 && <p className="col-span-full text-slate-500">{t("appstore.noAppsFound")}</p>}
             </div>
           </section>
         ) : (
           <>
             {[
-              { label: "Newly Added", apps: newest, key: "newly" },
-              { label: "Top Rated", apps: topRated, key: "top" },
-              { label: "Most Used", apps: mostUsed, key: "most" },
+              { label: t("appstore.newlyAdded"), apps: newest, key: "newly" },
+              { label: t("appstore.topRated"), apps: topRated, key: "top" },
+              { label: t("appstore.mostUsed"), apps: mostUsed, key: "most" },
             ].filter((s) => activeTab === "all" || activeTab === s.key).map((sec) => (
               <section key={sec.key}>
                 <div className="flex justify-between items-end mb-4">
                   <h2 className="text-2xl tracking-tight font-bold" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{sec.label}</h2>
-                  <button onClick={() => setActiveTab("all")} data-testid={`see-more-${sec.key}`} className="text-sm text-[#e11d48] font-medium hover:underline">See More →</button>
+                  <button onClick={() => setActiveTab("all")} data-testid={`see-more-${sec.key}`} className="text-sm text-[#e11d48] font-medium hover:underline">{t("appstore.seeMore")} →</button>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">{sec.apps.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}</div>
               </section>
@@ -163,8 +165,8 @@ export const AppStore = () => {
             {/* All apps section below */}
             <section>
               <div className="flex justify-between items-end mb-4">
-                <h2 className="text-2xl tracking-tight font-bold" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>Browse All Apps</h2>
-                <span className="text-xs text-slate-500 font-bold">{storeApps.length} apps</span>
+                <h2 className="text-2xl tracking-tight font-bold" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{t("appstore.browseAll")}</h2>
+                <span className="text-xs text-slate-500 font-bold">{storeApps.length} {t("appstore.appsCount")}</span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {storeApps.map((a) => <AppCard key={a.id} app={a} onClick={() => navigate(`/appstore/${a.id}`)} />)}

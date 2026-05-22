@@ -1,7 +1,8 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
+import { useTranslation } from "react-i18next";
 
 // Tiny i18n for the 3 BDApps demo apps (BondoBD, NewsNow, QuizBD)
-// Locale persisted per app via localStorage.
+// Locale syncs with the global react-i18next language by default.
 
 const STRINGS = {
   // ───── BondoBD ─────
@@ -258,9 +259,9 @@ const STRINGS = {
 };
 
 export const useDemoLocale = (app) => {
-  const key = `bdapps_locale_${app}`;
-  const [locale, setLocale] = useState(() => localStorage.getItem(key) || "bn");
-  useEffect(() => { localStorage.setItem(key, locale); }, [key, locale]);
+  const { i18n } = useTranslation();
+  const locale = i18n.language === "bn" ? "bn" : "en";
+  const setLocale = (l) => i18n.changeLanguage(l);
   const t = STRINGS[app][locale];
   return { locale, setLocale, t };
 };

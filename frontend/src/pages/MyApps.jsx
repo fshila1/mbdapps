@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import { Button } from "../components/ui/button";
 import { Plus, ExternalLink, Settings2, BarChart3, Pencil, Smartphone, Globe, Eye, RefreshCw, FileText } from "lucide-react";
@@ -36,6 +37,13 @@ const FILTERS = ["All", "Active", "Pending", "Rejected"];
 const MyApps = () => {
   const navigate = useNavigate();
   const { myApps, resubmitMyApp } = useApp();
+  const { t } = useTranslation();
+  const FILTER_LABELS = {
+    All: t("common.all"),
+    Active: t("common.active"),
+    Pending: t("common.pending"),
+    Rejected: t("myapps.rejected"),
+  };
   const [filter, setFilter] = useState("All");
   const [sort, setSort] = useState("Newest");
 
@@ -55,10 +63,10 @@ const MyApps = () => {
       <div className="space-y-6 max-w-7xl">
         <div className="flex items-end justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">My Apps <span className="text-slate-400 text-2xl font-medium">({myApps.length})</span></h1>
-            <p className="text-sm text-slate-600 mt-1">Manage your launched apps — add products, update content, view orders, never touch code.</p>
+            <h1 className="text-4xl font-bold tracking-tight">{t("myapps.title")} <span className="text-slate-400 text-2xl font-medium">({myApps.length})</span></h1>
+            <p className="text-sm text-slate-600 mt-1">{t("myapps.subtitle")}</p>
           </div>
-          <Button data-testid="build-new-app-btn" onClick={() => navigate("/digital")} className="bg-[#e11d48] hover:bg-[#be123c] gap-1 rounded-full px-5"><Plus size={14} /> 🚀 Build New App</Button>
+          <Button data-testid="build-new-app-btn" onClick={() => navigate("/digital")} className="bg-[#e11d48] hover:bg-[#be123c] gap-1 rounded-full px-5"><Plus size={14} /> 🚀 {t("myapps.buildNew")}</Button>
         </div>
 
         {/* Filters + Sort */}
@@ -66,13 +74,13 @@ const MyApps = () => {
           <div className="flex items-center gap-1 flex-wrap">
             {FILTERS.map((f) => {
               const count = f === "All" ? myApps.length : myApps.filter((a) => (f === "Active" && a.status === "Live") || (f === "Pending" && a.status === "Pending Review") || (f === "Rejected" && a.status === "Rejected")).length;
-              return <button key={f} onClick={() => setFilter(f)} data-testid={`myapps-filter-${f.toLowerCase()}`} className={`text-xs px-3 py-1.5 rounded-full font-bold ${filter === f ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}>{f} <span className="opacity-70">{count}</span></button>;
+              return <button key={f} onClick={() => setFilter(f)} data-testid={`myapps-filter-${f.toLowerCase()}`} className={`text-xs px-3 py-1.5 rounded-full font-bold ${filter === f ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}>{FILTER_LABELS[f]} <span className="opacity-70">{count}</span></button>;
             })}
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500">Sort:</span>
+            <span className="text-slate-500">{t("myapps.sort")}:</span>
             <select data-testid="myapps-sort" value={sort} onChange={(e) => setSort(e.target.value)} className="border border-slate-200 rounded h-7 text-xs px-2">
-              <option>Newest</option><option>Oldest</option><option>Name</option>
+              <option value="Newest">{t("myapps.sortNewest")}</option><option value="Oldest">{t("myapps.sortOldest")}</option><option value="Name">{t("myapps.sortName")}</option>
             </select>
           </div>
         </div>
@@ -80,9 +88,9 @@ const MyApps = () => {
         {filtered.length === 0 ? (
           <div data-testid="myapps-empty" className="bg-white border border-slate-200 rounded-2xl p-10 text-center">
             <div className="text-5xl mb-3">📱</div>
-            <h2 className="text-xl font-bold">No apps matching "{filter}"</h2>
-            <p className="text-sm text-slate-500 mt-1">Try another filter or build a new app.</p>
-            <Button onClick={() => navigate("/digital")} className="mt-4 bg-[#e11d48]">Build Your First App</Button>
+            <h2 className="text-xl font-bold">{t("myapps.noMatching", { filter: FILTER_LABELS[filter] })}</h2>
+            <p className="text-sm text-slate-500 mt-1">{t("myapps.tryAnother")}</p>
+            <Button onClick={() => navigate("/digital")} className="mt-4 bg-[#e11d48]">{t("myapps.buildFirst")}</Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">

@@ -1,0 +1,59 @@
+{
+  "summary": "Frontend i18n sweep verified: react-i18next wired correctly, English/Bangla language switcher in Layout + Login headers works, localStorage key 'bdapps_lang' persists choice across reload and logout, HTML <html lang> attribute syncs dynamically (en/bn). All 7 authenticated pages (Dashboard, My Apps, App Store, Digital, Reports, Provisioning, Add-Ons, Lite) render translated Bangla text. Sidebar nav (ডেভেলপার কনসোল / ড্যাশবোর্ড / প্রোভিশনিং / বিডিঅ্যাপস লাইট / অ্যাপ স্টোর / রিপোর্ট / ডিজিটাল / আমার অ্যাপস / অ্যাডঅনস / লগআউট) all translate. Demo apps (BondoBD, NewsNow) correctly mirror the global header language via demoI18n.jsx. No regressions, no functional bugs found.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "All pages", "issues": ["Carry-over from iter 10/11: api.fontshare.com CORS-blocked for Cabinet Grotesk — cosmetic fallback only, does not affect i18n"]}
+    ]
+  },
+  "verified_working": [
+    "Login page: EN hero 'Build telecom apps for ... 76 million Robi subscribers' visible by default; html lang='en' on first load.",
+    "Login page: Clicking data-testid='language-switcher' opens dropdown; clicking data-testid='language-option-bn' switches hero to 'টেলিকম অ্যাপ তৈরি করুন ৭.৬ কোটি রবি গ্রাহকদের জন্য'.",
+    "HTML lang attribute updates to 'bn' after switch and 'en' after switch back — verified via document.documentElement.lang.",
+    "localStorage key 'bdapps_lang' persists value 'bn' after switch and 'en' after revert.",
+    "Page refresh restores BN — hero remains in Bangla after reload.",
+    "Login persisted: navigating to /login while bn is selected keeps html lang='bn'.",
+    "Authenticated as developer@bdapps.com — Dashboard with BN: header 'স্বাগতম' style text + sidebar 'ডেভেলপার কনসোল / ড্যাশবোর্ড / প্রোভিশনিং / বিডিঅ্যাপস লাইট / অ্যাপ স্টোর / রিপোর্ট / ডিজিটাল / আমার অ্যাপস / অ্যাডঅনস / লগআউট' all rendered.",
+    "Sidebar 'নতুন' (New) badge translates correctly.",
+    "All page routes verified to contain Bangla characters when bdapps_lang='bn': /my-apps, /appstore, /digital, /reports, /provisioning, /add-ons, /lite.",
+    "Switching back to EN via header dropdown — Dashboard reverts to 'Welcome back, Rafiul.' style, html lang='en', localStorage='en'.",
+    "Demo apps /apps/bondobd and /apps/newsnow correctly mirror global header language (NewsNow shows 'Alokbarta / All News In One Place' when global lang=EN, screenshot confirms; BondoBD content in BN when global lang=BN)."
+  ],
+  "test_results_table": {
+    "i18n_initial_default_en": true,
+    "login_switcher_visible": true,
+    "login_bn_hero_translates": true,
+    "html_lang_attr_updates_dynamically": true,
+    "localstorage_bdapps_lang_persists": true,
+    "reload_preserves_bn": true,
+    "logout_to_login_preserves_lang": true,
+    "dashboard_bn": true,
+    "sidebar_bn": true,
+    "myapps_bn": true,
+    "appstore_bn": true,
+    "digital_bn": true,
+    "reports_bn": true,
+    "provisioning_bn": true,
+    "addons_bn": true,
+    "lite_bn": true,
+    "switch_back_to_en_works": true,
+    "demo_bondobd_syncs_with_global": true,
+    "demo_newsnow_syncs_with_global": true
+  },
+  "test_report_links": ["/app/test_reports/iteration_12.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "i18n/index.js is well-structured: LanguageDetector with localStorage→navigator order; explicit navigator.language.startsWith('bn'/'bd') fallback; HTML lang & dir sync via languageChanged event. Clean implementation.",
+    "LanguageSwitcher.jsx supports both dropdown (header) and pill (demo apps) variants — DRY.",
+    "Cosmetic only: api.fontshare.com Cabinet Grotesk font blocked by CORS (carry-over from iter 10). Recommend self-hosting or switching to a Google Fonts equivalent to silence the console errors. Does not affect Bangla rendering since Hind Siliguri / Tiro Bangla are correctly loaded from Google Fonts."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "100% (19/19 checks)"},
+  "test_credentials": "developer@bdapps.com / dev123",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "i18n is now globally wired via react-i18next at /app/frontend/src/i18n/index.js with localStorage key 'bdapps_lang'. Translation files: /app/frontend/src/locales/en.json + bn.json. Language switcher data-testids: 'language-switcher' (trigger), 'language-option-en', 'language-option-bn'. Demo apps now subscribe to global i18n.language via demoI18n.jsx. To force BN for testing without clicking dropdown, do: localStorage.setItem('bdapps_lang','bn'); page.reload(). Note: the dropdown trigger may get covered by a 'Welcome back!' toast after login — wait ~2.5s for toast dismissal before clicking the switcher."
+}

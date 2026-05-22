@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -136,6 +137,7 @@ const TrialModal = ({ open, onClose }) => {
 };
 
 const AddOns = () => {
+  const { t } = useTranslation();
   const [campOpen, setCampOpen] = useState(false);
   const [trialOpen, setTrialOpen] = useState(false);
   const [run, setRun] = useState(false);
@@ -157,12 +159,12 @@ const AddOns = () => {
         <div className="bg-gradient-to-r from-slate-900 via-rose-900 to-slate-900 text-white rounded-2xl px-6 py-8 relative overflow-hidden">
           <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at 30% 50%, #e11d48, transparent 60%)" }}></div>
           <div className="relative">
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">⚡ Supercharge Your App</h1>
-            <p className="text-sm opacity-80 mt-1 max-w-2xl">Premium paid services to grow users, maximize revenue, and understand your business.</p>
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">⚡ {t("addonsPage.heroTitle")}</h1>
+            <p className="text-sm opacity-80 mt-1 max-w-2xl">{t("addonsPage.heroSub")}</p>
             <div className="flex flex-wrap gap-6 mt-4 text-xs">
-              <div><b className="text-2xl text-amber-400">500%</b><div className="opacity-70">avg subscriber growth</div></div>
-              <div><b className="text-2xl text-emerald-400">BDT 2.8M</b><div className="opacity-70">avg monthly revenue</div></div>
-              <div><b className="text-2xl text-rose-300">98%</b><div className="opacity-70">client retention</div></div>
+              <div><b className="text-2xl text-amber-400">500%</b><div className="opacity-70">{t("addonsPage.statGrowth")}</div></div>
+              <div><b className="text-2xl text-emerald-400">BDT 2.8M</b><div className="opacity-70">{t("addonsPage.statRevenue")}</div></div>
+              <div><b className="text-2xl text-rose-300">98%</b><div className="opacity-70">{t("addonsPage.statRetention")}</div></div>
             </div>
           </div>
         </div>

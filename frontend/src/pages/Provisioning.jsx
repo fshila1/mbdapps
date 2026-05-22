@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import StatusBadge from "../components/StatusBadge";
 import { useApp } from "../context/AppContext";
@@ -471,6 +472,7 @@ const AppDetailDialog = ({ app, onClose }) => {
 
 const Provisioning = () => {
   const { apps, pendingTemplate, setPendingTemplate } = useApp();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const loc = useLocation();
   const [search, setSearch] = useState("");
@@ -502,11 +504,11 @@ const Provisioning = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-widest text-[#e11d48] font-bold mb-1">Provisioning</p>
-            <h1 className="text-3xl sm:text-4xl tracking-tighter font-bold text-[#0f172a]" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>Manage Pro Apps</h1>
+            <p className="text-xs uppercase tracking-widest text-[#e11d48] font-bold mb-1">{t("nav.provisioning")}</p>
+            <h1 className="text-3xl sm:text-4xl tracking-tighter font-bold text-[#0f172a]" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{t("provisioning.manageProApps")}</h1>
           </div>
           <Button data-testid="create-app-btn" className="bg-[#e11d48] hover:bg-[#be123c] text-white" onClick={() => setCreateOpen(true)}>
-            <Plus size={16} className="mr-1" /> Create New App
+            <Plus size={16} className="mr-1" /> {t("provisioning.createNewApp")}
           </Button>
         </div>
 

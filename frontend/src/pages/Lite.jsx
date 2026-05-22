@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import { useApp } from "../context/AppContext";
 import { Button } from "../components/ui/button";
@@ -20,19 +21,20 @@ import { AlertBroadcastDialog, ScheduledContentDialog } from "../components/lite
 
 // ============= LITE DASHBOARD =============
 const LiteDashboard = () => {
+  const { t } = useTranslation();
   return (
     <Layout>
       <div className="space-y-8">
         <div>
-          <p className="text-xs uppercase tracking-widest text-[#e11d48] font-bold mb-1">BDapps Lite</p>
-          <h1 className="text-3xl sm:text-4xl tracking-tighter font-bold text-[#0f172a]" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>Lite Console</h1>
-          <p className="text-slate-500 mt-2">Build keyword-based SMS apps in minutes.</p>
+          <p className="text-xs uppercase tracking-widest text-[#e11d48] font-bold mb-1">{t("nav.bdappsLite")}</p>
+          <h1 className="text-3xl sm:text-4xl tracking-tighter font-bold text-[#0f172a]" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{t("lite.console")}</h1>
+          <p className="text-slate-500 mt-2">{t("lite.consoleSub")}</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Tile testid="lite-tile-create" to="/lite/create" title="Create Application" description="Launch a new keyword SMS app in 4 steps." icon={Plus} accent />
-          <Tile testid="lite-tile-myapps" to="/lite/applications" title="My Applications" description="Manage your existing Lite apps." icon={FolderKanban} />
-          <Tile testid="lite-tile-settings" to="/lite/settings" title="Settings" description="Manage keywords and your profile." icon={Settings} />
-          <Tile testid="lite-tile-reports" to="/lite/reports" title="View Reports" description="Message history and analytics." icon={BarChart3} />
+          <Tile testid="lite-tile-create" to="/lite/create" title={t("lite.createApp")} description={t("lite.createAppSub")} icon={Plus} accent />
+          <Tile testid="lite-tile-myapps" to="/lite/applications" title={t("lite.myApps")} description={t("lite.myAppsSub")} icon={FolderKanban} />
+          <Tile testid="lite-tile-settings" to="/lite/settings" title={t("common.settings")} description={t("lite.settingsSub")} icon={Settings} />
+          <Tile testid="lite-tile-reports" to="/lite/reports" title={t("lite.viewReports")} description={t("lite.viewReportsSub")} icon={BarChart3} />
         </div>
       </div>
     </Layout>

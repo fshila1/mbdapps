@@ -1,27 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, ServerCog, Sparkles, Store, BarChart3, Layers, Users, ShieldCheck, Settings2, LogOut, X, FolderOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useApp } from "../context/AppContext";
 
 const DEV_LINKS = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/provisioning", label: "Provisioning", icon: ServerCog },
-  { to: "/lite", label: "BDapps Lite", icon: Sparkles },
-  { to: "/appstore", label: "App Store", icon: Store },
-  { to: "/reports", label: "Reports", icon: BarChart3 },
-  { to: "/digital", label: "Digital", icon: Layers, accent: true },
-  { to: "/my-apps", label: "My Apps", icon: FolderOpen, accent: true },
-  { to: "/add-ons", label: "Add-Ons", icon: Sparkles, accent: true },
+  { to: "/dashboard", labelKey: "nav.dashboard", testid: "side-dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/provisioning", labelKey: "nav.provisioning", testid: "side-provisioning", icon: ServerCog },
+  { to: "/lite", labelKey: "nav.bdappsLite", testid: "side-bdapps-lite", icon: Sparkles },
+  { to: "/appstore", labelKey: "nav.appStore", testid: "side-app-store", icon: Store },
+  { to: "/reports", labelKey: "nav.reports", testid: "side-reports", icon: BarChart3 },
+  { to: "/digital", labelKey: "nav.digital", testid: "side-digital", icon: Layers, accent: true },
+  { to: "/my-apps", labelKey: "nav.myApps", testid: "side-my-apps", icon: FolderOpen, accent: true },
+  { to: "/add-ons", labelKey: "nav.addOns", testid: "side-add-ons", icon: Sparkles, accent: true },
 ];
 
 const ADMIN_LINKS = [
-  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/admin/users", label: "User Management", icon: Users },
-  { to: "/admin/provisioning", label: "Provisioning", icon: ServerCog },
-  { to: "/appstore", label: "App Store", icon: Store },
-  { to: "/reports", label: "Reporting", icon: BarChart3 },
-  { to: "/admin/tap", label: "Tap Admin", icon: ShieldCheck },
-  { to: "/admin/appstore", label: "App Store Admin", icon: Settings2 },
+  { to: "/admin", labelKey: "nav.dashboard", testid: "side-dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/admin/users", labelKey: "nav.userManagement", testid: "side-user-management", icon: Users },
+  { to: "/admin/provisioning", labelKey: "nav.provisioning", testid: "side-provisioning", icon: ServerCog },
+  { to: "/appstore", labelKey: "nav.appStore", testid: "side-app-store", icon: Store },
+  { to: "/reports", labelKey: "nav.reporting", testid: "side-reporting", icon: BarChart3 },
+  { to: "/admin/tap", labelKey: "nav.tapAdmin", testid: "side-tap-admin", icon: ShieldCheck },
+  { to: "/admin/appstore", labelKey: "nav.appStoreAdmin", testid: "side-app-store-admin", icon: Settings2 },
 ];
 
 export const useSidebarCollapsed = () => {
@@ -34,6 +35,7 @@ export const useSidebarCollapsed = () => {
 
 const Sidebar = ({ open, onClose }) => {
   const { user, logout } = useApp();
+  const { t } = useTranslation();
   const loc = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useSidebarCollapsed();
@@ -64,19 +66,22 @@ const Sidebar = ({ open, onClose }) => {
           <button onClick={onClose} className="lg:hidden p-1 hover:bg-white/10 rounded" data-testid="sidebar-close"><X size={18} /></button>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-          {!collapsed && <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-2 py-1">{user.role === "admin" ? "Admin" : "Developer"} Console</p>}
-          {links.map((l) => (
-            <Link key={l.to} to={l.to} onClick={onClose} title={collapsed ? l.label : ""}
-              data-testid={`side-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
-              className={`group flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors min-h-[44px] ${collapsed ? "justify-center" : ""} ${isActive(l) ? "bg-[#e11d48] text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"} relative`}>
-              <l.icon size={16} className="shrink-0" />
-              {!collapsed && <span className="flex-1 truncate">{l.label}</span>}
-              {!collapsed && l.accent && !isActive(l) && <span className="text-[9px] uppercase font-bold bg-[#e11d48] text-white px-1.5 py-0.5 rounded">New</span>}
-              {collapsed && (
-                <span className="pointer-events-none absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">{l.label}</span>
-              )}
-            </Link>
-          ))}
+          {!collapsed && <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold px-2 py-1">{user.role === "admin" ? t("nav.adminConsole") : t("nav.developerConsole")}</p>}
+          {links.map((l) => {
+            const label = t(l.labelKey);
+            return (
+              <Link key={l.to} to={l.to} onClick={onClose} title={collapsed ? label : ""}
+                data-testid={l.testid}
+                className={`group flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors min-h-[44px] ${collapsed ? "justify-center" : ""} ${isActive(l) ? "bg-[#e11d48] text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"} relative`}>
+                <l.icon size={16} className="shrink-0" />
+                {!collapsed && <span className="flex-1 truncate">{label}</span>}
+                {!collapsed && l.accent && !isActive(l) && <span className="text-[9px] uppercase font-bold bg-[#e11d48] text-white px-1.5 py-0.5 rounded">{t("common.new")}</span>}
+                {collapsed && (
+                  <span className="pointer-events-none absolute left-full ml-2 px-2 py-1 bg-slate-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">{label}</span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
         <div className="p-2 border-t border-white/10">
           {!collapsed && (
@@ -85,9 +90,9 @@ const Sidebar = ({ open, onClose }) => {
               <div className="text-slate-400 truncate text-[11px]">{user.email}</div>
             </div>
           )}
-          <button onClick={onLogout} data-testid="sidebar-logout" title={collapsed ? "Logout" : ""}
+          <button onClick={onLogout} data-testid="sidebar-logout" title={collapsed ? t("common.logout") : ""}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-rose-300 hover:bg-white/5 min-h-[44px] ${collapsed ? "justify-center" : ""}`}>
-            <LogOut size={16} className="shrink-0" />{!collapsed && <span>Logout</span>}
+            <LogOut size={16} className="shrink-0" />{!collapsed && <span>{t("common.logout")}</span>}
           </button>
         </div>
       </aside>

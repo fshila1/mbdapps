@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import Tile from "../components/Tile";
 import { useApp } from "../context/AppContext";
@@ -7,6 +8,7 @@ import { ServerCog, Sparkles, Store, BarChart3, Layers, FolderOpen, Smartphone, 
 
 const DeveloperDashboard = () => {
   const { user, apps, liteApps, myApps } = useApp();
+  const { t } = useTranslation();
 
   // Quick Stats derived from My Apps
   const liveApps = myApps.filter((a) => a.status === "Live");
@@ -17,22 +19,21 @@ const DeveloperDashboard = () => {
   const totalSubs = apps.filter((a) => a.status === "Active Production").length * 24000 + 12500;
 
   const quickStats = [
-    { key: "live-apps", label: "Live Apps", value: liveApps.length, icon: Globe, accent: "emerald" },
-    { key: "pending-review", label: "Pending Review", value: pendingApps.length, icon: Smartphone, accent: "amber" },
-    { key: "subscribers", label: "Total Subscribers", value: totalSubs.toLocaleString(), icon: Users, accent: "indigo" },
-    { key: "revenue", label: "Lifetime Revenue", value: `৳${(totalRevenue / 1000).toFixed(0)}k`, icon: DollarSign, accent: "rose" },
+    { key: "live-apps", label: t("dashStat.liveApps"), value: liveApps.length, icon: Globe, accent: "emerald" },
+    { key: "pending-review", label: t("dashStat.pendingReview"), value: pendingApps.length, icon: Smartphone, accent: "amber" },
+    { key: "subscribers", label: t("dashStat.totalSubscribers"), value: totalSubs.toLocaleString(), icon: Users, accent: "indigo" },
+    { key: "revenue", label: t("dashStat.lifetimeRevenue"), value: `৳${(totalRevenue / 1000).toFixed(0)}k`, icon: DollarSign, accent: "rose" },
   ];
 
   return (
     <Layout>
       <div className="space-y-10">
         <section>
-          <p className="text-xs uppercase tracking-widest text-[#e11d48] font-bold mb-2">Developer Console</p>
+          <p className="text-xs uppercase tracking-widest text-[#e11d48] font-bold mb-2">{t("nav.developerConsole")}</p>
           <h1 className="text-4xl sm:text-5xl tracking-tighter font-bold text-[#0f172a]" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>
-            Welcome back, {user?.name?.split(" ")[0]}.
+            {t("dashboard.welcomeUser", { name: user?.name?.split(" ")[0] })}
           </h1>
-          <p className="text-slate-500 mt-2 max-w-2xl leading-relaxed">
-            You have <b className="text-[#0f172a]">{liveApps.length} live apps</b>, <b className="text-amber-600">{pendingApps.length} pending review</b>, and {totalOrders}+ transactions this month.
+          <p className="text-slate-500 mt-2 max-w-2xl leading-relaxed" dangerouslySetInnerHTML={{ __html: t("dashboard.statusLine", { live: liveApps.length, pending: pendingApps.length, orders: totalOrders }) }}>
           </p>
         </section>
 
@@ -52,10 +53,10 @@ const DeveloperDashboard = () => {
         <section data-testid="my-apps-quickview">
           <div className="flex items-end justify-between mb-4">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>My Apps</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Your active builds at a glance</p>
+              <h2 className="text-2xl font-bold tracking-tight" style={{ fontFamily: "'Cabinet Grotesk', sans-serif" }}>{t("nav.myApps")}</h2>
+              <p className="text-sm text-slate-500 mt-0.5">{t("dashboard.myAppsSub")}</p>
             </div>
-            <Link to="/my-apps" data-testid="view-all-apps" className="text-sm text-[#e11d48] font-bold hover:underline flex items-center gap-1">View all {myApps.length} apps <ArrowRight size={14} /></Link>
+            <Link to="/my-apps" data-testid="view-all-apps" className="text-sm text-[#e11d48] font-bold hover:underline flex items-center gap-1">{t("dashboard.viewAllN", { n: myApps.length })} <ArrowRight size={14} /></Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {myApps.slice(0, 6).map((app) => (
@@ -80,22 +81,22 @@ const DeveloperDashboard = () => {
           {myApps.length === 0 && (
             <Link to="/digital" className="block bg-gradient-to-br from-indigo-50 to-rose-50 border-2 border-dashed border-rose-200 rounded-2xl p-8 text-center hover:border-rose-400 transition-colors">
               <div className="text-4xl mb-2">🚀</div>
-              <div className="font-bold">Launch your first app</div>
-              <div className="text-sm text-slate-500 mt-1">Build a web or Android app in minutes — no code needed.</div>
+              <div className="font-bold">{t("dashboard.launchFirst")}</div>
+              <div className="text-sm text-slate-500 mt-1">{t("dashboard.launchFirstSub")}</div>
             </Link>
           )}
         </section>
 
         {/* Modules */}
         <section>
-          <h2 className="text-lg font-semibold mb-4 tracking-tight">Modules</h2>
+          <h2 className="text-lg font-semibold mb-4 tracking-tight">{t("dashboard.modules")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Tile testid="tile-digital" to="/digital" title="Digital Builder" description="Build web & Android apps in minutes with our no-code template gallery." icon={Layers} accent badge="Build" />
-            <Tile testid="tile-myapps" to="/my-apps" title="My Apps" description="Manage your launched apps. Edit products, view orders, no code needed." icon={FolderOpen} accent badge="CMS" />
-            <Tile testid="tile-provisioning" to="/provisioning" title="Provisioning" description="Submit and manage Pro apps with full SMS, USSD, CaaS, OTP and Subscription configurations." icon={ServerCog} />
-            <Tile testid="tile-lite" to="/lite" title="BDapps Lite" description="Build keyword-based SMS apps in 4 simple steps — perfect for alerts and services." icon={Sparkles} />
-            <Tile testid="tile-appstore" to="/appstore" title="App Store" description="Browse the public BDapps catalog. Promote your apps to 76M Robi subscribers." icon={Store} />
-            <Tile testid="tile-reports" to="/reports" title="Reports" description="Drill into yearly, monthly and daily analytics across applications and subscriptions." icon={BarChart3} />
+            <Tile testid="tile-digital" to="/digital" title={t("nav.digital")} description={t("dashboard.tileDigital")} icon={Layers} accent badge={t("dashboard.badgeBuild")} />
+            <Tile testid="tile-myapps" to="/my-apps" title={t("nav.myApps")} description={t("dashboard.tileMyApps")} icon={FolderOpen} accent badge={t("dashboard.badgeCMS")} />
+            <Tile testid="tile-provisioning" to="/provisioning" title={t("nav.provisioning")} description={t("dashboard.tileProvisioning")} icon={ServerCog} />
+            <Tile testid="tile-lite" to="/lite" title={t("nav.bdappsLite")} description={t("dashboard.tileLite")} icon={Sparkles} />
+            <Tile testid="tile-appstore" to="/appstore" title={t("nav.appStore")} description={t("dashboard.tileAppStore")} icon={Store} />
+            <Tile testid="tile-reports" to="/reports" title={t("nav.reports")} description={t("dashboard.tileReports")} icon={BarChart3} />
           </div>
         </section>
       </div>
