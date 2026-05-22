@@ -113,11 +113,11 @@ const SCHEMAS = {
 const GenericSection = ({ sectionParam }) => {
   const { app, triggerSave } = useOutletContext();
   const { appContent, updateAppContent, addCmsActivity } = useApp();
+  const [editing, setEditing] = useState(null);
   const schema = SCHEMAS[sectionParam];
   if (!schema) return <div className="text-slate-400 text-sm">Unsupported section</div>;
 
   const items = (appContent[app.id]?.[schema.sectionKey] || []);
-  const [editing, setEditing] = useState(null);
 
   if (schema.noEditor) {
     // Show table of sampled data
