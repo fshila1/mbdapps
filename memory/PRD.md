@@ -29,7 +29,49 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 - Data-testid on every interactive element
 - Mock data persisted across reloads via localStorage
 
-## What's Been Implemented (Feb 6 — initial; Feb 10 — fixes; Feb 11 — Web/Android Builders; Feb 14 — Lucrative No-Code overhaul; Feb 17 — Content & Data Management; Feb 18, 2026 — Sidebar collapse + App Store redesign + Two Showpiece Apps + Admin Approval Flow; Feb 19, 2026 — Rich SVG visual overhaul + EduPath BD + Dashboard Quick View; Feb 21, 2026 — 4 New BDApps Demo Apps + BDApps API Simulation Layer; Feb 21, 2026 (iteration 11) — Bilingual বাংলা/EN demo apps + Web Builder template reorder + Rich Bangla template-card previews)
+## What's Been Implemented (Feb 6 — initial; Feb 10 — fixes; Feb 11 — Web/Android Builders; Feb 14 — Lucrative No-Code overhaul; Feb 17 — Content & Data Management; Feb 18, 2026 — Sidebar collapse + App Store redesign + Two Showpiece Apps + Admin Approval Flow; Feb 19, 2026 — Rich SVG visual overhaul + EduPath BD + Dashboard Quick View; Feb 21, 2026 — 4 New BDApps Demo Apps + BDApps API Simulation Layer; Feb 21, 2026 (iteration 11) — Bilingual বাংলা/EN demo apps + Rich Bangla template-card previews; Feb 22, 2026 (iteration 12) — Site-wide i18n via react-i18next, EN + বাংলা everywhere)
+
+### Iteration 12 — Full Site-Wide i18n (Feb 22, 2026)
+**100% test pass per iteration_12.json (19/19 checks).** Migrated the entire BDApps platform to react-i18next with English + Bangla support, persistence, browser detection, and dynamic HTML `lang` attribute.
+
+**Infrastructure (new):**
+- `/src/i18n/index.js` — react-i18next init with `LanguageDetector`, localStorage key `bdapps_lang`, navigator-language fallback (Bengali browsers default to `bn`), fallback to `en`. HTML `<html lang>` updates dynamically on `languageChanged`.
+- `/src/locales/en.json` + `/src/locales/bn.json` — translation files organized by namespace: `common, nav, auth, dashboard, dashStat, appstore, myapps, digital, reports, reportsPage, provisioning, admin, addons, addonsPage, lite, footer, toast`.
+- `/src/components/LanguageSwitcher.jsx` — dropdown variant for global header (Globe icon + EN/বাং) + `pill` variant reused inside demo apps.
+- `/src/index.js` — imports `./i18n` so initialization happens before rendering.
+- `/public/index.html` — `Hind Siliguri` + `Tiro Bangla` Google Fonts loaded for proper Bangla typography.
+
+**Pages translated (high-visibility surfaces):**
+- `Layout.jsx` — language switcher in header, Notifications/Logout labels via i18n
+- `Sidebar.jsx` — all 8 dev nav + 7 admin nav links translate, "New" badge translates, Logout label translates, console header ("Developer Console" / "Admin Console") translates. Old `data-testid` values preserved for test stability.
+- `Login.jsx` — fully bilingual: hero ("Build telecom apps for 76 million Robi subscribers" ↔ "টেলিকম অ্যাপ তৈরি করুন ৭.৬ কোটি রবি গ্রাহকদের জন্য"), labels, button, forgot-password modal, demo credentials section, error messages, toasts. Language switcher visible top-right.
+- `DeveloperDashboard.jsx` — welcome line with interpolation, stat line (live/pending/orders), Quick Stats labels, My Apps Quick View, all 6 Module tiles (title + description), View All link.
+- `MyApps.jsx` — title, subtitle, "Build New App" CTA, 4 filter tabs (All/Active/Pending/Rejected), sort dropdown, empty state messages.
+- `AppStore.jsx` — search placeholder, 4 tabs (All Apps/Newly Added/Top Rated/Most Used), category dropdown placeholder, "Become a Developer" CTA, section labels, "See More" links, "Browse All Apps" footer.
+- `Digital.jsx` — page title + tagline, 3 tab metadata, 5 step labels, Demo Tour + Browse Add-Ons buttons.
+- `Reports.jsx` — 3 NAV sections + sub-tabs, 8 form labels, Submit + Excel/PDF/Print buttons.
+- `Provisioning.jsx` — h1 + Create New App CTA + section uppercase label.
+- `AddOns.jsx` — hero title + sub + 3 stat labels.
+- `Lite.jsx` — Lite Console h1 + 4 module tiles (Create/My Apps/Settings/View Reports).
+
+**Demo apps integration:**
+- `/src/services/demoI18n.jsx` — `useDemoLocale` now reads global `i18n.language` (no separate localStorage). When user toggles header switcher, BondoBD / NewsNow / QuizBD update instantly. Pill toggle inside each demo also routes through `i18n.changeLanguage`.
+
+**Out of scope (intentional):**
+- Mock seed data (article bodies, profile data, telecom keywords, app descriptions) stays in English — translating mock placeholder content adds no real value to a demo.
+- Some deep secondary modals/forms in Admin pages, Provisioning sub-tabs, and Lite create-flow not yet pulled through `t()` — backlog item.
+
+**Testing:** iteration_12.json — 19/19 checks pass:
+- Initial default EN ✓, switcher visible ✓, hero translates ✓
+- HTML lang updates dynamically ✓
+- localStorage `bdapps_lang` persists ✓, reload preserves ✓, logout-to-login preserves ✓
+- Dashboard, Sidebar, My Apps, App Store, Digital, Reports, Provisioning, Add-Ons, Lite all render correctly in BN ✓
+- EN switch back works ✓
+- Demo apps (BondoBD, NewsNow) sync with global language ✓
+
+
+
+## What's Been Implemented (Feb 6 — initial; Feb 10 — fixes; Feb 11 — Web/Android Builders; Feb 14 — Lucrative No-Code overhaul; Feb 17 — Content & Data Management; Feb 18, 2026 — Sidebar collapse + App Store redesign + Two Showpiece Apps + Admin Approval Flow; Feb 19, 2026 — Rich SVG visual overhaul + EduPath BD + Dashboard Quick View; Feb 21, 2026 — 4 New BDApps Demo Apps + BDApps API Simulation Layer; Feb 21, 2026 (iteration 11) — Bilingual বাংলা/EN demo apps + Rich Bangla template-card previews)
 
 ### Iteration 11 — Bilingual demo apps + Rich Web template previews (Feb 21, 2026)
 **100% test pass per iteration_11.json (14/14 checks).** Made the 3 BDApps demo apps (BondoBD / NewsNow / QuizBD) authentic-Bangladeshi-looking with a Bangla + English language toggle, reordered the Web App Builder so the BDApps demo templates appear first, and replaced their plain mini-mockups with rich Bangla CSS previews matching real Bangladeshi product references (Biye.bd / Alokbarta).
