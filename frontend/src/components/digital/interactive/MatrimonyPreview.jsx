@@ -73,15 +73,19 @@ const DividerOrnament = ({ color = PALETTE.gold }) => (
   </div>
 );
 
-/* SVG portrait — gender-aware (saree+bindi for Female, panjabi+topi for Male) */
-const MatriAvatar = ({ profile, size = 80, ring = true }) => {
+/* General gender-based avatar — neutral modern silhouette (no traditional attire).
+   Female: longer wavy hair + soft palette. Male: short hair + neutral palette.
+   Clean face, subtle gradient backdrop, gold ring frame for the premium look.   */
+const MatriAvatar = ({ profile, size = 80 }) => {
   const isFemale = profile.gender === "Female";
-  const hueA = isFemale ? "#F8C8DC" : "#D7B98C";
-  const hueB = isFemale ? "#C2185B" : "#5C4A2A";
-  const skin = "#F4D2B3";
-  const hair = "#2B1E14";
-  const dupatta = isFemale ? "#7E1733" : "#163A52";
-  const id = `g-${profile.id}`;
+  // Pseudo-random hue spread per profile so cards don't look identical
+  const seed = (profile.id || profile.name || "x").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+  const hueA = isFemale ? ["#FCE4EC","#FFE0E6","#FDE8E8","#F8E0F2"][seed % 4] : ["#E3F2FD","#E0F2F1","#ECEFF1","#E8EAF6"][seed % 4];
+  const hueB = isFemale ? ["#F48FB1","#F06292","#EC407A","#D81B60"][seed % 4] : ["#90A4AE","#78909C","#607D8B","#546E7A"][seed % 4];
+  const skin = ["#F4D2B3","#E8B894","#D4A373","#C68B59"][seed % 4];
+  const hair = ["#2B1E14","#3E2723","#1B1B1B","#4A2C20"][seed % 4];
+  const shirt = isFemale ? ["#D81B60","#7E1733","#AD1457","#C2185B"][seed % 4] : ["#1565C0","#37474F","#2E4B6E","#283593"][seed % 4];
+  const id = `av-${profile.id || seed}`;
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden style={{ display: "block" }}>
       <defs>
@@ -91,52 +95,57 @@ const MatriAvatar = ({ profile, size = 80, ring = true }) => {
         </linearGradient>
         <clipPath id={`${id}-c`}><circle cx="50" cy="50" r="49" /></clipPath>
       </defs>
-      {ring && <circle cx="50" cy="50" r="49" fill={`url(#${id})`} />}
+      <circle cx="50" cy="50" r="49" fill={`url(#${id})`} />
       <g clipPath={`url(#${id}-c)`}>
-        {/* Backdrop */}
         <rect x="0" y="0" width="100" height="100" fill={`url(#${id})`} />
-        <circle cx="50" cy="20" r="22" fill={PALETTE.gold} opacity="0.18" />
-        {/* Dupatta / shawl */}
-        <path d={isFemale
-          ? "M10 100 C 18 60, 32 50, 50 50 C 68 50, 82 60, 90 100 Z"
-          : "M14 100 C 22 70, 36 62, 50 62 C 64 62, 78 70, 86 100 Z"} fill={dupatta} />
-        {/* Neck */}
-        <rect x="44" y="50" width="12" height="10" fill={skin} />
-        {/* Head */}
+        {/* soft halo */}
+        <circle cx="50" cy="22" r="24" fill="#FFFFFF" opacity="0.18" />
+        {/* shoulders / shirt */}
+        <path d="M14 100 C 22 70, 34 62, 50 62 C 66 62, 78 70, 86 100 Z" fill={shirt} />
+        {/* shirt collar */}
+        <path d="M44 64 L 50 70 L 56 64 L 52 78 L 48 78 Z" fill="#FFFFFF" opacity="0.85" />
+        {/* neck */}
+        <rect x="45" y="52" width="10" height="11" fill={skin} />
+        {/* head */}
         <circle cx="50" cy="42" r="14" fill={skin} />
-        {/* Hair */}
+        {/* hair */}
         {isFemale ? (
           <>
-            <path d="M36 42 C 36 28, 64 28, 64 42 L 64 36 C 64 26, 36 26, 36 36 Z" fill={hair} />
-            <path d="M36 44 C 36 60, 32 64, 30 70 L 26 80 L 22 100 L 16 100 C 14 80, 24 60, 30 50 Z" fill={hair} opacity="0.85" />
-            <path d="M64 44 C 64 60, 68 64, 70 70 L 74 80 L 78 100 L 84 100 C 86 80, 76 60, 70 50 Z" fill={hair} opacity="0.85" />
+            {/* full hair cap with parted bangs */}
+            <path d="M34 42 C 34 26, 66 26, 66 42 L 66 36 C 66 24, 34 24, 34 36 Z" fill={hair} />
+            {/* long side locks */}
+            <path d="M34 42 C 32 56, 30 64, 30 78 L 28 92 L 22 92 C 22 72, 28 56, 32 46 Z" fill={hair} opacity="0.92" />
+            <path d="M66 42 C 68 56, 70 64, 70 78 L 72 92 L 78 92 C 78 72, 72 56, 68 46 Z" fill={hair} opacity="0.92" />
+            {/* subtle ear */}
+            <ellipse cx="34" cy="44" rx="1.6" ry="2.4" fill={skin} opacity="0.6" />
+            <ellipse cx="66" cy="44" rx="1.6" ry="2.4" fill={skin} opacity="0.6" />
           </>
         ) : (
           <>
-            <path d="M36 38 C 36 28, 64 28, 64 38 L 64 34 C 64 26, 36 26, 36 34 Z" fill={hair} />
-            {/* Topi */}
-            <ellipse cx="50" cy="28" rx="16" ry="4" fill={PALETTE.ink} />
-            <rect x="36" y="22" width="28" height="8" rx="2" fill={PALETTE.ink} />
-            <rect x="36" y="22" width="28" height="2" fill={PALETTE.gold} opacity="0.8" />
+            {/* short groomed hair */}
+            <path d="M36 38 C 36 28, 64 28, 64 38 C 64 32, 60 30, 50 30 C 40 30, 36 32, 36 38 Z" fill={hair} />
+            {/* sideburn hints */}
+            <path d="M36 38 L 36 46 L 38 46 Z" fill={hair} />
+            <path d="M64 38 L 64 46 L 62 46 Z" fill={hair} />
+            {/* ears */}
+            <ellipse cx="35" cy="44" rx="1.8" ry="2.6" fill={skin} />
+            <ellipse cx="65" cy="44" rx="1.8" ry="2.6" fill={skin} />
           </>
         )}
-        {/* Eyes */}
-        <circle cx="45" cy="43" r="1.2" fill={PALETTE.ink} />
-        <circle cx="55" cy="43" r="1.2" fill={PALETTE.ink} />
-        {/* Lips */}
-        <path d="M46 49 Q 50 51 54 49" stroke={isFemale ? "#962447" : "#7a3a2a"} strokeWidth="1.2" fill="none" strokeLinecap="round" />
-        {/* Bindi (female) */}
-        {isFemale && <circle cx="50" cy="34" r="1.4" fill="#B91C1C" />}
-        {/* Earrings (female) */}
-        {isFemale && (
-          <>
-            <circle cx="35" cy="44" r="1.6" fill={PALETTE.gold} />
-            <circle cx="65" cy="44" r="1.6" fill={PALETTE.gold} />
-          </>
-        )}
+        {/* eyes */}
+        <ellipse cx="45" cy="43" rx="1.3" ry="1.6" fill={PALETTE.ink} />
+        <ellipse cx="55" cy="43" rx="1.3" ry="1.6" fill={PALETTE.ink} />
+        {/* brows */}
+        <path d={isFemale ? "M42 40 Q 45 38.5 48 40" : "M42 39 Q 45 37.5 48 39"} stroke={hair} strokeWidth="1" fill="none" strokeLinecap="round" />
+        <path d={isFemale ? "M52 40 Q 55 38.5 58 40" : "M52 39 Q 55 37.5 58 39"} stroke={hair} strokeWidth="1" fill="none" strokeLinecap="round" />
+        {/* nose */}
+        <path d="M49.5 44 L 49 48 L 51 48" stroke={skin} strokeOpacity="0" />
+        <path d="M50 45 Q 49 48 50 49" stroke="#00000022" strokeWidth="0.6" fill="none" />
+        {/* smile */}
+        <path d="M46 50 Q 50 52.5 54 50" stroke={isFemale ? "#962447" : "#7a3a2a"} strokeWidth="1.2" fill="none" strokeLinecap="round" />
       </g>
-      {/* Outer thin gold ring */}
-      <circle cx="50" cy="50" r="49" fill="none" stroke={PALETTE.gold} strokeWidth="1.2" opacity="0.75" />
+      {/* outer subtle gold ring */}
+      <circle cx="50" cy="50" r="49" fill="none" stroke={PALETTE.gold} strokeWidth="1.2" opacity="0.7" />
     </svg>
   );
 };
@@ -186,13 +195,42 @@ export const MatrimonyWebPreview = ({ cfg = {}, content }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [genderFilter, setGenderFilter] = useState("All");
+  const [ageRange, setAgeRange] = useState("All");
+  const [religionFilter, setReligionFilter] = useState("All");
+  const [districtFilter, setDistrictFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("recommended");
 
   const openProfile = profiles.find((p) => p.id === openId) || profiles[0];
 
+  // Distinct values for filter dropdowns
+  const religions = useMemo(() => Array.from(new Set(profiles.map((p) => p.religion).filter(Boolean))), [profiles]);
+  const districts = useMemo(() => Array.from(new Set(profiles.map((p) => p.district).filter(Boolean))), [profiles]);
+
   const filteredProfiles = useMemo(() => {
-    if (genderFilter === "All") return profiles;
-    return profiles.filter((p) => p.gender === genderFilter);
-  }, [profiles, genderFilter]);
+    const inAge = (age) => {
+      if (ageRange === "All") return true;
+      const [lo, hi] = ageRange.split("-").map((n) => parseInt(n, 10));
+      if (ageRange.endsWith("+")) return age >= parseInt(ageRange, 10);
+      return age >= lo && age <= hi;
+    };
+    let arr = profiles.filter((p) => {
+      if (genderFilter !== "All" && p.gender !== genderFilter) return false;
+      if (!inAge(p.age)) return false;
+      if (religionFilter !== "All" && p.religion !== religionFilter) return false;
+      if (districtFilter !== "All" && p.district !== districtFilter) return false;
+      return true;
+    });
+    if (sortBy === "age-asc") arr = [...arr].sort((a, b) => a.age - b.age);
+    if (sortBy === "age-desc") arr = [...arr].sort((a, b) => b.age - a.age);
+    if (sortBy === "name") arr = [...arr].sort((a, b) => a.name.localeCompare(b.name));
+    return arr;
+  }, [profiles, genderFilter, ageRange, religionFilter, districtFilter, sortBy]);
+
+  const activeFilterCount = [genderFilter !== "All", ageRange !== "All", religionFilter !== "All", districtFilter !== "All"].filter(Boolean).length;
+  const resetFilters = () => { setGenderFilter("All"); setAgeRange("All"); setReligionFilter("All"); setDistrictFilter("All"); setSortBy("recommended"); };
+
+  // Compatibility hash so each card shows a stable percent
+  const compatPct = (p) => 70 + ((p.name || "").length * 7 + p.age) % 28;
 
   const fireToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 2200); };
   const toggleFav = (id) => {
@@ -378,45 +416,101 @@ export const MatrimonyWebPreview = ({ cfg = {}, content }) => {
 
   const BrowseView = (
     <div className="px-5 py-4" style={{ background: PALETTE.ivory, fontFamily: SANS }}>
-      <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+      <div className="flex items-end justify-between flex-wrap gap-2 mb-3">
         <div>
           <h2 className="text-xl font-bold" style={{ fontFamily: SERIF, color: PALETTE.ink }}>{tt("Recommended for You", "আপনার জন্য প্রস্তাবিত")}</h2>
-          <div className="text-[11px]" style={{ color: PALETTE.mute }}>{filteredProfiles.length} {tt("verified profiles", "যাচাইকৃত প্রোফাইল")}</div>
+          <div className="text-[11px]" style={{ color: PALETTE.mute }}>{filteredProfiles.length} {tt("of", "এর মধ্যে")} {profiles.length} {tt("verified profiles", "যাচাইকৃত প্রোফাইল")} {activeFilterCount > 0 && <button onClick={resetFilters} data-testid="matri-filter-reset" className="ml-2 underline" style={{ color: PALETTE.deep }}>{tt(`Reset (${activeFilterCount})`, `রিসেট (${activeFilterCount})`)}</button>}</div>
         </div>
-        <div className="flex items-center gap-1">
-          {["All", "Female", "Male"].map((g) => (
-            <button key={g} data-testid={`matri-filter-${g.toLowerCase()}`} onClick={() => setGenderFilter(g)} className="text-[11px] px-3 py-1 rounded-full font-semibold" style={genderFilter === g ? { background: PALETTE.deep, color: "#FFF" } : { background: "#FFF", color: PALETTE.deep, border: `1px solid ${PALETTE.deep}44` }}>
-              {tt(g, g === "All" ? "সকল" : g === "Female" ? "মেয়ে" : "ছেলে")}
-            </button>
-          ))}
+        <div className="flex items-center gap-1.5">
+          <label className="text-[10px] uppercase tracking-widest font-bold" style={{ color: PALETTE.goldDark }}>{tt("Sort", "সাজান")}</label>
+          <select data-testid="matri-sort" value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="text-[11px] px-2 py-1 rounded-lg outline-none" style={{ background: "#FFF", border: `1px solid ${PALETTE.deep}33`, color: PALETTE.ink }}>
+            <option value="recommended">{tt("Recommended", "প্রস্তাবিত")}</option>
+            <option value="age-asc">{tt("Age: Low → High", "বয়স: কম → বেশি")}</option>
+            <option value="age-desc">{tt("Age: High → Low", "বয়স: বেশি → কম")}</option>
+            <option value="name">{tt("Name (A-Z)", "নাম (A-Z)")}</option>
+          </select>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        {filteredProfiles.map((p) => (
-          <div key={p.id} data-testid={`matri-card-${p.id}`} className="relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition" style={{ border: `1px solid ${PALETTE.gold}55` }}>
-            <button onClick={() => toggleFav(p.id)} data-testid={`matri-fav-${p.id}`} className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-white/95 grid place-items-center shadow border" style={{ borderColor: `${PALETTE.deep}33` }}>
-              <Heart filled={!!favs[p.id]} />
-            </button>
-            <div className="relative aspect-[4/5] grid place-items-center" style={{ background: `linear-gradient(160deg, #FFF8E1 0%, #FAF1DF 100%)` }}>
-              <MatriAvatar profile={p} size={170} />
-              <div className="absolute top-2 left-2"><Pill bg="rgba(255,255,255,0.95)" color={PALETTE.deep}>✓ {tt("Verified", "যাচাই")}</Pill></div>
-              {interests[p.id] && <div className="absolute bottom-2 left-2"><Pill bg="rgba(255,255,255,0.95)" color={PALETTE.goldDark}>💌 {tt("Interest Sent", "আগ্রহ পাঠানো")}</Pill></div>}
-            </div>
-            <div className="p-3">
-              <div className="font-bold text-sm leading-tight" style={{ fontFamily: SERIF, color: PALETTE.ink }}>{p.name}, {p.age}</div>
-              <div className="text-[11px] truncate" style={{ color: PALETTE.mute }}>{p.profession}</div>
-              <div className="text-[10px] flex items-center gap-1 mt-0.5" style={{ color: PALETTE.mute }}>
-                <svg viewBox="0 0 24 24" width="11" height="11"><path d="M12 2 C 7 2 4 6 4 10 c 0 6 8 12 8 12 s 8 -6 8 -12 c 0 -4 -3 -8 -8 -8 z M12 12 a 2.5 2.5 0 1 1 0 -5 a 2.5 2.5 0 0 1 0 5 z" fill={PALETTE.gold} /></svg>
-                {p.district} · {p.height}
-              </div>
-              <div className="mt-2 flex items-center gap-1.5">
-                <GhostBtn full tid={`matri-view-${p.id}`} onClick={() => { setOpenId(p.id); setStage("detail"); }}>{tt("View", "দেখুন")}</GhostBtn>
-                <PrimaryBtn tid={`matri-interest-${p.id}`} onClick={() => sendInterest(p.id)}>{interests[p.id] ? tt("Sent ✓", "পাঠানো ✓") : tt("Interest", "আগ্রহ")}</PrimaryBtn>
-              </div>
-            </div>
-          </div>
-        ))}
+
+      {/* Filter Bar */}
+      <div className="rounded-2xl p-3 mb-4 grid grid-cols-2 md:grid-cols-5 gap-2" style={{ background: "#FFF", border: `1px solid ${PALETTE.gold}55` }}>
+        <FilterSelect testid="matri-filter-gender" label={tt("Gender", "লিঙ্গ")} value={genderFilter} onChange={setGenderFilter} options={[
+          { v: "All", l: tt("All", "সকল") },
+          { v: "Female", l: tt("Female", "মেয়ে") },
+          { v: "Male", l: tt("Male", "ছেলে") },
+        ]} />
+        <FilterSelect testid="matri-filter-age" label={tt("Age", "বয়স")} value={ageRange} onChange={setAgeRange} options={[
+          { v: "All", l: tt("All", "সকল") },
+          { v: "20-25", l: "20-25" },
+          { v: "25-30", l: "25-30" },
+          { v: "30-35", l: "30-35" },
+          { v: "35+", l: "35+" },
+        ]} />
+        <FilterSelect testid="matri-filter-religion" label={tt("Religion", "ধর্ম")} value={religionFilter} onChange={setReligionFilter} options={[{ v: "All", l: tt("All", "সকল") }, ...religions.map((r) => ({ v: r, l: r }))]} />
+        <FilterSelect testid="matri-filter-district" label={tt("District", "জেলা")} value={districtFilter} onChange={setDistrictFilter} options={[{ v: "All", l: tt("All", "সকল") }, ...districts.map((d) => ({ v: d, l: d }))]} />
+        <div className="flex items-end">
+          <PrimaryBtn full tid="matri-filter-apply" onClick={() => fireToast(tt(`Showing ${filteredProfiles.length} matches`, `${filteredProfiles.length}টি ম্যাচ`))}>
+            🔍 {tt("Apply Filters", "ফিল্টার প্রয়োগ")}
+          </PrimaryBtn>
+        </div>
       </div>
+
+      {filteredProfiles.length === 0 ? (
+        <div className="rounded-xl text-center py-10 px-4" style={{ background: "#FFF", border: `1px dashed ${PALETTE.gold}66` }}>
+          <div className="text-3xl">🔎</div>
+          <div className="text-sm font-bold mt-1" style={{ fontFamily: SERIF, color: PALETTE.ink }}>{tt("No profiles match your filters", "কোনো প্রোফাইল মেলেনি")}</div>
+          <div className="text-[11px] mt-1" style={{ color: PALETTE.mute }}>{tt("Try relaxing the age range or district.", "বয়সের পরিসর বা জেলা পরিবর্তন করুন।")}</div>
+          <div className="mt-3"><GhostBtn tid="matri-filter-reset-empty" onClick={resetFilters}>{tt("Reset filters", "ফিল্টার রিসেট")}</GhostBtn></div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {filteredProfiles.map((p) => {
+            const pct = compatPct(p);
+            const online = (p.id || p.name || "").length % 2 === 0;
+            return (
+              <div key={p.id} data-testid={`matri-card-${p.id}`} className="relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5" style={{ border: `1px solid ${PALETTE.gold}55` }}>
+                <button onClick={() => toggleFav(p.id)} data-testid={`matri-fav-${p.id}`} className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-white/95 grid place-items-center shadow border" style={{ borderColor: `${PALETTE.deep}33` }}>
+                  <Heart filled={!!favs[p.id]} size={15} />
+                </button>
+                {/* Avatar / hero */}
+                <div className="relative aspect-[5/4] grid place-items-center" style={{ background: `linear-gradient(160deg, #FFF8E1 0%, #FAF1DF 60%, #FCE7E1 100%)` }}>
+                  <MatriAvatar profile={p} size={150} />
+                  <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 items-start">
+                    <Pill bg="rgba(255,255,255,0.95)" color={PALETTE.deep}>✓ {tt("Verified", "যাচাই")}</Pill>
+                    {online && <Pill bg="rgba(16,185,129,0.95)" color="#FFF">● {tt("Online", "অনলাইন")}</Pill>}
+                  </div>
+                  {interests[p.id] && <div className="absolute bottom-2.5 left-2.5"><Pill bg="rgba(255,255,255,0.95)" color={PALETTE.goldDark}>💌 {tt("Interest Sent", "আগ্রহ পাঠানো")}</Pill></div>}
+                  {/* Compatibility ribbon */}
+                  <div className="absolute bottom-2.5 right-2.5 text-center text-[10px] font-bold px-2 py-1 rounded-full text-white shadow" style={{ background: `linear-gradient(135deg, ${PALETTE.deep}, ${PALETTE.rose})` }}>
+                    {pct}% {tt("Match", "মিল")}
+                  </div>
+                </div>
+                {/* Info block */}
+                <div className="p-3">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-bold text-[15px] leading-tight truncate" style={{ fontFamily: SERIF, color: PALETTE.ink }}>{p.name}</div>
+                      <div className="text-[11px]" style={{ color: PALETTE.mute }}>{p.age} {tt("yrs", "বছর")} · {p.height || "—"} · {p.religion || "—"}</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-2 grid grid-cols-2 gap-1 text-[10.5px]">
+                    <InfoRow icon="🎓" value={p.education} mute={PALETTE.mute} ink={PALETTE.ink} />
+                    <InfoRow icon="💼" value={p.profession} mute={PALETTE.mute} ink={PALETTE.ink} />
+                    <InfoRow icon="📍" value={p.district} mute={PALETTE.mute} ink={PALETTE.ink} />
+                    <InfoRow icon="💍" value={p.maritalStatus} mute={PALETTE.mute} ink={PALETTE.ink} />
+                  </div>
+
+                  <div className="mt-2.5 flex items-center gap-1.5">
+                    <GhostBtn full tid={`matri-view-${p.id}`} onClick={() => { setOpenId(p.id); setStage("detail"); }}>{tt("View Profile", "প্রোফাইল দেখুন")}</GhostBtn>
+                    <PrimaryBtn tid={`matri-interest-${p.id}`} onClick={() => sendInterest(p.id)}>{interests[p.id] ? `✓ ${tt("Sent", "পাঠানো")}` : `💌 ${tt("Interest", "আগ্রহ")}`}</PrimaryBtn>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 
@@ -581,6 +675,25 @@ const Field = ({ label, value }) => (
   <div className="rounded p-1.5" style={{ background: PALETTE.paper, border: `1px solid ${PALETTE.gold}33` }}>
     <div className="text-[9px] uppercase tracking-widest" style={{ color: PALETTE.goldDark }}>{label}</div>
     <div className="font-semibold truncate" style={{ color: PALETTE.ink }}>{value || "—"}</div>
+  </div>
+);
+
+const InfoRow = ({ icon, value, mute, ink }) => (
+  <div className="flex items-center gap-1 min-w-0">
+    <span className="text-[11px]" aria-hidden>{icon}</span>
+    <span className="truncate" style={{ color: ink }} title={value || ""}>{value || "—"}</span>
+  </div>
+);
+
+const FilterSelect = ({ label, value, onChange, options, testid }) => (
+  <div>
+    <label className="text-[10px] uppercase tracking-widest font-bold block mb-0.5" style={{ color: PALETTE.goldDark }}>{label}</label>
+    <div className="relative">
+      <select data-testid={testid} value={value} onChange={(e) => onChange(e.target.value)} className="w-full appearance-none text-xs px-2.5 py-1.5 rounded-lg outline-none" style={{ background: PALETTE.paper, color: PALETTE.ink, border: `1px solid ${PALETTE.deep}33` }}>
+        {options.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
+      </select>
+      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] pointer-events-none" style={{ color: PALETTE.goldDark }}>▼</span>
+    </div>
   </div>
 );
 
