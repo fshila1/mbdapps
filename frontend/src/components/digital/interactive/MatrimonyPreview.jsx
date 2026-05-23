@@ -871,12 +871,12 @@ const ChatScreen = ({ ctx, lang }) => {
 };
 
 export const matrimonyAndroidScreens = (lang) => ([
-  { id: "splash",   label: T(lang, "Splash",  "স্প্ল্যাশ"),  content: (ctx) => <SplashScreen   ctx={ctx} lang={lang} /> },
-  { id: "otp",      label: T(lang, "OTP",     "OTP"),       content: (ctx) => <OtpPhoneScreen ctx={ctx} lang={lang} /> },
-  { id: "otp-code", label: T(lang, "Verify",  "যাচাই"),     content: (ctx) => <OtpCodeScreen  ctx={ctx} lang={lang} /> },
-  { id: "browse",   label: T(lang, "Browse",  "ব্রাউজ"),     content: (ctx) => <BrowseScreen   ctx={ctx} lang={lang} /> },
-  { id: "detail",   label: T(lang, "Profile", "প্রোফাইল"),   content: (ctx) => <ProfileScreen  ctx={ctx} lang={lang} /> },
-  { id: "chat",     label: T(lang, "Chat",    "চ্যাট"),       content: (ctx) => <ChatScreen     ctx={ctx} lang={lang} /> },
+  { id: "splash",   label: T(lang, "Splash",  "স্প্ল্যাশ"),  render: (ctx) => <SplashScreen   ctx={ctx} lang={lang} /> },
+  { id: "otp",      label: T(lang, "OTP",     "OTP"),       render: (ctx) => <OtpPhoneScreen ctx={ctx} lang={lang} /> },
+  { id: "otp-code", label: T(lang, "Verify",  "যাচাই"),     render: (ctx) => <OtpCodeScreen  ctx={ctx} lang={lang} /> },
+  { id: "browse",   label: T(lang, "Browse",  "ব্রাউজ"),     render: (ctx) => <BrowseScreen   ctx={ctx} lang={lang} /> },
+  { id: "detail",   label: T(lang, "Profile", "প্রোফাইল"),   render: (ctx) => <ProfileScreen  ctx={ctx} lang={lang} /> },
+  { id: "chat",     label: T(lang, "Chat",    "চ্যাট"),       render: (ctx) => <ChatScreen     ctx={ctx} lang={lang} /> },
 ]);
 
 export default MatrimonyWebPreview;

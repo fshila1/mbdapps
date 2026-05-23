@@ -1,0 +1,57 @@
+{
+  "summary": "Tested BondoBD (Matrimony) template isolation across Web, Pro, and Android builders in /digital. ALL critical flows pass: landing hero with photographic avatars, OTP journey (phone→4-digit code→verify), Browse view with 6 verified profiles, filter (Age 25-30 → 2 cards Sadia+Karim + Reset (1)), favourites (heart toggle + toast + Favourites nav badge), Send Interest (toast + ✓ Sent button state), Profile detail (4-field grid, About/Family, BDT 49 unlock, Send interest, Start chat), Chat (incoming bubbles + outgoing send + auto-reply), Premium plans (Free / 7-Days / Monthly with 'Subscribe via CaaS' → '✓ Charged BDT XX via CaaS' toast). Step 4 CMS shows EXACTLY 4 sections (profiles, stories, plans, storeInfo) — NO banners/categories/products leak. Step 5 preview renders matrimony (NOT e-commerce); applied banner shows '6 items · 3 stories · 3 plans'. E-commerce regression: web-ecom still renders products correctly, no matrimony leak. Web template tab shows food/health/edu live preview testids all intact. Pro builder pro-bondobd correctly renders MatrimonyWebPreview (not SubPortal fallback). Mobile 420×900 viewport: 2-col card grid + collapsed filters. Bangla i18n switches OTP screen labels to Bangla characters. ONE P0 BUG FOUND AND FIXED: Android emulator threw 'current.render is not a function' because matrimonyAndroidScreens used 'content:' key but AndroidEmulator expects 'render:'. Fixed in MatrimonyPreview.jsx — Android now renders all 6 screens correctly (Splash→OTP→Verify→Browse→Profile→Chat).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "All preview modals", "issues": ["Carry-over from iter 9-12: api.fontshare.com Cabinet Grotesk CORS-blocked — cosmetic console error only, fallback fonts render fine"]}
+    ]
+  },
+  "verified_working": [
+    "Login developer@bdapps.com/dev123 → /dashboard works",
+    "/digital → Web tab → BondoBD card visible with testid live-preview-web-bondobd",
+    "Live preview modal opens with chrome URL bondobd-matrimony-service.bdapps.app, hero 'Find Your Perfect Match', 6 featured profile chips (Rahima, Sadia, Nusrat, Karim, Tanvir, Rafiqul) with randomuser.me avatars, BEGIN YOUR SEARCH filter card, 3 Real Success Stories (Imran&Tahmina, Sabbir&Mehjabin, Rafi&Anika)",
+    "ZERO e-commerce leak detected anywhere in matrimony preview (no Add to Cart / Wireless Headphones / Products / Categories / Banners)",
+    "OTP journey: matri-cta-start → phone input (matri-otp-phone) → matri-otp-send → 4-digit code → matri-otp-verify → browse view",
+    "Browse: 6 profile cards. Age filter '25-30' → 2 cards (Sadia 26 + Karim 29), Reset (1) link appears. Reset → 6 cards back.",
+    "Favourite heart matri-fav-p2 → toast 'Verified — welcome' + favourite list badge increments → matri-nav-favorites shows Sadia",
+    "Interest matri-interest-p1 → 'Interest sent' toast + button changes to ✓ Sent",
+    "matri-view-p1 → Detail page with Family, Education labels, BDT 49 unlock, matri-detail-chat button visible, no ecom leak",
+    "matri-detail-chat → Chat view with matri-chat-input + matri-chat-send. Typed 'Assalamualaikum' → outgoing bubble appears + auto-reply triggers within ~1.5s",
+    "matri-nav-plans → 3 plans (Free, Premium 7 Days, Premium Monthly) with CaaS subscribe buttons. Clicking plan #2 fires 'Charged BDT … via CaaS' toast and returns to browse.",
+    "use-template-web-bondobd → Step 4 CMS sidebar sections = [profiles, stories, plans, storeInfo] — exactly 4 matrimony sections, NO banners/categories/products",
+    "Step 4 Skip — Use Sample Data populates content. Step 5 (Preview & Launch) renders matrimony preview with banner '6 items · 3 stories · 3 plans'",
+    "Android tab: live-preview-and-bondobd opens AndroidEmulator with 6 screens (Splash→OTP→Verify→Browse→Profile→Chat) — works AFTER bug fix",
+    "Pro tab: live-preview-pro-bondobd renders MatrimonyWebPreview component (NOT SubPortal fallback), 'Find Your Perfect Match' present",
+    "E-commerce regression OK: web-ecom live preview still renders products/cart correctly, no matrimony leak. web-food, web-health, web-edu testids all present.",
+    "Bangla i18n: setting localStorage bdapps_lang='bn' switches OTP screen to Bangla characters (Welcome to BondoBD screen contains Unicode 0980-09FF range)",
+    "Mobile responsive 420×900: Browse renders 6 profile cards in 2-column grid; filter bar collapses to 2-col; toast visible at bottom"
+  ],
+  "bug_fixed_in_this_iteration": [
+    {
+      "severity": "P0",
+      "file": "/app/frontend/src/components/digital/interactive/MatrimonyPreview.jsx",
+      "lines": "873-880",
+      "rca": "matrimonyAndroidScreens objects used key 'content:' but AndroidEmulator.jsx line 71 calls current.render(ctx). All other Android screen definitions (ecomScreens, foodScreens, etc.) use 'render:'. The mismatched key caused TypeError: current.render is not a function whenever Android BondoBD live preview was opened.",
+      "fix": "Renamed key 'content' → 'render' for all 6 screen objects (splash, otp, otp-code, browse, detail, chat) so the Android emulator can invoke each screen's render function.",
+      "verification": "After fix: live-preview-and-bondobd opens emulator showing 'Screen 2/6 · Verify Phone · Welcome to BondoBD' with all 6 screens navigable via Next/Back — no runtime error overlay."
+    }
+  ],
+  "test_report_links": ["/app/test_reports/iteration_13.json"],
+  "action_items": [
+    "(Optional, cosmetic) Self-host Cabinet Grotesk or replace with Google Fonts equivalent — api.fontshare.com is CORS-blocked. Carry-over from iter 9-12, does not impact functionality."
+  ],
+  "critical_code_review_comments": [
+    "MatrimonyPreview.jsx is 882 lines — slightly over the 700-line guideline. Consider splitting helper sub-components (SplashScreen / OtpPhoneScreen / etc.) into a separate matrimony/screens/ folder for maintainability.",
+    "Inconsistent screen-object schema across templates was the root cause of the Android P0 crash. Recommend extracting a shared TypeScript-style type (or JSDoc typedef) for AndroidEmulator screen entries to prevent future drift between 'render' vs 'content' keys.",
+    "TEMPLATE_KIND map in contentSeeds.js does the right thing (web/pro/and-bondobd → 'matrimony'); ContentManager.jsx correctly gates section visibility by kind so matrimony only shows profiles/stories/plans/storeInfo. Clean isolation."
+  ],
+  "updated_files": ["/app/frontend/src/components/digital/interactive/MatrimonyPreview.jsx"],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "100% after fix (19/19 scenarios pass; Android passed only after the P0 fix in this iteration)"},
+  "test_credentials": "developer@bdapps.com / dev123",
+  "seed_data_creation": "None — Step 4 'Skip — Use Sample Data' button auto-populates 6 profiles + 3 stories + 3 plans from contentSeeds.js SAMPLE_CONTENT['web-bondobd']",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Matrimony preview is fully isolated and working across web-bondobd, pro-bondobd, and and-bondobd. Key testids: matri-cta-start, matri-otp-phone, matri-otp-send, matri-otp-d0..3 (4 digit OTP NOT 6), matri-otp-verify, matri-filter-{gender|age|religion|district}, matri-filter-reset, matri-fav-{p1..p6}, matri-interest-{p1..p6}, matri-view-{p1..p6}, matri-nav-{browse|favorites|plans}, matri-detail-chat, matri-detail-interest, matri-chat-input, matri-chat-send, matri-plan-{free|premium7|monthly}. CMS sections (content-section-profiles/stories/plans/storeInfo) gated by TEMPLATE_KIND in contentSeeds.js. To dismiss welcome modal: localStorage.setItem('bdapps-digital-welcomed','1'). E-commerce regression confirmed clean for web-ecom/food/health/edu."
+}
