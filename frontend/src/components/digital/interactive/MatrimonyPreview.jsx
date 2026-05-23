@@ -160,7 +160,7 @@ const Heart = ({ filled, size = 14, color = PALETTE.rose }) => (
 
 /* ============== MAIN WEB PREVIEW ======================================== */
 
-export const MatrimonyWebPreview = ({ cfg = {}, content }) => {
+export const MatrimonyWebPreview = ({ cfg = {}, content, chromeless = false, onPhoneSubmit, onOtpVerify, onInterest, onSubscribe }) => {
   const lang = cfg.language || "English";
   const tt = (en, bn) => T(lang, en, bn);
   const profiles = (content?.profiles?.length ? content.profiles : FALLBACK_PROFILES);
@@ -226,6 +226,7 @@ export const MatrimonyWebPreview = ({ cfg = {}, content }) => {
   };
   const sendInterest = (id) => {
     setInterests((m) => ({ ...m, [id]: true }));
+    if (onInterest) onInterest(profiles.find((p) => p.id === id));
     fireToast(tt("💌 Interest sent — they'll receive an SMS", "💌 আগ্রহ পাঠানো হয়েছে"));
   };
   const startChat = (id) => {
@@ -371,7 +372,7 @@ export const MatrimonyWebPreview = ({ cfg = {}, content }) => {
         </div>
         <div className="mt-4 flex gap-2">
           <GhostBtn full tid="matri-otp-back" onClick={() => setStage("landing")}>← {tt("Back", "ফিরে")}</GhostBtn>
-          <PrimaryBtn full tid="matri-otp-send" onClick={() => setStage("otp-code")}>{tt("Send OTP", "OTP পাঠান")}</PrimaryBtn>
+          <PrimaryBtn full tid="matri-otp-send" onClick={() => { if (onPhoneSubmit) onPhoneSubmit(phone); setStage("otp-code"); }}>{tt("Send OTP", "OTP পাঠান")}</PrimaryBtn>
         </div>
       </div>
       <div className="text-center text-[11px] mt-3" style={{ color: PALETTE.mute }}>{tt("🔒 Charged via Robi CaaS — Tk 0.50 SMS only", "🔒 রবি CaaS দিয়ে — মাত্র ০.৫০ টাকা SMS")}</div>
@@ -392,7 +393,7 @@ export const MatrimonyWebPreview = ({ cfg = {}, content }) => {
         <div className="mt-2 text-[10px] text-center" style={{ color: PALETTE.goldDark }}>{tt("Demo OTP — type any 4 digits or click Verify", "ডেমো — যেকোনো ৪ অঙ্ক বা Verify চাপুন")}</div>
         <div className="mt-4 flex gap-2">
           <GhostBtn full tid="matri-otp-resend" onClick={() => fireToast(tt("📨 OTP resent via Robi SMS", "📨 OTP আবার পাঠানো হয়েছে"))}>{tt("Resend OTP", "আবার পাঠান")}</GhostBtn>
-          <PrimaryBtn full tid="matri-otp-verify" onClick={() => { fireToast(tt("✓ Verified — welcome to BondoBD", "✓ যাচাই সম্পন্ন")); setStage("browse"); }}>{tt("Verify & Continue", "যাচাই করুন")}</PrimaryBtn>
+          <PrimaryBtn full tid="matri-otp-verify" onClick={() => { if (onOtpVerify) onOtpVerify(otp.join("") || "1234"); fireToast(tt("✓ Verified — welcome to BondoBD", "✓ যাচাই সম্পন্ন")); setStage("browse"); }}>{tt("Verify & Continue", "যাচাই করুন")}</PrimaryBtn>
         </div>
       </div>
     </div>
@@ -644,7 +645,7 @@ export const MatrimonyWebPreview = ({ cfg = {}, content }) => {
               {(p.features || []).map((f, i) => <li key={i} className="flex gap-1.5"><span style={{ color: PALETTE.goldDark }}>✓</span> {f}</li>)}
             </ul>
             <div className="mt-3">
-              <PrimaryBtn full tid={`matri-plan-${p.id}`} onClick={() => { fireToast(p.price === 0 ? tt("✓ Free plan active", "✓ ফ্রি প্ল্যান চালু") : tt(`✓ Charged BDT ${p.price} via CaaS`, `✓ CaaS দিয়ে ${p.price} টাকা কাটা হয়েছে`)); setStage("browse"); }}>
+              <PrimaryBtn full tid={`matri-plan-${p.id}`} onClick={() => { if (onSubscribe) onSubscribe(p); fireToast(p.price === 0 ? tt("✓ Free plan active", "✓ ফ্রি প্ল্যান চালু") : tt(`✓ Charged BDT ${p.price} via CaaS`, `✓ CaaS দিয়ে ${p.price} টাকা কাটা হয়েছে`)); setStage("browse"); }}>
                 {p.price === 0 ? tt("Continue Free", "ফ্রি চালিয়ে যান") : tt("Subscribe via CaaS", "CaaS দিয়ে সাবস্ক্রাইব")}
               </PrimaryBtn>
             </div>
@@ -656,7 +657,7 @@ export const MatrimonyWebPreview = ({ cfg = {}, content }) => {
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden" style={{ background: PALETTE.ivory, fontFamily: SANS, color: PALETTE.ink }}>
-      {TopBar}
+      {!chromeless && TopBar}
       <div className="flex-1 overflow-y-auto">
         {stage === "landing"   && LandingView}
         {stage === "otp-phone" && OtpPhoneView}
