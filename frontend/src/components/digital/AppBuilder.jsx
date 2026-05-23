@@ -84,10 +84,10 @@ const AppBuilder = ({ template, type, designId, customization, content, onBack }
     }
     return (
       <WebPreviewWrapper url={`${cfg.domain?.subdomain || template.slug}.bdapps.app`} customerMode={customerMode} onCustomerToggle={() => setCustomerMode(!customerMode)} onRestart={() => setRestartKey((k) => k + 1)}>
-        <UniversalWebPreview key={restartKey} templateId={template.id} cfg={cfg} height="h-[600px]" />
+        <UniversalWebPreview key={restartKey} templateId={template.id} cfg={cfg} content={content} height="h-[600px]" />
       </WebPreviewWrapper>
     );
-  }, [type, template.id, template.slug, cfg, customerMode, restartKey]);
+  }, [type, template.id, template.slug, cfg, content, customerMode, restartKey]);
 
   const onGenerate = () => {
     setGenerating(true);
@@ -146,7 +146,7 @@ const AppBuilder = ({ template, type, designId, customization, content, onBack }
           <div className="flex items-center gap-2 text-emerald-800"><span className="w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] flex items-center justify-center font-bold">✓</span>
             <b>Your content is live in the preview</b>
             <span className="text-xs text-emerald-700">
-              {(content.products?.length || content.menuItems?.length || content.doctors?.length || content.courses?.length || content.properties?.length || content.packages?.length || content.campaigns?.length || 0)} items · {content.banners?.length || 0} banners · {content.categories?.length || 0} categories
+              {(content.products?.length || content.menuItems?.length || content.doctors?.length || content.courses?.length || content.properties?.length || content.packages?.length || content.campaigns?.length || content.profiles?.length || 0)} items · {(content.banners?.length || content.stories?.length || 0)} {content.profiles?.length ? "stories" : "banners"} · {(content.categories?.length || content.plans?.length || 0)} {content.profiles?.length ? "plans" : "categories"}
             </span>
           </div>
           <button data-testid="content-edit-link" onClick={onBack} className="text-xs text-emerald-700 hover:underline font-bold">← Edit Content</button>

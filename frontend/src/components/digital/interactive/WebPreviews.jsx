@@ -2,6 +2,13 @@ import React, { useState, useMemo } from "react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
+import { MatrimonyWebPreview } from "./MatrimonyPreview";
+
+// Pro builder adapter: BDappsWebPreview passes (appName, tagline, primary, accent, language).
+// MatrimonyWebPreview expects cfg.* — wrap so Pro+Web previews share one source of truth.
+const ProMatrimonyAdapter = ({ appName, tagline, primary, accent, language }) => (
+  <MatrimonyWebPreview cfg={{ appName, tagline, primary, accent, language, fontFamily: "Inter, sans-serif" }} />
+);
 
 // Helper: language strings (English / Bengali)
 const T = (lang, en, bn) => (lang === "Bengali" ? bn : en);
@@ -719,6 +726,8 @@ const PREVIEWS = {
   "pro-store": StorePreview,
   "pro-premium": PremiumPreview,
   "pro-admin": AdminPreview,
+  // Matrimony (BondoBD) — isolated preview
+  "pro-bondobd": ProMatrimonyAdapter,
 };
 
 const BDappsWebPreview = ({ templateId, appName = "BDapps App", tagline = "Your tagline", primaryColor = "#0f172a", secondaryColor = "#e11d48", language = "English", url, height }) => {

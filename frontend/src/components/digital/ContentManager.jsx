@@ -27,14 +27,16 @@ const SECTIONS = {
   travel:     ["banners","destinations","packages","storeInfo"],
   ngo:        ["banners","team","campaigns","storeInfo"],
   saas:       ["banners","pricing","testimonials","storeInfo"],
+  matrimony:  ["profiles","stories","plans","storeInfo"],
 };
 
 const SECTION_LABELS = {
-  banners: "Banners", categories: "Categories", products: "Products", storeInfo: "Store Info",
+  banners: "Banners", categories: "Categories", products: "Products", storeInfo: "Service Info",
   menuItems: "Menu Items", doctors: "Doctors", services: "Services",
   instructors: "Instructors", courses: "Courses", areas: "Areas", agents: "Agents",
   properties: "Properties", destinations: "Destinations", packages: "Tour Packages",
   team: "Team", campaigns: "Campaigns", pricing: "Pricing Plans", testimonials: "Testimonials",
+  profiles: "Member Profiles", stories: "Success Stories", plans: "Subscription Plans",
 };
 
 const MIN_REQUIRED = {
@@ -46,6 +48,7 @@ const MIN_REQUIRED = {
   travel:     { packages: 1 },
   ngo:        { campaigns: 1 },
   saas:       { pricing: 1 },
+  matrimony:  { profiles: 3, plans: 1 },
 };
 
 const sectionState = (content, section) => {
@@ -149,16 +152,16 @@ const ListItemEditor = ({ items = [], onChange, fields, testidPrefix, addLabel }
 
 const StoreInfoEditor = ({ info = {}, onChange, kind }) => {
   const upd = (patch) => onChange({ ...info, ...patch });
-  const isHealth = kind === "health"; const isFood = kind === "restaurant";
+  const isHealth = kind === "health"; const isFood = kind === "restaurant"; const isMatri = kind === "matrimony";
   return (
     <div className="space-y-3 bg-white border border-slate-200 rounded-lg p-3">
-      <TextField label={isHealth ? "Clinic Name" : isFood ? "Restaurant Name" : "Business Name"} required value={info.name} onChange={(v) => upd({ name: v })} testid="info-name" />
+      <TextField label={isHealth ? "Clinic Name" : isFood ? "Restaurant Name" : isMatri ? "Matrimony Service Name" : "Business Name"} required value={info.name} onChange={(v) => upd({ name: v })} testid="info-name" />
       <div className="grid grid-cols-2 gap-2">
-        <TextField label="Phone" required value={info.phone} onChange={(v) => upd({ phone: v })} testid="info-phone" />
+        <TextField label={isMatri ? "Support Phone" : "Phone"} required value={info.phone} onChange={(v) => upd({ phone: v })} testid="info-phone" />
         <TextField label="Email" value={info.email} onChange={(v) => upd({ email: v })} testid="info-email" />
       </div>
-      <TextField label="Address" required value={info.address} onChange={(v) => upd({ address: v })} testid="info-address" />
-      {(isFood || isHealth) && <TextField label="Hours" optional value={info.hours} onChange={(v) => upd({ hours: v })} testid="info-hours" />}
+      <TextField label={isMatri ? "Office Address" : "Address"} required value={info.address} onChange={(v) => upd({ address: v })} testid="info-address" />
+      {(isFood || isHealth || isMatri) && <TextField label={isMatri ? "Support Hours" : "Hours"} optional value={info.hours} onChange={(v) => upd({ hours: v })} testid="info-hours" />}
       <TextField label="Currency" value={info.currency || "BDT"} onChange={(v) => upd({ currency: v })} testid="info-currency" />
     </div>
   );
@@ -170,7 +173,7 @@ const ContentManager = ({ template, onBack, onContinue, initial }) => {
   const kind = getKindFor(template.id);
   const sections = SECTIONS[kind] || SECTIONS.ecommerce;
   const [activeSection, setActiveSection] = useState(sections[0]);
-  const [content, setContent] = useState(() => initial || { storeInfo: {}, banners: [], categories: [], products: [], menuItems: [], doctors: [], services: [], instructors: [], courses: [], areas: [], agents: [], properties: [], destinations: [], packages: [], team: [], campaigns: [], pricing: [], testimonials: [] });
+  const [content, setContent] = useState(() => initial || { storeInfo: {}, banners: [], categories: [], products: [], menuItems: [], doctors: [], services: [], instructors: [], courses: [], areas: [], agents: [], properties: [], destinations: [], packages: [], team: [], campaigns: [], pricing: [], testimonials: [], profiles: [], stories: [], plans: [] });
   const [warnOpen, setWarnOpen] = useState(false);
 
   const setSection = (key, items) => setContent((p) => ({ ...p, [key]: items }));
@@ -332,6 +335,47 @@ const ContentManager = ({ template, onBack, onContinue, initial }) => {
         { key: "name", label: "Name", required: true },
         { key: "company", label: "Company / Role" },
         { key: "quote", type: "textarea", label: "Quote", max: 200 },
+      ]} />;
+    if (activeSection === "profiles") return <ListItemEditor items={content.profiles} onChange={(v) => setSection("profiles", v)} testidPrefix="pf" addLabel="Profile"
+      fields={[
+        { key: "image", type: "image", label: "Drop profile photo (square)" },
+        { key: "name", label: "Full Name", required: true },
+        { key: "_row1", type: "row", fields: [
+          { key: "age", label: "Age", inputType: "number", required: true },
+          { key: "gender", label: "Gender", required: true },
+        ]},
+        { key: "_row2", type: "row", fields: [
+          { key: "district", label: "District", required: true },
+          { key: "religion", label: "Religion" },
+        ]},
+        { key: "education", label: "Education", required: true, placeholder: "e.g. BSc, BUET" },
+        { key: "profession", label: "Profession", required: true, placeholder: "e.g. Software Engineer" },
+        { key: "_row3", type: "row", fields: [
+          { key: "height", label: "Height", placeholder: "e.g. 5'8\"" },
+          { key: "maritalStatus", label: "Marital Status", placeholder: "Never Married" },
+        ]},
+        { key: "about", type: "textarea", label: "About Me", max: 250, optional: true },
+        { key: "status", type: "select", label: "Status", options: ["Active","Hidden","Featured"] },
+      ]} />;
+    if (activeSection === "stories") return <ListItemEditor items={content.stories} onChange={(v) => setSection("stories", v)} testidPrefix="st" addLabel="Story"
+      fields={[
+        { key: "image", type: "image", label: "Drop couple photo (4:3)", height: "h-28" },
+        { key: "couple", label: "Couple Names", required: true, placeholder: "e.g. Imran & Tahmina" },
+        { key: "_row", type: "row", fields: [
+          { key: "year", label: "Year", placeholder: "2025" },
+          { key: "district", label: "District", placeholder: "Dhaka" },
+        ]},
+        { key: "quote", type: "textarea", label: "Their Story", max: 280, required: true },
+      ]} />;
+    if (activeSection === "plans") return <ListItemEditor items={content.plans} onChange={(v) => setSection("plans", v)} testidPrefix="pl" addLabel="Plan"
+      fields={[
+        { key: "name", label: "Plan Name", required: true, placeholder: "e.g. Premium Monthly" },
+        { key: "_row", type: "row", fields: [
+          { key: "price", label: "Price (BDT)", inputType: "number", prefix: "৳", required: true },
+          { key: "period", label: "Billing Period", placeholder: "month / 7 days / lifetime" },
+        ]},
+        { key: "badge", label: "Badge (Optional)", placeholder: "Popular / Best Value", optional: true },
+        { key: "status", type: "select", label: "Status", options: ["Active","Draft","Archived"] },
       ]} />;
     if (activeSection === "storeInfo") return <StoreInfoEditor info={content.storeInfo} onChange={(v) => setSection("storeInfo", v)} kind={kind} />;
     return null;
@@ -495,6 +539,53 @@ const MiniPreview = ({ content, template, section }) => {
             </div>
           );
         })}
+      </div>
+    );
+  }
+  if (section === "profiles" && content.profiles?.length > 0) {
+    return (
+      <div className="space-y-1.5">
+        {content.profiles.slice(0, 3).map((p) => (
+          <div key={p.id} className="bg-white border border-slate-200 rounded p-1.5 flex items-center gap-2">
+            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0" style={{ background: p.image ? `url(${p.image}) center/cover` : `linear-gradient(135deg, ${primary}, #f43f5e)` }}>
+              {!p.image && <div className="w-full h-full flex items-center justify-center text-white text-[10px] font-bold">{p.name?.[0]}</div>}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] font-bold truncate">{p.name}, {p.age}</div>
+              <div className="text-[9px] text-slate-500 truncate">{p.profession} · {p.district}</div>
+              <div className="text-[9px]" style={{ color: primary }}>🔒 Contact locked</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (section === "stories" && content.stories?.length > 0) {
+    return (
+      <div className="space-y-1.5">
+        {content.stories.slice(0, 2).map((s) => (
+          <div key={s.id} className="bg-white border border-slate-200 rounded overflow-hidden">
+            <div className="h-14 relative" style={{ background: s.image ? `url(${s.image}) center/cover` : `linear-gradient(135deg, ${primary}, #fb7185)` }}>
+              <div className="absolute bottom-1 left-1.5 text-white text-[10px] font-bold drop-shadow">{s.couple}</div>
+            </div>
+            <div className="p-1.5 text-[9px] text-slate-600 line-clamp-2">"{s.quote}"</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (section === "plans" && content.plans?.length > 0) {
+    return (
+      <div className="space-y-1.5">
+        {content.plans.slice(0, 3).map((p) => (
+          <div key={p.id} className="bg-white border border-slate-200 rounded p-1.5 flex items-center justify-between">
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold truncate">{p.name}</div>
+              <div className="text-[9px] text-slate-500">{p.period}</div>
+            </div>
+            <div className="text-[10px] font-bold" style={{ color: primary }}>৳{p.price}</div>
+          </div>
+        ))}
       </div>
     );
   }

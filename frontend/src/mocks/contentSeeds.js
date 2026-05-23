@@ -127,6 +127,28 @@ export const SAMPLE_CONTENT = {
     ],
     testimonials: [{ id: uid("ts"), name: "Faria Sultana", company: "GrowthLab BD", quote: "Increased team productivity by 40%", image: "" }],
   }),
+  // ============ MATRIMONY (BondoBD) ============
+  "web-bondobd": () => ({
+    storeInfo: { name: "BondoBD Matrimony", phone: "+880 1700-200200", email: "support@bondobd.com", address: "Banani Road 11, Dhaka 1213", hours: "24/7 Online Support", currency: "BDT" },
+    profiles: [
+      { id: uid("pf"), name: "Rahima Akter", age: 24, gender: "Female", district: "Dhaka", religion: "Islam", education: "BSc, BUET", profession: "Software Engineer", height: "5'4\"", maritalStatus: "Never Married", about: "Family-oriented engineer who loves reading and travel.", status: "Active", featured: true, image: "" },
+      { id: uid("pf"), name: "Sadia Rahman", age: 26, gender: "Female", district: "Chittagong", religion: "Islam", education: "MBBS, DMC", profession: "Doctor", height: "5'3\"", maritalStatus: "Never Married", about: "Pediatrician passionate about child welfare.", status: "Active", featured: true, image: "" },
+      { id: uid("pf"), name: "Nusrat Jahan", age: 23, gender: "Female", district: "Sylhet", religion: "Islam", education: "MBA, IBA", profession: "Banker", height: "5'5\"", maritalStatus: "Never Married", about: "Loves classical music and cooking.", status: "Active", featured: false, image: "" },
+      { id: uid("pf"), name: "Karim Ahmed", age: 29, gender: "Male", district: "Dhaka", religion: "Islam", education: "BSc, NSU", profession: "Architect", height: "5'10\"", maritalStatus: "Never Married", about: "Designs sustainable homes for Bangladesh.", status: "Active", featured: true, image: "" },
+      { id: uid("pf"), name: "Tanvir Hossain", age: 31, gender: "Male", district: "Khulna", religion: "Islam", education: "MSc, RUET", profession: "Civil Engineer", height: "5'11\"", maritalStatus: "Never Married", about: "Family man who enjoys cricket and travelling.", status: "Active", featured: false, image: "" },
+      { id: uid("pf"), name: "Rafiqul Karim", age: 33, gender: "Male", district: "Rajshahi", religion: "Islam", education: "MBBS, RMC", profession: "Doctor", height: "5'9\"", maritalStatus: "Never Married", about: "Practising cardiologist in Rajshahi Medical.", status: "Active", featured: false, image: "" },
+    ],
+    stories: [
+      { id: uid("st"), couple: "Imran & Tahmina", year: "2025", district: "Dhaka", quote: "Met on BondoBD in October, married in December. The OTP-verified profiles made us feel safe from day one.", image: "" },
+      { id: uid("st"), couple: "Sabbir & Mehjabin", year: "2024", district: "Chittagong", quote: "Our families connected through BondoBD's SMS interest alerts. Alhamdulillah, we're now a family of three!", image: "" },
+      { id: uid("st"), couple: "Rafi & Anika", year: "2024", district: "Sylhet", quote: "Premium contact unlock was worth every taka — saved us months of intermediaries.", image: "" },
+    ],
+    plans: [
+      { id: uid("pl"), name: "Free", price: 0, period: "lifetime", features: ["Browse profiles","View blurred contact","Daily 5 match suggestions"], badge: "", status: "Active" },
+      { id: uid("pl"), name: "Premium 7 Days", price: 49, period: "7 days", features: ["Unlock 10 contacts","Direct WhatsApp","SMS interest alerts","Priority listing"], badge: "Popular", status: "Active" },
+      { id: uid("pl"), name: "Premium Monthly", price: 199, period: "month", features: ["Unlimited contact unlock","Verified badge","Family invitation","Priority support"], badge: "Best Value", status: "Active" },
+    ],
+  }),
 };
 
 // Map android template IDs to web equivalents
@@ -135,6 +157,9 @@ SAMPLE_CONTENT["and-food"] = SAMPLE_CONTENT["web-food"];
 SAMPLE_CONTENT["and-doctor"] = SAMPLE_CONTENT["web-health"];
 SAMPLE_CONTENT["and-edu"] = SAMPLE_CONTENT["web-edu"];
 SAMPLE_CONTENT["and-travel"] = SAMPLE_CONTENT["web-travel"];
+// Matrimony — Pro + Android share the same seed
+SAMPLE_CONTENT["pro-bondobd"] = SAMPLE_CONTENT["web-bondobd"];
+SAMPLE_CONTENT["and-bondobd"] = SAMPLE_CONTENT["web-bondobd"];
 
 // Default empty content per template type — used at start of Step 4
 export const EMPTY_CONTENT = {
@@ -146,6 +171,7 @@ export const EMPTY_CONTENT = {
   travel: { storeInfo: {}, banners: [], destinations: [], packages: [] },
   ngo: { storeInfo: {}, banners: [], team: [], impact: {}, campaigns: [] },
   saas: { storeInfo: {}, banners: [], pricing: [], testimonials: [] },
+  matrimony: { storeInfo: {}, profiles: [], stories: [], plans: [] },
 };
 
 export const TEMPLATE_KIND = {
@@ -157,6 +183,10 @@ export const TEMPLATE_KIND = {
   "web-travel": "travel", "and-travel": "travel",
   "web-ngo": "ngo",
   "web-saas": "saas",
+  // Matrimony (BondoBD) — Web / Pro / Android all isolated
+  "web-bondobd": "matrimony",
+  "pro-bondobd": "matrimony",
+  "and-bondobd": "matrimony",
 };
 
 export const getKindFor = (templateId) => TEMPLATE_KIND[templateId] || "ecommerce";

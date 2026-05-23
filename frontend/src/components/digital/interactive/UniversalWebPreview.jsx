@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { MatrimonyWebPreview } from "./MatrimonyPreview";
 
 // Compact yet truly interactive web previews for universal templates.
 // Each has 3-6 internal pages with working buttons and state.
@@ -569,13 +570,14 @@ const PREVIEWS = {
   "web-travel": TravelBooking,
   "web-ngo": NgoPlatform,
   "web-saas": SaasDashboard,
+  "web-bondobd": MatrimonyWebPreview,
 };
 
-const UniversalWebPreview = ({ templateId, cfg, url, height = "h-[600px]" }) => {
+const UniversalWebPreview = ({ templateId, cfg, url, height = "h-[600px]", content }) => {
   const Comp = PREVIEWS[templateId] || EcomStore;
   return (
     <BrowserChrome url={url || `${(cfg.appName || "app").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.bdapps.app`} dark={cfg.dark} height={height}>
-      <Comp cfg={cfg} />
+      <Comp cfg={cfg} content={content} />
     </BrowserChrome>
   );
 };
