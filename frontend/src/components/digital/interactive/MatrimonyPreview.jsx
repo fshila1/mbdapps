@@ -29,13 +29,16 @@ const SANS = '"Hind Siliguri","Inter",system-ui,sans-serif';
 const T = (lang, en, bn) => (lang === "Bengali" ? bn : en);
 
 /* ---------- Default seed data (used when user has not populated content) -- */
+// Photographic avatars via randomuser.me (free, stable CDN). Each profile gets
+// a deterministic gender-matched portrait. SVG fallback (MatriAvatar) renders
+// instantly while the image loads + on error.
 const FALLBACK_PROFILES = [
-  { id: "p1", name: "Rahima Akter",   age: 24, gender: "Female", district: "Dhaka",      religion: "Islam",   education: "BSc, BUET",      profession: "Software Engineer", height: "5'4\"", maritalStatus: "Never Married", about: "Family-oriented engineer who loves reading and travel.", family: "Father — Govt. Service · Mother — Homemaker · 1 sister" },
-  { id: "p2", name: "Sadia Rahman",   age: 26, gender: "Female", district: "Chittagong", religion: "Islam",   education: "MBBS, DMC",      profession: "Pediatrician",      height: "5'3\"", maritalStatus: "Never Married", about: "Pediatrician passionate about child welfare.",          family: "Father — Doctor · Mother — Teacher · 2 brothers" },
-  { id: "p3", name: "Nusrat Jahan",   age: 23, gender: "Female", district: "Sylhet",     religion: "Islam",   education: "MBA, IBA",       profession: "Banker",            height: "5'5\"", maritalStatus: "Never Married", about: "Loves classical music and cooking.",                    family: "Father — Banker · Mother — Homemaker · 1 brother" },
-  { id: "p4", name: "Karim Ahmed",    age: 29, gender: "Male",   district: "Dhaka",      religion: "Islam",   education: "BSc, NSU",       profession: "Architect",         height: "5'10\"", maritalStatus: "Never Married", about: "Designs sustainable homes for Bangladesh.",            family: "Father — Engineer · Mother — Homemaker · 1 sister" },
-  { id: "p5", name: "Tanvir Hossain", age: 31, gender: "Male",   district: "Khulna",     religion: "Islam",   education: "MSc, RUET",      profession: "Civil Engineer",    height: "5'11\"", maritalStatus: "Never Married", about: "Family man who enjoys cricket and travelling.",        family: "Father — Govt. Officer · Mother — Homemaker" },
-  { id: "p6", name: "Rafiqul Karim",  age: 33, gender: "Male",   district: "Rajshahi",   religion: "Islam",   education: "MBBS, RMC",      profession: "Cardiologist",      height: "5'9\"",  maritalStatus: "Never Married", about: "Practising cardiologist in Rajshahi Medical.",         family: "Father — Doctor · Mother — Teacher" },
+  { id: "p1", name: "Rahima Akter",   age: 24, gender: "Female", district: "Dhaka",      religion: "Islam",   education: "BSc, BUET",      profession: "Software Engineer", height: "5'4\"", maritalStatus: "Never Married", about: "Family-oriented engineer who loves reading and travel.", family: "Father — Govt. Service · Mother — Homemaker · 1 sister", photo: "https://randomuser.me/api/portraits/women/65.jpg" },
+  { id: "p2", name: "Sadia Rahman",   age: 26, gender: "Female", district: "Chittagong", religion: "Islam",   education: "MBBS, DMC",      profession: "Pediatrician",      height: "5'3\"", maritalStatus: "Never Married", about: "Pediatrician passionate about child welfare.",          family: "Father — Doctor · Mother — Teacher · 2 brothers",         photo: "https://randomuser.me/api/portraits/women/72.jpg" },
+  { id: "p3", name: "Nusrat Jahan",   age: 23, gender: "Female", district: "Sylhet",     religion: "Islam",   education: "MBA, IBA",       profession: "Banker",            height: "5'5\"", maritalStatus: "Never Married", about: "Loves classical music and cooking.",                    family: "Father — Banker · Mother — Homemaker · 1 brother",        photo: "https://randomuser.me/api/portraits/women/79.jpg" },
+  { id: "p4", name: "Karim Ahmed",    age: 29, gender: "Male",   district: "Dhaka",      religion: "Islam",   education: "BSc, NSU",       profession: "Architect",         height: "5'10\"", maritalStatus: "Never Married", about: "Designs sustainable homes for Bangladesh.",            family: "Father — Engineer · Mother — Homemaker · 1 sister",       photo: "https://randomuser.me/api/portraits/men/32.jpg" },
+  { id: "p5", name: "Tanvir Hossain", age: 31, gender: "Male",   district: "Khulna",     religion: "Islam",   education: "MSc, RUET",      profession: "Civil Engineer",    height: "5'11\"", maritalStatus: "Never Married", about: "Family man who enjoys cricket and travelling.",        family: "Father — Govt. Officer · Mother — Homemaker",             photo: "https://randomuser.me/api/portraits/men/45.jpg" },
+  { id: "p6", name: "Rafiqul Karim",  age: 33, gender: "Male",   district: "Rajshahi",   religion: "Islam",   education: "MBBS, RMC",      profession: "Cardiologist",      height: "5'9\"",  maritalStatus: "Never Married", about: "Practising cardiologist in Rajshahi Medical.",         family: "Father — Doctor · Mother — Teacher",                      photo: "https://randomuser.me/api/portraits/men/52.jpg" },
 ];
 
 const FALLBACK_PLANS = [
@@ -73,12 +76,29 @@ const DividerOrnament = ({ color = PALETTE.gold }) => (
   </div>
 );
 
-/* General gender-based avatar — neutral modern silhouette (no traditional attire).
-   Female: longer wavy hair + soft palette. Male: short hair + neutral palette.
-   Clean face, subtle gradient backdrop, gold ring frame for the premium look.   */
-const MatriAvatar = ({ profile, size = 80 }) => {
+/* Photographic avatar with SVG fallback. Renders <img> when profile.photo is
+   set; on load-error or no-url, falls back to the gender-neutral SVG portrait.
+   shape: "circle" | "fill". "fill" makes the avatar fill its parent container. */
+const MatriAvatar = ({ profile, size = 80, shape = "circle" }) => {
+  const [errored, setErrored] = useState(false);
+  if (shape === "fill") {
+    return profile.photo && !errored ? (
+      <img src={profile.photo} alt={profile.name} loading="lazy" onError={() => setErrored(true)} className="absolute inset-0 w-full h-full object-cover" />
+    ) : (
+      <div className="absolute inset-0 grid place-items-center" style={{ background: `linear-gradient(160deg, ${PALETTE.paper} 0%, #FCE7E1 100%)` }}>
+        <MatriAvatarSvg profile={profile} size={Math.min(size, 160)} />
+      </div>
+    );
+  }
+  const ringStyle = { width: size, height: size, borderRadius: "50%", boxShadow: `0 0 0 2px ${PALETTE.gold}66, 0 0 0 4px #FFFFFF` };
+  if (profile.photo && !errored) {
+    return <img src={profile.photo} alt={profile.name} loading="lazy" onError={() => setErrored(true)} style={{ ...ringStyle, objectFit: "cover", display: "block" }} />;
+  }
+  return <div style={ringStyle}><MatriAvatarSvg profile={profile} size={size} /></div>;
+};
+
+const MatriAvatarSvg = ({ profile, size = 80 }) => {
   const isFemale = profile.gender === "Female";
-  // Pseudo-random hue spread per profile so cards don't look identical
   const seed = (profile.id || profile.name || "x").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
   const hueA = isFemale ? ["#FCE4EC","#FFE0E6","#FDE8E8","#F8E0F2"][seed % 4] : ["#E3F2FD","#E0F2F1","#ECEFF1","#E8EAF6"][seed % 4];
   const hueB = isFemale ? ["#F48FB1","#F06292","#EC407A","#D81B60"][seed % 4] : ["#90A4AE","#78909C","#607D8B","#546E7A"][seed % 4];
@@ -87,65 +107,29 @@ const MatriAvatar = ({ profile, size = 80 }) => {
   const shirt = isFemale ? ["#D81B60","#7E1733","#AD1457","#C2185B"][seed % 4] : ["#1565C0","#37474F","#2E4B6E","#283593"][seed % 4];
   const id = `av-${profile.id || seed}`;
   return (
-    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden style={{ display: "block" }}>
+    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden style={{ display: "block", borderRadius: "50%" }}>
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={hueA} />
-          <stop offset="100%" stopColor={hueB} />
+          <stop offset="0%" stopColor={hueA} /><stop offset="100%" stopColor={hueB} />
         </linearGradient>
         <clipPath id={`${id}-c`}><circle cx="50" cy="50" r="49" /></clipPath>
       </defs>
       <circle cx="50" cy="50" r="49" fill={`url(#${id})`} />
       <g clipPath={`url(#${id}-c)`}>
         <rect x="0" y="0" width="100" height="100" fill={`url(#${id})`} />
-        {/* soft halo */}
         <circle cx="50" cy="22" r="24" fill="#FFFFFF" opacity="0.18" />
-        {/* shoulders / shirt */}
         <path d="M14 100 C 22 70, 34 62, 50 62 C 66 62, 78 70, 86 100 Z" fill={shirt} />
-        {/* shirt collar */}
-        <path d="M44 64 L 50 70 L 56 64 L 52 78 L 48 78 Z" fill="#FFFFFF" opacity="0.85" />
-        {/* neck */}
         <rect x="45" y="52" width="10" height="11" fill={skin} />
-        {/* head */}
         <circle cx="50" cy="42" r="14" fill={skin} />
-        {/* hair */}
         {isFemale ? (
-          <>
-            {/* full hair cap with parted bangs */}
-            <path d="M34 42 C 34 26, 66 26, 66 42 L 66 36 C 66 24, 34 24, 34 36 Z" fill={hair} />
-            {/* long side locks */}
-            <path d="M34 42 C 32 56, 30 64, 30 78 L 28 92 L 22 92 C 22 72, 28 56, 32 46 Z" fill={hair} opacity="0.92" />
-            <path d="M66 42 C 68 56, 70 64, 70 78 L 72 92 L 78 92 C 78 72, 72 56, 68 46 Z" fill={hair} opacity="0.92" />
-            {/* subtle ear */}
-            <ellipse cx="34" cy="44" rx="1.6" ry="2.4" fill={skin} opacity="0.6" />
-            <ellipse cx="66" cy="44" rx="1.6" ry="2.4" fill={skin} opacity="0.6" />
-          </>
+          <path d="M34 42 C 34 26, 66 26, 66 42 L 66 36 C 66 24, 34 24, 34 36 Z M34 42 C 32 56, 30 64, 30 78 L 28 92 L 22 92 C 22 72, 28 56, 32 46 Z M66 42 C 68 56, 70 64, 70 78 L 72 92 L 78 92 C 78 72, 72 56, 68 46 Z" fill={hair} />
         ) : (
-          <>
-            {/* short groomed hair */}
-            <path d="M36 38 C 36 28, 64 28, 64 38 C 64 32, 60 30, 50 30 C 40 30, 36 32, 36 38 Z" fill={hair} />
-            {/* sideburn hints */}
-            <path d="M36 38 L 36 46 L 38 46 Z" fill={hair} />
-            <path d="M64 38 L 64 46 L 62 46 Z" fill={hair} />
-            {/* ears */}
-            <ellipse cx="35" cy="44" rx="1.8" ry="2.6" fill={skin} />
-            <ellipse cx="65" cy="44" rx="1.8" ry="2.6" fill={skin} />
-          </>
+          <path d="M36 38 C 36 28, 64 28, 64 38 C 64 32, 60 30, 50 30 C 40 30, 36 32, 36 38 Z" fill={hair} />
         )}
-        {/* eyes */}
         <ellipse cx="45" cy="43" rx="1.3" ry="1.6" fill={PALETTE.ink} />
         <ellipse cx="55" cy="43" rx="1.3" ry="1.6" fill={PALETTE.ink} />
-        {/* brows */}
-        <path d={isFemale ? "M42 40 Q 45 38.5 48 40" : "M42 39 Q 45 37.5 48 39"} stroke={hair} strokeWidth="1" fill="none" strokeLinecap="round" />
-        <path d={isFemale ? "M52 40 Q 55 38.5 58 40" : "M52 39 Q 55 37.5 58 39"} stroke={hair} strokeWidth="1" fill="none" strokeLinecap="round" />
-        {/* nose */}
-        <path d="M49.5 44 L 49 48 L 51 48" stroke={skin} strokeOpacity="0" />
-        <path d="M50 45 Q 49 48 50 49" stroke="#00000022" strokeWidth="0.6" fill="none" />
-        {/* smile */}
-        <path d="M46 50 Q 50 52.5 54 50" stroke={isFemale ? "#962447" : "#7a3a2a"} strokeWidth="1.2" fill="none" strokeLinecap="round" />
+        <path d="M46 50 Q 50 52.5 54 50" stroke="#7a3a2a" strokeWidth="1.2" fill="none" strokeLinecap="round" />
       </g>
-      {/* outer subtle gold ring */}
-      <circle cx="50" cy="50" r="49" fill="none" stroke={PALETTE.gold} strokeWidth="1.2" opacity="0.7" />
     </svg>
   );
 };
@@ -456,54 +440,75 @@ export const MatrimonyWebPreview = ({ cfg = {}, content }) => {
       </div>
 
       {filteredProfiles.length === 0 ? (
-        <div className="rounded-xl text-center py-10 px-4" style={{ background: "#FFF", border: `1px dashed ${PALETTE.gold}66` }}>
+        <div className="rounded-3xl text-center py-10 px-4" style={{ background: "#FFF", border: `1px dashed ${PALETTE.gold}66` }}>
           <div className="text-3xl">🔎</div>
           <div className="text-sm font-bold mt-1" style={{ fontFamily: SERIF, color: PALETTE.ink }}>{tt("No profiles match your filters", "কোনো প্রোফাইল মেলেনি")}</div>
           <div className="text-[11px] mt-1" style={{ color: PALETTE.mute }}>{tt("Try relaxing the age range or district.", "বয়সের পরিসর বা জেলা পরিবর্তন করুন।")}</div>
           <div className="mt-3"><GhostBtn tid="matri-filter-reset-empty" onClick={resetFilters}>{tt("Reset filters", "ফিল্টার রিসেট")}</GhostBtn></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredProfiles.map((p) => {
             const pct = compatPct(p);
             const online = (p.id || p.name || "").length % 2 === 0;
+            const fav = !!favs[p.id];
             return (
-              <div key={p.id} data-testid={`matri-card-${p.id}`} className="relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5" style={{ border: `1px solid ${PALETTE.gold}55` }}>
-                <button onClick={() => toggleFav(p.id)} data-testid={`matri-fav-${p.id}`} className="absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full bg-white/95 grid place-items-center shadow border" style={{ borderColor: `${PALETTE.deep}33` }}>
-                  <Heart filled={!!favs[p.id]} size={15} />
-                </button>
-                {/* Avatar / hero */}
-                <div className="relative aspect-[5/4] grid place-items-center" style={{ background: `linear-gradient(160deg, #FFF8E1 0%, #FAF1DF 60%, #FCE7E1 100%)` }}>
-                  <MatriAvatar profile={p} size={150} />
-                  <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 items-start">
-                    <Pill bg="rgba(255,255,255,0.95)" color={PALETTE.deep}>✓ {tt("Verified", "যাচাই")}</Pill>
-                    {online && <Pill bg="rgba(16,185,129,0.95)" color="#FFF">● {tt("Online", "অনলাইন")}</Pill>}
+              <div
+                key={p.id}
+                data-testid={`matri-card-${p.id}`}
+                className="group relative bg-white rounded-3xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                style={{ border: `1px solid ${PALETTE.gold}33`, boxShadow: "0 1px 2px rgba(126,23,51,0.04), 0 4px 12px rgba(126,23,51,0.04)" }}
+                onMouseEnter={(e) => e.currentTarget.style.boxShadow = `0 8px 28px ${PALETTE.deep}22, 0 2px 6px ${PALETTE.deep}14`}
+                onMouseLeave={(e) => e.currentTarget.style.boxShadow = "0 1px 2px rgba(126,23,51,0.04), 0 4px 12px rgba(126,23,51,0.04)"}
+              >
+                {/* Photo */}
+                <div className="relative aspect-square overflow-hidden">
+                  <MatriAvatar profile={p} shape="fill" size={180} />
+                  {/* Gradient overlay for legibility */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/2" style={{ background: `linear-gradient(to top, ${PALETTE.deep}ee 0%, ${PALETTE.deep}66 40%, transparent 100%)` }} />
+                  {/* Top-left badge stack */}
+                  <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
+                    <span className="inline-flex items-center gap-1 text-[8.5px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full backdrop-blur" style={{ background: "rgba(255,255,255,0.92)", color: PALETTE.deep }}>✓ {tt("Verified", "যাচাই")}</span>
+                    {online && (
+                      <span className="inline-flex items-center gap-1 text-[8.5px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full backdrop-blur" style={{ background: "rgba(16,185,129,0.95)", color: "#FFF" }}>
+                        <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
+                        {tt("Online", "অনলাইন")}
+                      </span>
+                    )}
                   </div>
-                  {interests[p.id] && <div className="absolute bottom-2.5 left-2.5"><Pill bg="rgba(255,255,255,0.95)" color={PALETTE.goldDark}>💌 {tt("Interest Sent", "আগ্রহ পাঠানো")}</Pill></div>}
-                  {/* Compatibility ribbon */}
-                  <div className="absolute bottom-2.5 right-2.5 text-center text-[10px] font-bold px-2 py-1 rounded-full text-white shadow" style={{ background: `linear-gradient(135deg, ${PALETTE.deep}, ${PALETTE.rose})` }}>
-                    {pct}% {tt("Match", "মিল")}
+                  {/* Favourite */}
+                  <button onClick={() => toggleFav(p.id)} data-testid={`matri-fav-${p.id}`} aria-label="favourite" className="absolute top-2 right-2 w-7 h-7 rounded-full grid place-items-center transition-all backdrop-blur" style={{ background: fav ? "rgba(194,24,91,0.95)" : "rgba(255,255,255,0.92)", border: `1px solid ${fav ? "#FFF" : PALETTE.deep + "22"}` }}>
+                    <Heart filled={fav} size={13} color={fav ? "#FFF" : PALETTE.deep} />
+                  </button>
+                  {/* Compatibility chip top-right (under fav) */}
+                  <div className="absolute top-10 right-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-bold text-white shadow-sm" style={{ background: `linear-gradient(135deg, ${PALETTE.deep}, ${PALETTE.rose})` }}>
+                    ✨ {pct}%
+                  </div>
+                  {/* Name overlay on photo bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 p-2.5 text-white">
+                    <div className="flex items-end justify-between gap-1">
+                      <h3 className="font-bold text-[14px] leading-tight truncate drop-shadow" style={{ fontFamily: SERIF }}>{p.name}, {p.age}</h3>
+                    </div>
+                    <div className="text-[10px] truncate opacity-95 mt-0.5">📍 {p.district} · {p.height || "—"}</div>
                   </div>
                 </div>
-                {/* Info block */}
-                <div className="p-3">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="font-bold text-[15px] leading-tight truncate" style={{ fontFamily: SERIF, color: PALETTE.ink }}>{p.name}</div>
-                      <div className="text-[11px]" style={{ color: PALETTE.mute }}>{p.age} {tt("yrs", "বছর")} · {p.height || "—"} · {p.religion || "—"}</div>
-                    </div>
-                  </div>
 
-                  <div className="mt-2 grid grid-cols-2 gap-1 text-[10.5px]">
-                    <InfoRow icon="🎓" value={p.education} mute={PALETTE.mute} ink={PALETTE.ink} />
-                    <InfoRow icon="💼" value={p.profession} mute={PALETTE.mute} ink={PALETTE.ink} />
-                    <InfoRow icon="📍" value={p.district} mute={PALETTE.mute} ink={PALETTE.ink} />
-                    <InfoRow icon="💍" value={p.maritalStatus} mute={PALETTE.mute} ink={PALETTE.ink} />
+                {/* Info */}
+                <div className="px-3 pt-2 pb-2.5">
+                  <div className="space-y-0.5 text-[10.5px]" style={{ color: PALETTE.ink }}>
+                    <div className="flex items-center gap-1.5 min-w-0"><span className="opacity-70">🎓</span><span className="truncate">{p.education || "—"}</span></div>
+                    <div className="flex items-center gap-1.5 min-w-0"><span className="opacity-70">💼</span><span className="truncate">{p.profession || "—"}</span></div>
+                    <div className="flex items-center gap-1.5 min-w-0"><span className="opacity-70">💍</span><span className="truncate" style={{ color: PALETTE.mute }}>{p.religion} · {p.maritalStatus?.replace("Never Married", tt("Single", "অবিবাহিত")) || "—"}</span></div>
                   </div>
-
-                  <div className="mt-2.5 flex items-center gap-1.5">
-                    <GhostBtn full tid={`matri-view-${p.id}`} onClick={() => { setOpenId(p.id); setStage("detail"); }}>{tt("View Profile", "প্রোফাইল দেখুন")}</GhostBtn>
-                    <PrimaryBtn tid={`matri-interest-${p.id}`} onClick={() => sendInterest(p.id)}>{interests[p.id] ? `✓ ${tt("Sent", "পাঠানো")}` : `💌 ${tt("Interest", "আগ্রহ")}`}</PrimaryBtn>
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <button data-testid={`matri-view-${p.id}`} onClick={() => { setOpenId(p.id); setStage("detail"); }} className="flex-1 text-[10.5px] font-bold py-1.5 rounded-full transition" style={{ color: PALETTE.deep, border: `1px solid ${PALETTE.deep}33`, background: "#FFF" }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = PALETTE.paper}
+                      onMouseLeave={(e) => e.currentTarget.style.background = "#FFF"}>
+                      {tt("View", "দেখুন")}
+                    </button>
+                    <button data-testid={`matri-interest-${p.id}`} onClick={() => sendInterest(p.id)} className="flex-1 text-[10.5px] font-bold py-1.5 rounded-full text-white transition shadow-sm" style={{ background: interests[p.id] ? PALETTE.goldDark : `linear-gradient(135deg, ${PALETTE.deep}, ${PALETTE.rose})` }}>
+                      {interests[p.id] ? `✓ ${tt("Sent", "পাঠানো")}` : `💌 ${tt("Interest", "আগ্রহ")}`}
+                    </button>
                   </div>
                 </div>
               </div>
