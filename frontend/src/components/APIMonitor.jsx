@@ -41,11 +41,14 @@ const APIMonitor = ({ autoOpen = false }) => {
 
   return (
     <>
-      {/* Floating toggle button */}
+      {/* Floating toggle button — positioned bottom-LEFT to avoid the
+          Emergent / Made-with badge in the bottom-right corner which can
+          intercept clicks and obscure the panel. */}
       <button
         data-testid="api-monitor-toggle"
         onClick={() => setOpen((p) => !p)}
-        className={`fixed bottom-6 right-6 z-[80] w-14 h-14 rounded-full bg-slate-900 hover:bg-slate-700 text-white shadow-2xl flex items-center justify-center transition-all ${pulse ? "ring-4 ring-emerald-400 scale-110" : ""}`}
+        style={{ zIndex: 2147483646 }}
+        className={`fixed bottom-6 left-6 w-14 h-14 rounded-full bg-slate-900 hover:bg-slate-700 text-white shadow-2xl flex items-center justify-center transition-all ${pulse ? "ring-4 ring-emerald-400 scale-110" : ""}`}
         title="BDApps API Monitor"
       >
         <Activity size={22} className={pulse ? "text-emerald-400" : "text-white"} />
@@ -60,7 +63,8 @@ const APIMonitor = ({ autoOpen = false }) => {
       {open && (
         <div
           data-testid="api-monitor-panel"
-          className="fixed bottom-24 right-6 z-[81] w-[360px] max-w-[calc(100vw-2rem)] h-[480px] bg-slate-900 text-slate-100 rounded-2xl shadow-2xl border border-slate-700 flex flex-col overflow-hidden"
+          style={{ zIndex: 2147483647 }}
+          className="fixed bottom-24 left-6 w-[360px] max-w-[calc(100vw-2rem)] h-[480px] bg-slate-900 text-slate-100 rounded-2xl shadow-2xl border border-slate-700 flex flex-col overflow-hidden"
         >
           {/* Header */}
           <div className="px-4 py-3 border-b border-slate-700 flex items-center justify-between bg-gradient-to-r from-slate-800 to-slate-900">

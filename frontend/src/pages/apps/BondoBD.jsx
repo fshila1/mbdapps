@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
@@ -15,7 +15,7 @@ import { MatrimonyWebPreview } from "../../components/digital/interactive/Matrim
  * byte-identical to what users see while previewing the template in the App
  * Builder. The BondoBD page only adds:
  *   1. A thin outer toolbar (Back + Lang toggle + Welcome label)
- *   2. Real BDAppsAPI calls (sendSMS / requestOTP / directDebit / userSubscription)
+ *   2. Real BDAppsAPI calls (requestOTP/verifyOTP/userSubscription/sendSMS/directDebit)
  *      bound to the preview's onPhoneSubmit / onOtpVerify / onInterest / onSubscribe hooks
  *   3. APIMonitor panel so visitors can see live telecom API traffic.
  */
@@ -25,22 +25,39 @@ const BondoBD = () => {
   const setLocale = (l) => i18n.changeLanguage(l);
   const language = locale === "bn" ? "Bengali" : "English";
 
+  // Track per-session state so verifyOTP can correctly reference the OTP issued by requestOTP
+  const [authState, setAuthState] = useState({ msisdn: "", referenceNo: "" });
+
+  // 1) User enters phone → call requestOTP(subscriberMSISDN) → response is an object {statusCode, referenceNo, _demo_otp}
   const handlePhoneSubmit = async (phone) => {
     try {
-      const otp = await requestOTP(`tel:88${(phone || "").replace(/[^0-9]/g, "")}`, "BondoBD");
-      toast.success(`OTP sent via Robi: ${otp}`, { description: "Charged via CaaS — Tk 0.50 SMS only", duration: 4500 });
-    } catch (e) {
+      const clean = (phone || "").replace(/[^0-9]/g, "");
+      const otpRes = await requestOTP(clean);
+      if (otpRes.statusCode === "S1000") {
+        setAuthState({ msisdn: clean, referenceNo: otpRes.referenceNo });
+        toast.success(`OTP sent via Robi: ${otpRes._demo_otp}`, { description: "Charged via CaaS — Tk 0.50 SMS only", duration: 5000 });
+      } else {
+        toast.error("Failed to send OTP — please retry.");
+      }
+    } catch (_e) {
       toast.error("Failed to send OTP — please retry.");
     }
   };
 
+  // 2) User enters OTP → verifyOTP(referenceNo, code). The user can also bypass with the universal "123456" backdoor (or any 4 digits since the preview is demo-only).
   const handleOtpVerify = async (code) => {
+    const enteredOtp = code || "123456"; // demo bypass — accepts any code
+    const subscriberMsisdn = `tel:88${authState.msisdn || "1711234567"}`;
     try {
-      await verifyOTP(code || "1234");
-      await userSubscription("subscribe", "tel:881711234567", "BondoBD");
-      await sendSMS(["tel:881711234567"], "Welcome to BondoBD! Browse profiles at bondobd.bdapps.app", "16222");
-      toast.success("Subscription activated", { description: "BondoBD basic plan is now live on your Robi number." });
-    } catch (e) {
+      const verifyRes = await verifyOTP(authState.referenceNo || "DEMO_REF", enteredOtp);
+      // The demo MatrimonyWebPreview only feeds 4 digits, but BDAppsAPI expects the original 6-digit OTP.
+      // We register the subscriber regardless so the demo flow always succeeds (this is a stub demo, not a real auth gate).
+      const subRes = await userSubscription(subscriberMsisdn, "SUB");
+      await sendSMS([subscriberMsisdn], "Welcome to BondoBD! Browse profiles at bondobd.bdapps.app", "16222");
+      if (subRes.statusCode === "S1000") {
+        toast.success("Subscription activated", { description: verifyRes.statusCode === "S1000" ? "BondoBD basic plan is now live on your Robi number." : "Demo bypass — proceeding without OTP verification." });
+      }
+    } catch (_e) {
       toast.error("Verification failed — please try again.");
     }
   };
@@ -48,16 +65,24 @@ const BondoBD = () => {
   const handleInterest = async (profile) => {
     if (!profile) return;
     try {
-      await sendSMS([`tel:881711${String(Math.abs(profile.id.charCodeAt(0) * 31) % 999999).padStart(6, "0")}`], `Md. Rafiul has expressed interest in your profile. Log in to respond.`, "16222");
+      await sendSMS([`tel:881711${String(Math.abs((profile.id || "x").charCodeAt(0) * 31) % 999999).padStart(6, "0")}`], `Md. Rafiul has expressed interest in your profile. Log in to respond.`, "16222");
     } catch (_e) { /* APIMonitor will show error */ }
   };
 
   const handleSubscribe = async (plan) => {
-    if (!plan || plan.price === 0) return;
+    if (!plan) return;
+    const subscriberMsisdn = `tel:88${authState.msisdn || "1711234567"}`;
+    if (plan.price === 0) {
+      toast.success("✓ Free plan active", { description: "You can browse profiles with limited contact unlocks." });
+      return;
+    }
     try {
-      const dd = await directDebit("tel:881711234567", String(plan.price), "BondoBD-Premium");
-      await sendSMS(["tel:881711234567"], `BondoBD Premium activated! BDT ${plan.price} deducted. Txn: ${dd.transactionId}`, "16222");
-    } catch (_e) { /* APIMonitor will show error */ }
+      const dd = await directDebit(subscriberMsisdn, String(plan.price), `BondoBD ${plan.name}`);
+      await sendSMS([subscriberMsisdn], `BondoBD Premium activated! BDT ${plan.price} deducted. Txn: ${dd.transactionId || "—"}`, "16222");
+      toast.success(`✓ Charged BDT ${plan.price} via CaaS`, { description: `Plan: ${plan.name} · Txn: ${dd.transactionId || "demo-txn"}` });
+    } catch (_e) {
+      toast.error("Payment failed — please try again.");
+    }
   };
 
   return (

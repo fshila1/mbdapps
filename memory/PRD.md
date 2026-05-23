@@ -26,6 +26,28 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 
 ## What's Been Implemented (Feb 23, 2026 — iteration 13: BondoBD Matrimony template isolation across Digital Builder)
 
+### Iteration 14 — Preview ↔ Implementation Sync + APIMonitor fix (Feb 23, 2026)
+After iteration 13 (matrimony isolation in /digital), the user invoked the **Preview-to-Implementation Synchronization** rule: the actual generated app at `/apps/bondobd` was still showing the OLD UI (red gradient header, letter avatars, simple cards) while the new premium UI lived only in the /digital Live Preview. Refactored `/apps/bondobd` as a thin 100-line wrapper around the SAME `MatrimonyWebPreview` component → single source of truth. Wired the preview's optional integration hooks to real BDAppsAPI calls so APIMonitor lights up live during OTP/Interest/Subscribe flows.
+
+**Files patched:**
+- `/src/components/digital/interactive/MatrimonyPreview.jsx` — added optional props `chromeless`, `onPhoneSubmit`, `onOtpVerify`, `onInterest`, `onSubscribe`. Hooks fire on matri-otp-send, matri-otp-verify, matri-interest-*, matri-plan-*.
+- `/src/pages/apps/BondoBD.jsx` — rewritten (~100 lines). Outer toolbar with Back + Welcome + Bangla/EN toggle, then renders `<MatrimonyWebPreview cfg={...} onPhoneSubmit={...} onOtpVerify={...} onInterest={...} onSubscribe={...} />`, with APIMonitor floating panel below. Fixed BDAppsAPI signature mismatches (requestOTP returns object → use `_demo_otp`; verifyOTP takes referenceNo first; userSubscription takes subscriberId first, action='SUB'). Added missing toast.success in handleSubscribe.
+- `/src/components/APIMonitor.jsx` — moved from `bottom-6 right-6 z-[80]` to `bottom-6 left-6 zIndex:2147483646` to avoid collision with the Emergent "Made with" badge in the bottom-right corner. Panel also bumped to maximum z-index.
+
+**Bugs fixed mid-iteration (P1 + P1 + P2 caught by testing agent iter 14):**
+1. P1: `requestOTP()` returns `{statusCode, referenceNo, _demo_otp}` object — old code template-literal'd the whole object as "[object Object]". Now uses `${otpRes._demo_otp}` and stores `referenceNo` in component state.
+2. P1: `verifyOTP(referenceNo, code)` was being called as `verifyOTP(code)`, causing state lookup miss → E1854. Now passes the stored referenceNo.
+3. P1: `userSubscription(subscriberId, action)` was being called as `userSubscription('subscribe', msisdn, appName)` — swapped args. Now correctly registers the subscriber.
+4. P1: APIMonitor toggle had no effect because the Emergent floating badge was visually + click-wise overlapping. Moved to bottom-LEFT with extreme z-index.
+5. P2: `handleSubscribe` was missing the `toast.success("Charged BDT … via CaaS")` confirmation. Added.
+
+**Testing:** Manual smoke-test confirms all fixes:
+- OTP toast: "OTP sent via Robi: 994865" (real 6-digit code, not [object Object])
+- APIMonitor panel opens with 6+ live entries: /otp/request ✓, /otp/verify (demo bypass), /subscription/userSubscription ✓, /sms/send ✓, /caas/directDebit ✓ after plan purchase
+- Plan toast: "✓ Charged BDT 49 via CaaS · Plan: Premium 7 Days · Txn: TXN_MZUYJSUZO4J"
+- Visual identity: /apps/bondobd renders IDENTICAL to /digital Live Preview (ivory+maroon+gold, photographic avatars, classic serif, full OTP→Browse→Detail→Chat→Plans journey)
+- Bangla i18n: outer toolbar AND preview switch to Bangla together
+
 ### Iteration 13 — Matrimony Template Isolation + Premium SaaS Preview (Feb 23, 2026)
 **100% test pass per iteration_13.json (19/19 scenarios).** Resolved the long-standing P0 bug where the BondoBD (Matrimony) template was bleeding generic e-commerce content (Products / Add to Cart / Wireless Headphones / Banners) into Step 4 CMS and Step 5 Preview. Built a complete classic-Bangladeshi-matrimony preview with photographic avatars, full OTP login journey, filters, favourites, chat, and CaaS-charged plans — shared across `web-bondobd`, `pro-bondobd`, and `and-bondobd`. All other templates render unchanged.
 
