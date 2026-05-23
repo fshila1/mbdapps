@@ -1,0 +1,81 @@
+{
+  "summary": "Tested /apps/bondobd public route after rewrite as thin wrapper around MatrimonyWebPreview. CORE VISUAL/UI GOAL ACHIEVED: /apps/bondobd renders the new premium matrimony UI (ivory+maroon+gold theme, photographic randomuser.me avatars, BondoBD — Matrimony Service · VERIFIED MATRIMONY · BANGLADESH topbar, Find Your Perfect Match hero, Begin Your Search 4-filter card, 6 featured profiles Rahima/Sadia/Nusrat/Karim/Tanvir/Rafiqul, 3 success stories Imran&Tahmina / Sabbir&Mehjabin / Rafi&Anika). OLD UI IS GONE: no red gradient 'Send OTP via Robi' header, no 2,40,000+ stat tiles, no Browse Profiles/My Account tabs, no letter-only avatar circles. OTP journey (matri-cta-start→matri-otp-send→matri-otp-d0..3→matri-otp-verify), interest send, favourite heart with nav badge increment, profile detail, chat (input+send+auto-reply), plans (3 plans pl1/pl2/pl3), Bangla i18n (ফিরে / স্বাগতম, মো. রফিউল), and mobile responsiveness (420×900) all work. The 'Subscription activated · BondoBD basic plan is now live on your Robi number.' toast fires correctly. APIMonitor floating dock is visible with live call badge that increments (4 calls after OTP+verify+sub+sms). HOWEVER, 3 INTEGRATION BUGS found in /app/frontend/src/pages/apps/BondoBD.jsx — argument signatures are wrong for BDAppsAPI calls, causing the OTP toast to display '[object Object]' instead of the OTP code, and likely making userSubscription/verifyOTP silently no-op (toasts still fire). APIMonitor panel does NOT open when its floating toggle is clicked (badge updates fine, but panel never renders). Plan subscribe 'Charged BDT 49 via CaaS' toast did not fire after clicking matri-plan-pl2.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "APIMonitor", "issue": "Clicking floating toggle (data-testid=api-monitor-toggle) does NOT open the panel — verified twice. Badge counter increments correctly (showed 4 calls after OTP+verify+sub flow) so subscribeMonitor() and setLogs work, but setOpen(p=>!p) state toggle never renders the panel (data-testid=api-monitor-panel not present in DOM after click). Possibly a z-index or Sonner/Emergent badge overlap intercepting the click, or a regression in the component. Force=True click did not help. Major impact: users cannot actually inspect API call history despite the request saying APIMonitor should 'light up'.", "selector": "[data-testid='api-monitor-toggle']", "priority": "HIGH"},
+      {"component": "BondoBD OTP toast", "issue": "Toast renders 'OTP sent via Robi: [object Object]' instead of the demo OTP code. requestOTP() returns an object {statusCode, referenceNo, _demo_otp, ...} but BondoBD.jsx line 31 interpolates the whole object via template literal. Should use ${otp._demo_otp} or ${otp.referenceNo}.", "selector": "sonner toast", "priority": "HIGH"},
+      {"component": "Plans · Subscribe via CaaS", "issue": "Clicking matri-plan-pl2 (Premium 7 Days) does NOT show the expected '✓ Charged BDT 49 via CaaS' toast. handleSubscribe() in BondoBD.jsx only calls directDebit + sendSMS silently — no toast.success(). MatrimonyWebPreview internal toast also did not fire.", "selector": "[data-testid='matri-plan-pl2']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [
+      {"flow": "BondoBD → BDAppsAPI signature mismatches", "issue": "Three BDAppsAPI helpers are invoked with WRONG arg order in /app/frontend/src/pages/apps/BondoBD.jsx:\n  • Line 30: requestOTP(`tel:88…`, 'BondoBD') — signature is requestOTP(subscriberMSISDN); 2nd arg ignored. Returned VALUE is an object but BondoBD treats it as a string → [object Object] in toast.\n  • Line 39: verifyOTP(code || '1234') — signature is verifyOTP(referenceNo, enteredOtp). Passing the OTP code as referenceNo means state.otpStore lookup fails → returns E1854 'Could not find OTP'. BondoBD does NOT check the response and proceeds to userSubscription regardless, so the user-facing 'Subscription activated' toast fires even though verification actually FAILED on the API layer. APIMonitor would correctly log the E1854 verify failure.\n  • Line 40: userSubscription('subscribe', 'tel:881711234567', 'BondoBD') — signature is userSubscription(subscriberId, action). subscriberId is set to literal 'subscribe' and action to 'tel:881711234567'. The `if (action==='SUB')` branch never executes so no subscriber is actually registered. APIMonitor still records the call (S1000) but state is wrong.\nNet effect: toasts and APIMonitor LOOK correct but underlying integration state is broken — verification fails silently and no subscriber row is persisted.", "affected_selectors": ["[data-testid='matri-otp-send']", "[data-testid='matri-otp-verify']", "[data-testid='api-monitor-toggle']"]}
+    ],
+    "design_issues": [
+      {"screen": "All preview modals", "issues": ["Carry-over from iter 9–13: api.fontshare.com Cabinet Grotesk CORS-blocked — cosmetic console warning only, fallback fonts render fine."]}
+    ]
+  },
+  "verified_working": [
+    "Public route /apps/bondobd loads with NO login (correct)",
+    "Outer toolbar: bondobd-back link, Welcome label, lang-bn/lang-en toggle pill — all testids present",
+    "MatrimonyWebPreview TopBar: BondoBD — Matrimony Service · VERIFIED MATRIMONY · BANGLADESH",
+    "Hero: 'Find Your Perfect Match' + BANGLADESH'S MOST TRUSTED badge + 1,84,000+ members / 12,400 happy couples / 4.9 rating stats",
+    "Begin Your Search 4-filter card (I am a, Looking for, Age, Religion) + 'Start with OTP →' CTA",
+    "6 Featured Profile chips with photographic randomuser.me avatars: Rahima/Sadia/Nusrat/Karim/Tanvir/Rafiqul",
+    "3 Real Success Stories: Imran & Tahmina, Sabbir & Mehjabin, Rafi & Anika",
+    "OLD UI fully removed: no 'Send OTP via Robi' button, no '2,40,000+ Profiles' stat tiles, no Browse Profiles/My Account tabs, no letter-only avatars",
+    "OTP journey: matri-cta-start → 'Welcome to BondoBD' phone screen → matri-otp-phone input → matri-otp-send → 4-digit code screen with matri-otp-d0..d3 + 'Demo OTP — type any 4 digits' hint → matri-otp-verify → Browse view",
+    "Toast 'Subscription activated · BondoBD basic plan is now live on your Robi number.' fires after matri-otp-verify (sonner toaster confirmed)",
+    "APIMonitor floating button visible bottom-right with rose badge showing live call count (incremented 1→4 across OTP+verify+sub+SMS chain)",
+    "Browse view: 6 verified profile cards in 4-col grid (lg viewport) with ✓ Verified badge, ● Online dot, ❤ favourite heart, ✨ Match %, name+age, district+height, education, profession, religion+single, View + 💌 Interest buttons",
+    "matri-interest-p1 click → 'Interest sent' toast + button changes to ✓ Sent state",
+    "matri-fav-p2 click → toast + matri-nav-favorites badge increments to 1 (Favourites · 1)",
+    "matri-view-p3 click → Detail page with photo + matri-detail-chat + matri-detail-interest buttons",
+    "matri-detail-chat → Chat view with matri-chat-input + matri-chat-send. Typed message appears + auto-reply within ~1s",
+    "matri-nav-plans renders 3 plan cards with testids matri-plan-pl1, matri-plan-pl2, matri-plan-pl3",
+    "Bangla i18n: lang-bn click flips outer toolbar to 'ফিরে' + 'স্বাগতম, মো. রফিউল' AND MatrimonyWebPreview internal labels (প্রোফাইল / ফেভারিট / প্রিমিয়াম / ফিল্টার প্রয়োগ / পাঠান / আগ্রহ / দেখুন / যাচাইকৃত / অনলাইন / অবিবাহিত) — full bilingual",
+    "Mobile 420×900: outer Back+lang toggle visible, 2-col profile card grid, filter bar collapses cleanly"
+  ],
+  "bugs_found_in_this_iteration": [
+    {
+      "severity": "P1",
+      "file": "/app/frontend/src/pages/apps/BondoBD.jsx",
+      "lines": "28-46",
+      "rca": "BondoBD.jsx invokes three BDAppsAPI helpers with WRONG argument order. (1) requestOTP returns an object — `${otp}` in toast template literal stringifies as '[object Object]'. (2) verifyOTP(code) passes the OTP code as referenceNo, so state.otpStore[code] lookup fails → returns E1854 ('Could not find OTP'), but BondoBD does not await/check the response and proceeds to userSubscription regardless. (3) userSubscription('subscribe', 'tel:881711234567', 'BondoBD') swaps args — subscriberId becomes 'subscribe' and action becomes 'tel:...', so the `action==='SUB'` branch never runs and no subscriber is registered in state. Net effect: UI looks correct (toasts fire, APIMonitor lights up) but underlying mock state is broken, which defeats the 'real BDAppsAPI integration' goal of this iteration.",
+      "fix_recommendation": "Update BondoBD.jsx:\n  • const otpRes = await requestOTP(`tel:88…`); toast.success(`OTP sent via Robi: ${otpRes._demo_otp}`, ...) — and STORE otpRes.referenceNo in state so verifyOTP can use it.\n  • await verifyOTP(referenceNo, code) — pass the stored referenceNo as first arg and user-entered code as second.\n  • await userSubscription(`tel:881711234567`, 'SUB') — subscriberId first, action second, and action must be 'SUB' (uppercase) to match the API switch.\n  • Check S1000 statusCode before firing the 'Subscription activated' toast."
+    },
+    {
+      "severity": "P1",
+      "file": "/app/frontend/src/components/APIMonitor.jsx",
+      "rca": "Clicking the floating toggle button (data-testid=api-monitor-toggle) does NOT render the panel even though setOpen toggles. Verified twice with force=True. Badge counter updates correctly so subscribeMonitor/setLogs/setPulse all fire. Possible causes: (a) z-index conflict — Emergent badge sits in same bottom-right area and may overlap, (b) sonner Toaster container or pageshell renders over z-[81], (c) state is being reset by parent re-render. Needs developer investigation — perhaps log open state inside the component or boost z-index to z-[200].",
+      "fix_recommendation": "Verify setOpen state changes via React DevTools or console.log; consider boosting panel z-index to z-[200]; or check whether MatrimonyWebPreview / Sonner Toaster is portal-mounting an overlay that intercepts clicks. If clicks register but panel doesn't render, the issue is React state isolation."
+    },
+    {
+      "severity": "P2",
+      "file": "/app/frontend/src/pages/apps/BondoBD.jsx",
+      "lines": "55-61 (handleSubscribe)",
+      "rca": "handleSubscribe calls directDebit + sendSMS but never calls toast.success — so clicking matri-plan-pl2 does NOT show the expected '✓ Charged BDT 49 via CaaS' confirmation toast. MatrimonyWebPreview internal handler also did not toast in our test.",
+      "fix_recommendation": "Add toast.success(`✓ Charged BDT ${plan.price} via CaaS`, { description: `Txn: ${dd.transactionId}` }) after the directDebit await."
+    }
+  ],
+  "test_report_links": ["/app/test_reports/iteration_14.json"],
+  "action_items": [
+    "Fix BondoBD.jsx BDAppsAPI signature mismatches (requestOTP/verifyOTP/userSubscription wrong arg order) — see fix_recommendation above. This is THE iteration's headline integration and it is currently broken at the data layer (UI looks fine).",
+    "Fix APIMonitor floating panel — clicking the toggle does not render data-testid=api-monitor-panel. Badge counter works, but inspector flow is dead. Likely z-index / portal overlap.",
+    "Add toast.success in handleSubscribe so matri-plan-pl2 click shows '✓ Charged BDT 49 via CaaS'.",
+    "(Optional, carry-over) Self-host Cabinet Grotesk to remove fontshare CORS console warning."
+  ],
+  "critical_code_review_comments": [
+    "BondoBD.jsx is a clean ~100-line thin wrapper — architecturally correct. But the BDAppsAPI handlers have a typing/contract drift between BDAppsAPI.js and BondoBD.jsx. Recommend adding JSDoc @typedef or migrating BDAppsAPI.js to TypeScript so call-sites get arg-order errors at edit time.",
+    "verifyOTP returns a response object with statusCode that is currently IGNORED by BondoBD.jsx — even failures (E1850 invalid OTP, E1854 not found) silently flow to userSubscription. Always check response.statusCode === 'S1000' before chaining the next call.",
+    "BondoBD hard-codes 'tel:881711234567' as the subscriber MSISDN inside handleOtpVerify / handleSubscribe instead of using the phone the user just entered. Should pipe the user's phone through onPhoneSubmit and store it in state, then use it in the verify+subscribe handlers.",
+    "APIMonitor regression must be reproduced — if a recent change broke its visibility, that breaks every other /apps/* page that uses it.",
+    "MatrimonyPreview.jsx is now ~880+ lines (still over 700-line guideline). Carry-over from iter 13 — extract SplashScreen / OtpPhoneScreen / OtpCodeScreen / ProfileCardGrid / DetailScreen / ChatScreen / PlansScreen into matrimony/screens/ subfolder."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "78% — 18/23 scenarios fully pass. 3 explicit failures (OTP toast text, APIMonitor panel, plan charged toast) and 1 hidden integration failure (verifyOTP+userSubscription wrong args silently fail at API layer though UI displays success). All visual/UX requirements met."},
+  "test_credentials": "None required — /apps/bondobd is a public route",
+  "seed_data_creation": "None — MatrimonyWebPreview uses internal demo profiles/stories/plans",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Visual/UI/UX of /apps/bondobd is fully aligned with /digital Live Preview (no red header, no letter avatars, no old stats tiles). PRIMARY OUTSTANDING BUG is in /app/frontend/src/pages/apps/BondoBD.jsx — the BDAppsAPI call signatures are wrong (requestOTP returns object not string; verifyOTP takes (referenceNo, otp) not (otp); userSubscription takes (subscriberId, action) not (action, subscriberId, appName)). The toasts and APIMonitor badge fire but underlying mock state never registers the subscriber. SECONDARY BUG: APIMonitor floating panel does NOT open when its toggle button (data-testid=api-monitor-toggle) is clicked — badge updates but panel never renders. TERTIARY: handleSubscribe missing toast.success. Once fixed, retest: (a) OTP toast should show actual 6-digit demo OTP code, (b) APIMonitor panel should open and list OTP/SMS/Subscription/CaaS rows, (c) matri-plan-pl2 click should show 'Charged BDT 49 via CaaS' toast. Key testids reference: bondobd-back, lang-bn, lang-en, matri-cta-start, matri-otp-phone, matri-otp-send, matri-otp-d0..3, matri-otp-verify, matri-fav-p1..p6, matri-interest-p1..p6, matri-view-p1..p6, matri-nav-{browse|favorites|plans}, matri-detail-chat, matri-detail-interest, matri-chat-input, matri-chat-send, matri-plan-pl1/pl2/pl3, api-monitor-toggle, api-monitor-panel. Toast lib: sonner."
+}
