@@ -13,6 +13,7 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 - React Router v7 for routing
 - Shadcn UI + Tailwind + lucide-react icons + recharts for charts + sonner for toasts
 - Fonts: Cabinet Grotesk (headings) + IBM Plex Sans (body) + JetBrains Mono (code)
+- i18n via `react-i18next` (EN + বাং)
 
 ## User Personas
 1. **Developer** — submits Pro/Lite apps, manages keywords, reads reports, browses Digital templates
@@ -22,6 +23,44 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 ## Demo Credentials
 - Developer: `developer@bdapps.com` / `dev123`
 - Admin: `admin@bdapps.com` / `admin123`
+
+## What's Been Implemented (Feb 23, 2026 — iteration 13: BondoBD Matrimony template isolation across Digital Builder)
+
+### Iteration 13 — Matrimony Template Isolation + Premium SaaS Preview (Feb 23, 2026)
+**100% test pass per iteration_13.json (19/19 scenarios).** Resolved the long-standing P0 bug where the BondoBD (Matrimony) template was bleeding generic e-commerce content (Products / Add to Cart / Wireless Headphones / Banners) into Step 4 CMS and Step 5 Preview. Built a complete classic-Bangladeshi-matrimony preview with photographic avatars, full OTP login journey, filters, favourites, chat, and CaaS-charged plans — shared across `web-bondobd`, `pro-bondobd`, and `and-bondobd`. All other templates render unchanged.
+
+**Files added:**
+- `/src/components/digital/interactive/MatrimonyPreview.jsx` — premium matrimony preview (~880 lines):
+  - State machine: `landing | otp-phone | otp-code | browse | detail | chat | favorites | plans`
+  - `MatriAvatar` — photographic avatar via randomuser.me with SVG portrait fallback on error (gender-neutral silhouettes; no traditional attire)
+  - Classic warm palette: ivory `#FFFBEF` + maroon `#7E1733` + gold `#C7A24A` + dusty rose `#C2185B`
+  - Floral SVG corner ornaments + DividerOrnament (star/diamond divider)
+  - Landing: "Find Your Perfect Match" serif hero + 4-filter search card + 6 Featured Profiles + 3 Real Success Stories
+  - OTP: 2-step flow (phone with +88 prefix, terms checkbox → 4-digit code with Demo OTP hint, Resend, Verify)
+  - Browse: 5-column filter bar (Gender / Age / Religion / District / Apply) + Sort dropdown + 4-column responsive card grid (`grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4`)
+  - Profile cards: `rounded-3xl` with aspect-square photo + gradient overlay, ✓ Verified + ● Online (pulsing) badges, ❤ Favourite + ✨ Match % chip, name + age + district + height overlay, education + profession + religion·marital info, View + 💌 Interest CTAs, hover lift animation
+  - Detail page: full photo + 4-field grid (Education/Height/Religion/Marital Status) + About + Family + Locked Contact (blurred until plan purchase) + Send Interest + Start Chat
+  - Chat: avatar header + Online·Verified badge + incoming mock messages + outgoing send + auto-reply (~900ms)
+  - Favourites: dedicated tab with live count badge in header + per-card View/Chat actions
+  - Plans: 3-tier (Free / Premium 7 Days / Premium Monthly) with "Subscribe via CaaS" → toast "✓ Charged BDT XX via CaaS"
+  - `matrimonyAndroidScreens()` export — 6 Android screens (Splash → OTP Phone → OTP Code → Browse → Profile → Chat) using `render:` key (matches AndroidEmulator schema)
+
+**Files patched:**
+- `/src/mocks/contentSeeds.js` — `TEMPLATE_KIND` adds web/pro/and-bondobd → `matrimony`. `EMPTY_CONTENT.matrimony = { storeInfo, profiles, stories, plans }`. `SAMPLE_CONTENT['web-bondobd']` seeds 6 BD profiles (Rahima/Sadia/Nusrat/Karim/Tanvir/Rafiqul) + 3 success stories + 3 plans with full bio/family/photo URLs (randomuser.me). Pro + Android share the same seed.
+- `/src/components/digital/ContentManager.jsx` — `SECTIONS.matrimony = ['profiles','stories','plans','storeInfo']`. `SECTION_LABELS` adds Member Profiles / Success Stories / Subscription Plans. `MIN_REQUIRED.matrimony = { profiles: 3, plans: 1 }`. Editor branches for `profiles` (name/age/gender/district/religion/education/profession/height/marital/about/status), `stories` (photo/couple/year/district/quote), `plans` (name/price/period/badge/status). `StoreInfoEditor` adapts to matrimony kind. MiniPreview gains 3 matrimony branches (profile list, story cards with photo, plan rows).
+- `/src/components/digital/interactive/UniversalWebPreview.jsx` — imports MatrimonyWebPreview; PREVIEWS map adds `web-bondobd`; forwards `content` prop into preview component.
+- `/src/components/digital/interactive/UniversalAndroidPreview.jsx` — imports matrimonyAndroidScreens; SCREENS map adds `and-bondobd`.
+- `/src/components/digital/interactive/WebPreviews.jsx` — imports MatrimonyWebPreview; adds `ProMatrimonyAdapter` wrapper so the Pro Builder (`pro-bondobd`) uses the same matrimony component (not the generic SubPortal fallback).
+- `/src/components/digital/AppBuilder.jsx` — passes `content` prop into UniversalWebPreview for Step 5 (preview now reflects the user's matrimony content). Content-applied banner now counts profiles/stories/plans for matrimony templates.
+
+**Bug fixed mid-iteration:**
+- P0 (caught by testing agent): `matrimonyAndroidScreens` used `content:` key but `AndroidEmulator.jsx` calls `current.render(ctx)` — all 6 screen objects now use `render:` matching the schema of ecomScreens/foodScreens/etc.
+
+**Testing:** iteration_13.json — 19/19 pass. Verified: ZERO e-commerce leak in matrimony preview/CMS. Full OTP→Browse→Filter→Fav→Interest→View→Chat→Plans flow works. Step 4 CMS shows exactly 4 matrimony sections. Step 5 preview reflects user content. Mobile 420×900 → 2-col grid. Bangla i18n switches OTP labels. E-commerce regression confirmed clean (web-ecom/food/health/edu still render correctly). Pro builder pro-bondobd renders MatrimonyWebPreview (not SubPortal). Android emulator pre-fix crashed; post-fix all 6 screens navigable.
+
+**Carry-over (cosmetic, not blocking):** Cabinet Grotesk via api.fontshare.com CORS-blocked — fallback system fonts render fine.
+
+
 
 ## Core Requirements (Static)
 - All flows must be navigable end-to-end with no broken pages
