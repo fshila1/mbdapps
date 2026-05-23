@@ -3,11 +3,19 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
 import { MatrimonyWebPreview } from "./MatrimonyPreview";
+import { NewsWebPreview } from "./NewsPreview";
+import { QuizWebPreview } from "./QuizPreview";
 
 // Pro builder adapter: BDappsWebPreview passes (appName, tagline, primary, accent, language).
 // MatrimonyWebPreview expects cfg.* — wrap so Pro+Web previews share one source of truth.
 const ProMatrimonyAdapter = ({ appName, tagline, primary, accent, language }) => (
   <MatrimonyWebPreview cfg={{ appName, tagline, primary, accent, language, fontFamily: "Inter, sans-serif" }} />
+);
+const ProNewsAdapter = ({ appName, tagline, primary, accent, language, content }) => (
+  <NewsWebPreview cfg={{ appName, tagline, primary, accent, language, fontFamily: "Inter, sans-serif" }} content={content} />
+);
+const ProQuizAdapter = ({ appName, tagline, primary, accent, language, content }) => (
+  <QuizWebPreview cfg={{ appName, tagline, primary, accent, language, fontFamily: "Inter, sans-serif" }} content={content} />
 );
 
 // Helper: language strings (English / Bengali)
@@ -728,6 +736,10 @@ const PREVIEWS = {
   "pro-admin": AdminPreview,
   // Matrimony (BondoBD) — isolated preview
   "pro-bondobd": ProMatrimonyAdapter,
+  // News (NewsNow BD) — isolated preview
+  "pro-newsnow": ProNewsAdapter,
+  // Quiz (QuizBD) — isolated preview
+  "pro-quizbd": ProQuizAdapter,
 };
 
 const BDappsWebPreview = ({ templateId, appName = "BDapps App", tagline = "Your tagline", primaryColor = "#0f172a", secondaryColor = "#e11d48", language = "English", url, height }) => {

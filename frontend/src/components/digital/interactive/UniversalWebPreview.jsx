@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MatrimonyWebPreview } from "./MatrimonyPreview";
+import { NewsWebPreview } from "./NewsPreview";
+import { QuizWebPreview } from "./QuizPreview";
 
 // Compact yet truly interactive web previews for universal templates.
 // Each has 3-6 internal pages with working buttons and state.
@@ -571,6 +573,8 @@ const PREVIEWS = {
   "web-ngo": NgoPlatform,
   "web-saas": SaasDashboard,
   "web-bondobd": MatrimonyWebPreview,
+  "web-newsnow": NewsWebPreview,
+  "web-quizbd": QuizWebPreview,
 };
 
 const UniversalWebPreview = ({ templateId, cfg, url, height = "h-[600px]", content }) => {

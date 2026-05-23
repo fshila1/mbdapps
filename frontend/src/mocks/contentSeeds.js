@@ -127,6 +127,80 @@ export const SAMPLE_CONTENT = {
     ],
     testimonials: [{ id: uid("ts"), name: "Faria Sultana", company: "GrowthLab BD", quote: "Increased team productivity by 40%", image: "" }],
   }),
+  // ============ NEWS (NewsNow BD) ============
+  "web-newsnow": () => ({
+    storeInfo: { name: "NewsNow BD", phone: "+880 1700-400400", email: "newsroom@newsnow.bd", address: "Karwan Bazar, Dhaka 1215", hours: "24/7 Newsroom", currency: "BDT" },
+    newsBanner: { headline: "Bangladesh Economy Grows 6.5% in Q4 — GDP Report 2026", subhead: "Finance Minister credits digital service economy as a 'major contributor' to growth.", featuredImage: "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?w=1200&q=80", breakingBadge: true },
+    newsCategories: [
+      { id: uid("nc"), name: "Politics", slug: "politics", color: "#dc2626" },
+      { id: uid("nc"), name: "Sports", slug: "sports", color: "#16a34a" },
+      { id: uid("nc"), name: "Business", slug: "business", color: "#d97706" },
+      { id: uid("nc"), name: "Technology", slug: "technology", color: "#2563eb" },
+      { id: uid("nc"), name: "Entertainment", slug: "entertainment", color: "#9333ea" },
+      { id: uid("nc"), name: "International", slug: "international", color: "#0891b2" },
+      { id: uid("nc"), name: "Lifestyle", slug: "lifestyle", color: "#db2777" },
+    ],
+    articles: [
+      { id: uid("art"), title: "Bangladesh Economy Grows 6.5% in Q4 — GDP Report 2026", subtitle: "Strong garment exports, remittance inflows lead growth", summary: "Bangladesh's economy expanded by 6.5% in the fourth quarter, exceeding analyst expectations driven by strong garment exports and remittance inflows.", content: "Bangladesh's economy expanded by 6.5% in the fourth quarter of 2025-26, exceeding analyst expectations of 5.8%. The growth was driven by a 12% jump in garment exports, an 18% increase in remittance inflows from the Middle East, and a notable rise in domestic consumption fueled by easing inflation.\n\nFinance Minister highlighted the Robi-backed digital service economy as a 'major contributor' to the growth, citing the 2 billion BDT generated through telecom-native apps in 2025.\n\nThe BB governor also confirmed inflation has eased to 6.1%, well within the target band. Analysts now expect another rate cut at the next monetary policy committee meeting in March.", author: "Mehedi Hassan", publishDate: "2026-02-14", featuredImage: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1000&q=80", category: "Business", tags: ["GDP","Economy","Bangladesh"], readTime: 5, featured: true, trending: true, status: "Published" },
+      { id: uid("art"), title: "Metro Rail Extension to Gazipur Inaugurated", subtitle: "Cuts commute times by half for 4M daily commuters", summary: "The PM inaugurated the metro rail extension from Uttara to Gazipur.", content: "The Prime Minister has officially inaugurated the metro rail extension from Uttara to Gazipur, cutting commute times by half for the 4 million daily commuters. The new 22km stretch features 8 stations and will run every 4 minutes during peak hours.", author: "Bangladesh Sangbad Sangstha", publishDate: "2026-02-14", featuredImage: "https://images.unsplash.com/photo-1581262208435-41726149a759?w=1000&q=80", category: "Politics", tags: ["Metro","Infrastructure"], readTime: 3, featured: true, trending: true, status: "Published" },
+      { id: uid("art"), title: "Bangladesh Wins Asia Cup Series Against Pakistan", subtitle: "Shakib named Player of the Series in 2-1 victory", summary: "Bangladesh clinched a thrilling 2-1 series victory against Pakistan.", content: "Bangladesh clinched a thrilling 2-1 series victory against Pakistan in the Asia Cup ODI series. Shakib Al Hasan was named player of the series. The decider in Mirpur drew over 25,000 fans.", author: "T Sports", publishDate: "2026-02-13", featuredImage: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=1000&q=80", category: "Sports", tags: ["Cricket","Asia Cup"], readTime: 2, featured: false, trending: true, status: "Published" },
+      { id: uid("art"), title: "BDApps Reaches 10 Million Developer Downloads", subtitle: "Platform now hosts 5,000+ active developer apps", summary: "Robi's BDApps platform crossed 10 million downloads.", content: "Robi's BDApps platform crossed 10 million downloads across its developer-built apps. The platform now hosts over 5,000 active apps from 1,200+ Bangladeshi developers.", author: "Tech Desk", publishDate: "2026-02-14", featuredImage: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=1000&q=80", category: "Technology", tags: ["BDApps","Robi"], readTime: 3, featured: true, trending: false, status: "Published" },
+      { id: uid("art"), title: "DSE Index Rises 2.4% on Banking Sector Strength", subtitle: "Main index closes at 6,310 led by banks and pharma", summary: "The DSE main index closed at 6,310, up 2.4%.", content: "The DSE main index closed at 6,310, up 2.4% led by banking and pharma stocks. Daily turnover crossed BDT 12 billion for the first time in eight months.", author: "Business Desk", publishDate: "2026-02-14", featuredImage: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1000&q=80", category: "Business", tags: ["Stocks","DSE"], readTime: 3, featured: false, trending: false, status: "Published" },
+      { id: uid("art"), title: "Shakib Al Hasan Retires from T20 Internationals", subtitle: "End of an era after 17 years in international cricket", summary: "Shakib Al Hasan announced his retirement from T20I cricket.", content: "Shakib Al Hasan announced his retirement from T20I cricket after 17 years. He thanked fans at a press conference held at the BCB head office. He will continue playing ODIs and Tests.", author: "Sports Desk", publishDate: "2026-02-14", featuredImage: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=1000&q=80", category: "Sports", tags: ["Cricket","Shakib"], readTime: 2, featured: true, trending: true, status: "Published" },
+      { id: uid("art"), title: "UN Climate Summit: Bangladesh Secures $500M Fund", subtitle: "Climate adaptation funding announced at COP", summary: "Bangladesh secured USD 500 million in climate adaptation funding.", content: "Bangladesh secured USD 500 million in climate adaptation funding at the UN COP summit. The fund will support coastal embankment projects and salinity-resistant crop research.", author: "International Desk", publishDate: "2026-02-13", featuredImage: "https://images.unsplash.com/photo-1569163139394-de4798aa62b6?w=1000&q=80", category: "International", tags: ["Climate","UN"], readTime: 4, featured: false, trending: false, status: "Published" },
+      { id: uid("art"), title: "Robi Launches 5G Pilot in Gulshan", subtitle: "Speeds exceed 1Gbps in initial trials", summary: "Robi has begun 5G trials in select areas of Dhaka.", content: "Robi has begun 5G trials in select areas of Dhaka, with speeds exceeding 1Gbps in initial tests. Commercial rollout is expected by Q3 2026.", author: "Robi Newsroom", publishDate: "2026-02-12", featuredImage: "https://images.unsplash.com/photo-1563770660941-20978e870e26?w=1000&q=80", category: "Technology", tags: ["5G","Robi"], readTime: 3, featured: false, trending: true, status: "Published" },
+    ],
+    trending: [
+      { id: uid("tr"), headline: "Shakib Al Hasan retires from T20Is", priority: 1 },
+      { id: uid("tr"), headline: "GDP grows 6.5% in Q4", priority: 2 },
+      { id: uid("tr"), headline: "Gazipur metro line opens", priority: 3 },
+      { id: uid("tr"), headline: "Robi 5G pilot in Gulshan", priority: 4 },
+      { id: uid("tr"), headline: "Asia Cup: Bangladesh beats Pakistan", priority: 5 },
+    ],
+    editorsPicks: [
+      { id: uid("ep"), articleTitle: "Bangladesh Economy Grows 6.5% in Q4 — GDP Report 2026", note: "Most important read of the week" },
+      { id: uid("ep"), articleTitle: "Shakib Al Hasan Retires from T20 Internationals", note: "End of an era" },
+      { id: uid("ep"), articleTitle: "BDApps Reaches 10 Million Developer Downloads", note: "Bangladesh tech milestone" },
+    ],
+    ads: [
+      { id: uid("ad"), name: "Sidebar Sponsor — Robi", image: "", targetUrl: "https://robi.com.bd", placement: "Sidebar" },
+      { id: uid("ad"), name: "Top Banner — BDApps", image: "", targetUrl: "https://bdapps.com", placement: "Header" },
+    ],
+    liveFeed: [
+      { id: uid("lf"), source: "Prothom Alo", endpoint: "https://api.prothomalo.com/rss", category: "All" },
+      { id: uid("lf"), source: "Daily Star BD", endpoint: "https://api.thedailystar.net/rss", category: "All" },
+      { id: uid("lf"), source: "BBC Bangla", endpoint: "https://feeds.bbci.co.uk/bengali/rss.xml", category: "International" },
+    ],
+  }),
+  // ============ QUIZ (QuizBD) ============
+  "web-quizbd": () => ({
+    storeInfo: { name: "QuizBD", phone: "+880 1700-500500", email: "play@quizbd.com", address: "Banani, Dhaka", hours: "Always Open", currency: "BDT" },
+    quizDetails: { title: "Bangladesh Knowledge Master", description: "Test your knowledge of Bangladesh — history, sports, culture, and current affairs. Climb the leaderboard, earn certificates, and win prizes!", coverImage: "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=1200&q=80", category: "General Knowledge" },
+    quizCategories: [
+      { id: uid("qc"), name: "Bangladesh GK", icon: "🇧🇩", color: "#16a34a" },
+      { id: uid("qc"), name: "Islam & Religion", icon: "🕌", color: "#0891b2" },
+      { id: uid("qc"), name: "Science & Tech", icon: "🔬", color: "#2563eb" },
+      { id: uid("qc"), name: "Sports", icon: "⚽", color: "#d97706" },
+      { id: uid("qc"), name: "Entertainment", icon: "🎬", color: "#9333ea" },
+    ],
+    questions: [
+      { id: uid("q"), text: "What is the national flower of Bangladesh?", type: "multiple-choice", options: ["Water Lily (Shapla)", "Rose", "Lotus", "Orchid"], correct: 0, explanation: "Shapla (Water Lily) is the national flower of Bangladesh.", difficulty: "Easy", category: "Bangladesh GK", points: 10 },
+      { id: uid("q"), text: "How many districts are in Bangladesh?", type: "multiple-choice", options: ["48", "64", "72", "56"], correct: 1, explanation: "Bangladesh has 64 administrative districts across 8 divisions.", difficulty: "Easy", category: "Bangladesh GK", points: 10 },
+      { id: uid("q"), text: "In which year did Bangladesh gain independence?", type: "multiple-choice", options: ["1947", "1970", "1971", "1975"], correct: 2, explanation: "Bangladesh declared independence on March 26, 1971.", difficulty: "Easy", category: "Bangladesh GK", points: 10 },
+      { id: uid("q"), text: "What is the longest river in Bangladesh?", type: "multiple-choice", options: ["Buriganga", "Karnaphuli", "Meghna", "Jamuna"], correct: 3, explanation: "Jamuna is the longest river in Bangladesh.", difficulty: "Medium", category: "Bangladesh GK", points: 15 },
+      { id: uid("q"), text: "How many pillars of Islam are there?", type: "multiple-choice", options: ["3", "4", "5", "6"], correct: 2, explanation: "There are 5 pillars of Islam.", difficulty: "Easy", category: "Islam & Religion", points: 10 },
+      { id: uid("q"), text: "What does CPU stand for?", type: "multiple-choice", options: ["Central Power Unit", "Computer Processing Unit", "Central Processing Unit", "Core Power Unit"], correct: 2, explanation: "CPU stands for Central Processing Unit.", difficulty: "Easy", category: "Science & Tech", points: 10 },
+      { id: uid("q"), text: "Bangladesh's most capped Test cricketer?", type: "multiple-choice", options: ["Mashrafe Mortaza", "Shakib Al Hasan", "Tamim Iqbal", "Mushfiqur Rahim"], correct: 1, explanation: "Shakib Al Hasan holds the record for most Test caps.", difficulty: "Medium", category: "Sports", points: 15 },
+      { id: uid("q"), text: "Who wrote 'Amar Sonar Bangla'?", type: "multiple-choice", options: ["Rabindranath Tagore", "Kazi Nazrul Islam", "Lalon Shah", "Shyamal Mitra"], correct: 0, explanation: "Rabindranath Tagore wrote the Bangladesh national anthem.", difficulty: "Easy", category: "Entertainment", points: 10 },
+    ],
+    quizSettings: { timeLimit: 10, passingScore: 60, attemptsAllowed: 3, randomize: true, showExplanations: true },
+    leaderboardSettings: { enabled: true, rankingRule: "Points + Streak", showWeekly: true, showAllTime: true },
+    certificates: [
+      { id: uid("cert"), name: "Bronze Achiever", template: "minimal-bronze", passingRequirement: 60, color: "#a16207" },
+      { id: uid("cert"), name: "Silver Scholar", template: "modern-silver", passingRequirement: 75, color: "#94a3b8" },
+      { id: uid("cert"), name: "Gold Master", template: "elegant-gold", passingRequirement: 90, color: "#eab308" },
+    ],
+  }),
   // ============ MATRIMONY (BondoBD) ============
   "web-bondobd": () => ({
     storeInfo: { name: "BondoBD Matrimony", phone: "+880 1700-200200", email: "support@bondobd.com", address: "Banani Road 11, Dhaka 1213", hours: "24/7 Online Support", currency: "BDT" },
@@ -160,6 +234,13 @@ SAMPLE_CONTENT["and-travel"] = SAMPLE_CONTENT["web-travel"];
 // Matrimony — Pro + Android share the same seed
 SAMPLE_CONTENT["pro-bondobd"] = SAMPLE_CONTENT["web-bondobd"];
 SAMPLE_CONTENT["and-bondobd"] = SAMPLE_CONTENT["web-bondobd"];
+// News (NewsNow BD) — Pro + Android share the same seed
+SAMPLE_CONTENT["pro-newsnow"] = SAMPLE_CONTENT["web-newsnow"];
+SAMPLE_CONTENT["and-newsnow"] = SAMPLE_CONTENT["web-newsnow"];
+SAMPLE_CONTENT["and-news"] = SAMPLE_CONTENT["web-newsnow"];
+// Quiz (QuizBD) — Pro + Android share the same seed
+SAMPLE_CONTENT["pro-quizbd"] = SAMPLE_CONTENT["web-quizbd"];
+SAMPLE_CONTENT["and-quizbd"] = SAMPLE_CONTENT["web-quizbd"];
 
 // Default empty content per template type — used at start of Step 4
 export const EMPTY_CONTENT = {
@@ -172,6 +253,8 @@ export const EMPTY_CONTENT = {
   ngo: { storeInfo: {}, banners: [], team: [], impact: {}, campaigns: [] },
   saas: { storeInfo: {}, banners: [], pricing: [], testimonials: [] },
   matrimony: { storeInfo: {}, profiles: [], stories: [], plans: [] },
+  news: { storeInfo: {}, newsBanner: {}, newsCategories: [], articles: [], trending: [], editorsPicks: [], ads: [], liveFeed: [] },
+  quiz: { storeInfo: {}, quizDetails: {}, quizCategories: [], questions: [], quizSettings: {}, leaderboardSettings: {}, certificates: [] },
 };
 
 export const TEMPLATE_KIND = {
@@ -187,6 +270,15 @@ export const TEMPLATE_KIND = {
   "web-bondobd": "matrimony",
   "pro-bondobd": "matrimony",
   "and-bondobd": "matrimony",
+  // News (NewsNow BD) — Web / Pro / Android isolated
+  "web-newsnow": "news",
+  "pro-newsnow": "news",
+  "and-newsnow": "news",
+  "and-news": "news",
+  // Quiz (QuizBD) — Web / Pro / Android isolated
+  "web-quizbd": "quiz",
+  "pro-quizbd": "quiz",
+  "and-quizbd": "quiz",
 };
 
 export const getKindFor = (templateId) => TEMPLATE_KIND[templateId] || "ecommerce";

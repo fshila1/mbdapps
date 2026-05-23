@@ -1,316 +1,95 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { ChevronLeft, Bell, Search, Bookmark, Share2 } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import APIMonitor from "../../components/APIMonitor";
 import { requestOTP, verifyOTP, userSubscription, sendSMS, notifySubscribers } from "../../services/BDAppsAPI";
-import { useDemoLocale, LangToggle } from "../../services/demoI18n";
+import { NewsWebPreview } from "../../components/digital/interactive/NewsPreview";
 
-const CATEGORIES = ["Bangladesh", "Technology", "Business", "Sports", "International"];
-const CAT_COLORS = {
-  Bangladesh: "from-emerald-600 to-green-800",
-  Technology: "from-sky-600 to-blue-800",
-  Business: "from-amber-600 to-orange-700",
-  Sports: "from-rose-600 to-red-800",
-  International: "from-indigo-600 to-purple-800",
-};
-
-const ARTICLES = [
-  // Bangladesh
-  { id: 1, cat: "Bangladesh", title: "Bangladesh Economy Grows 6.5% in Q4 — GDP Report 2026", author: "Staff Reporter", date: "Today", readTime: 4, body: "Bangladesh's economy expanded by 6.5% in the fourth quarter, exceeding analyst expectations. The growth was driven by strong garment exports, remittance inflows from the Middle East, and increased domestic consumption.\n\nFinance Minister highlighted the Robi-backed digital service economy as a 'major contributor' to the growth, citing the 2 billion BDT generated through telecom-native apps in 2025.\n\nThe BB governor also confirmed inflation has eased to 6.1%, well within the target band. Analysts now expect another rate cut at the next monetary policy committee.", shares: 1248 },
-  { id: 2, cat: "Bangladesh", title: "New Metro Rail Extension to Gazipur Inaugurated by PM", author: "BSS", date: "Today", readTime: 3, body: "The Prime Minister has officially inaugurated the metro rail extension from Uttara to Gazipur, cutting commute times by half for the 4 million daily commuters.\n\nThe new 22km stretch features 8 stations and will run every 4 minutes during peak hours.", shares: 842 },
-  { id: 3, cat: "Bangladesh", title: "Bangladesh Wins Asia Cup Cricket Series Against Pakistan", author: "T Sports", date: "Yesterday", readTime: 2, body: "Bangladesh clinched a thrilling 2-1 series victory against Pakistan in the Asia Cup ODI series. Shakib Al Hasan was named player of the series.", shares: 4218 },
-  // Technology
-  { id: 4, cat: "Technology", title: "BDApps Reaches 10 Million Developer Downloads Milestone", author: "Tech Desk", date: "Today", readTime: 3, body: "Robi's BDApps platform crossed 10 million downloads across its developer-built apps. The platform now hosts over 5,000 active apps from 1,200+ Bangladeshi developers.", shares: 1820 },
-  { id: 5, cat: "Technology", title: "Bangladesh Launches First AI-Powered Government Portal", author: "Tech Desk", date: "Yesterday", readTime: 5, body: "The Bangladesh ICT Division has rolled out an AI-powered citizen services portal answering 200+ government queries in Bangla and English.", shares: 612 },
-  { id: 6, cat: "Technology", title: "Robi 5G Pilot Begins in Dhaka's Gulshan Area", author: "Robi Newsroom", date: "2 days ago", readTime: 4, body: "Robi has begun 5G trials in select areas of Dhaka, with speeds exceeding 1Gbps in initial tests.", shares: 924 },
-  // Business
-  { id: 7, cat: "Business", title: "DSE Index Rises 2.4% on Strong Banking Sector Performance", author: "Business Desk", date: "Today", readTime: 3, body: "The DSE main index closed at 6,310, up 2.4% led by banking and pharma stocks.", shares: 412 },
-  { id: 8, cat: "Business", title: "New E-Commerce Policy to Support Local Startups", author: "Business Desk", date: "Yesterday", readTime: 4, body: "Cabinet approved a new e-commerce policy giving tax breaks to local startups for 5 years.", shares: 318 },
-  { id: 9, cat: "Business", title: "Garment Exports Hit All-Time High of USD 42 Billion", author: "Business Desk", date: "3 days ago", readTime: 5, body: "Bangladesh garment exports reached a record USD 42 billion in FY 2025-26.", shares: 1102 },
-  // Sports
-  { id: 10, cat: "Sports", title: "Shakib Al Hasan Retires from T20 Internationals", author: "Sports Desk", date: "Today", readTime: 2, body: "Shakib Al Hasan announced his retirement from T20I cricket after 17 years.", shares: 7820 },
-  { id: 11, cat: "Sports", title: "Bangladesh Football Team Qualifies for SAFF Final", author: "Sports Desk", date: "Yesterday", readTime: 3, body: "Bangladesh defeated Nepal 2-1 to qualify for the SAFF Championship final.", shares: 920 },
-  { id: 12, cat: "Sports", title: "Abahani vs Mohammedan: Derby Preview", author: "Sports Desk", date: "2 days ago", readTime: 4, body: "The biggest derby of the season previewed with team analysis and player form.", shares: 422 },
-  // International
-  { id: 13, cat: "International", title: "UN Climate Summit: Bangladesh Receives $500M Climate Fund", author: "International Desk", date: "Today", readTime: 4, body: "Bangladesh secured USD 500 million in climate adaptation funding at the UN COP summit.", shares: 612 },
-  { id: 14, cat: "International", title: "Middle East Ceasefire Agreement: Bangladesh's Diplomatic Role", author: "International Desk", date: "Yesterday", readTime: 3, body: "Bangladesh played a key mediating role in the recent Middle East ceasefire talks.", shares: 312 },
-  { id: 15, cat: "International", title: "Global Inflation Eases: Impact on Bangladesh Import Costs", author: "International Desk", date: "2 days ago", readTime: 5, body: "Global inflation has eased to 3.2%, bringing relief for Bangladesh import costs.", shares: 218 },
-];
-
+/**
+ * Public NewsNow BD app.
+ *
+ * SINGLE SOURCE OF TRUTH: this page wraps the same NewsWebPreview component
+ * that powers the /digital live preview. The /apps/newsnow live app is
+ * therefore byte-identical to what users see when previewing the News
+ * template in the App Builder. This page only adds:
+ *   1. A thin outer toolbar (Back + Lang toggle)
+ *   2. Real BDAppsAPI calls (requestOTP / verifyOTP / userSubscription / sendSMS / notifySubscribers)
+ *      bound to the preview's onPhoneSubmit / onOtpVerify hooks
+ *   3. APIMonitor panel so visitors can see live telecom API traffic.
+ */
 const NewsNow = () => {
-  const navigate = useNavigate();
-  const { locale, setLocale, t } = useDemoLocale("news");
-  const bn = locale === "bn";
-  const [page, setPage] = useState("home"); // home, article, category, account
-  const [showHero, setShowHero] = useState(true); // toggle the welcome hero with OTP
-  const [selectedArticle, setSelectedArticle] = useState(null);
-  const [selectedCat, setSelectedCat] = useState(null);
-  const [bookmarks, setBookmarks] = useState([]);
-  const [subscribed, setSubscribed] = useState(false);
-  const [subModalOpen, setSubModalOpen] = useState(false);
-  const [phone, setPhone] = useState("");
-  const [otpRef, setOtpRef] = useState("");
-  const [demoOtp, setDemoOtp] = useState("");
-  const [otpInput, setOtpInput] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [subscriberId, setSubscriberId] = useState("");
+  const { i18n } = useTranslation();
+  const locale = i18n.language === "bn" ? "bn" : "en";
+  const setLocale = (l) => i18n.changeLanguage(l);
+  const language = locale === "bn" ? "Bengali" : "English";
 
-  const breaking = ARTICLES.slice(0, 4).map((a) => a.title).join(" · ");
+  const [authState, setAuthState] = useState({ msisdn: "", referenceNo: "" });
 
-  const openArticle = (a) => { setSelectedArticle(a); setPage("article"); };
-
-  const handleSendOtp = async () => {
-    if (!phone || phone.length < 10) return toast.error("Enter valid mobile");
-    setBusy(true);
-    const r = await requestOTP(phone);
-    setBusy(false);
-    if (r.statusCode === "S1000") { setOtpRef(r.referenceNo); setDemoOtp(r._demo_otp); setOtpSent(true); toast.success("OTP sent"); }
-  };
-  const handleVerifyAndSub = async () => {
-    if (otpInput.length !== 6) return toast.error("6-digit OTP");
-    setBusy(true);
-    const v = await verifyOTP(otpRef, otpInput);
-    if (v.statusCode !== "S1000") { setBusy(false); return toast.error(v.statusDetail); }
-    setSubscriberId(v.subscriberId);
-    await userSubscription(v.subscriberId, "SUB");
-    await sendSMS([`tel:88${phone}`], "You have subscribed to NewsNow BD breaking news alerts. Shortcode: 16222 | Unsub: Reply STOP", "16222");
-    setBusy(false);
-    setSubscribed(true);
-    setSubModalOpen(false);
-    setOtpSent(false);
-    setOtpInput("");
-    toast.success("Subscribed to SMS alerts!");
+  const handlePhoneSubmit = async (phone) => {
+    try {
+      const clean = (phone || "").replace(/[^0-9]/g, "");
+      const otpRes = await requestOTP(clean);
+      if (otpRes.statusCode === "S1000") {
+        setAuthState({ msisdn: clean, referenceNo: otpRes.referenceNo });
+        toast.success(`OTP sent via Robi: ${otpRes._demo_otp}`, { description: "Charged via CaaS — Tk 0.50 SMS only", duration: 5000 });
+      } else {
+        toast.error("Failed to send OTP — please retry.");
+      }
+    } catch {
+      toast.error("Failed to send OTP — please retry.");
+    }
   };
 
-  const broadcast = async () => {
-    setBusy(true);
-    const r = await notifySubscribers("BREAKING: Bangladesh Economy Grows 6.5% — Read at newsnow.bdapps.app", "APP_000375");
-    setBusy(false);
-    toast.success(`Broadcast sent to ${r.sentCount.toLocaleString()} subscribers`);
-  };
-
-  const toggleBookmark = (id) => {
-    setBookmarks((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
-    toast.success(bookmarks.includes(id) ? "Removed from bookmarks" : "Saved to bookmarks");
+  const handleOtpVerify = async (code) => {
+    const enteredOtp = code || "123456";
+    const subscriberMsisdn = `tel:88${authState.msisdn || "1711234567"}`;
+    try {
+      const verifyRes = await verifyOTP(authState.referenceNo || "DEMO_REF", enteredOtp);
+      const subRes = await userSubscription(subscriberMsisdn, "SUB");
+      await sendSMS([subscriberMsisdn], "You have subscribed to NewsNow BD breaking news alerts. Shortcode: 16222 | Unsub: Reply STOP", "16222");
+      // Demo: also fire a sample broadcast so the activity feed lights up
+      notifySubscribers("BREAKING: Bangladesh Economy Grows 6.5% — Read at newsnow.bdapps.app", "APP_000375").catch(() => {});
+      if (subRes.statusCode === "S1000") {
+        toast.success("Subscribed to SMS alerts!", { description: verifyRes.statusCode === "S1000" ? "Verified via Robi OTP." : "Demo bypass — subscription confirmed." });
+      }
+    } catch {
+      toast.error("Verification failed — please try again.");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50" data-testid="newsnow-app">
-      <header className="bg-gradient-to-r from-slate-900 to-blue-950 text-white sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <button onClick={() => navigate(-1)} className="text-xs opacity-70 flex items-center gap-1"><ChevronLeft size={14} /> {t.back}</button>
-          <div className="font-black text-xl flex items-center gap-2" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "serif" }}>
-            <div className="w-8 h-8 rounded-md bg-amber-500 flex items-center justify-center text-white font-black" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "serif" }}>{bn ? "আ" : "A"}</div>
-            <div>
-              <div className="leading-none">{t.title}</div>
-              <div className="text-[9px] uppercase tracking-wider opacity-60 font-sans">{t.subtitle}</div>
-            </div>
-          </div>
+    <div className="min-h-screen flex flex-col bg-[#fdfdfb]">
+      {/* Thin outer toolbar — provides Back + Lang only. The masthead + nav
+          come from the NewsWebPreview so the generated app exactly mirrors
+          the live /digital preview. */}
+      <div className="w-full bg-white/80 backdrop-blur sticky top-0 z-40 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+          <Link to="/appstore" data-testid="newsnow-back" className="inline-flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-slate-900">
+            <ChevronLeft size={16} /> {locale === "bn" ? "ফিরে" : "Back"}
+          </Link>
           <div className="flex items-center gap-3">
-            <LangToggle locale={locale} setLocale={setLocale} />
-            <Search size={16} className="opacity-70 hidden sm:block" />
-            <Bell size={16} className="opacity-70 hidden sm:block" />
+            <span className="hidden sm:inline text-xs text-slate-500">{locale === "bn" ? "স্বাগতম, পাঠক" : "Welcome, Reader"}</span>
+            <div className="inline-flex bg-slate-900/10 rounded-full border border-slate-900/20 p-0.5 text-[10px] font-bold">
+              {["bn", "en"].map((l) => (
+                <button key={l} data-testid={`lang-${l}`} onClick={() => setLocale(l)} className={`px-2.5 py-1 rounded-full transition-all ${locale === l ? "bg-slate-900 text-white" : "text-slate-700 opacity-70 hover:opacity-100"}`}>
+                  {l === "bn" ? "বাংলা" : "EN"}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-        {/* breaking ticker */}
-        <div className="bg-red-600 text-white text-xs py-1.5 overflow-hidden whitespace-nowrap">
-          <div className="inline-block" style={{ animation: "marquee 60s linear infinite" }}>
-            🔴 {t.breaking}: {breaking} · {breaking}
-          </div>
-        </div>
-        <style>{`@keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }`}</style>
-      </header>
+      </div>
 
-      {page === "home" && showHero && !subscribed && (
-        <section className="relative overflow-hidden border-b border-slate-200" style={{ background: "linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%)" }}>
-          <div className="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-12 gap-6 items-start">
-            <div className="md:col-span-5">
-              <div className="text-amber-600 font-bold text-sm uppercase tracking-wider" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.welcome}</div>
-              <h1 className="text-4xl md:text-5xl font-black leading-[1.05] mt-2 text-slate-900" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "serif" }}>{t.mainTitle1}<br /><span className="text-amber-600">{t.mainTitle2}</span></h1>
-              <p className="mt-3 text-sm text-slate-600 max-w-md" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.mainSub}</p>
-              <ul className="mt-4 space-y-2 text-sm">
-                {[t.feature1, t.feature2, t.feature3].map((f, i) => (
-                  <li key={i} className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-2 shrink-0"></div><span style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }} className="text-slate-700">{f}</span></li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="md:col-span-4">
-              <div className="bg-white rounded-2xl shadow-xl border-2 border-amber-200 p-5">
-                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.mobile}</div>
-                {!otpSent ? (
-                  <>
-                    <div className="relative mt-2">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-600 font-mono text-sm">+88</span>
-                      <input data-testid="newsnow-hero-phone" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="01XXXXXXXXX" className="w-full border-2 border-amber-200 rounded-lg pl-12 pr-3 py-3 text-sm font-mono focus:border-amber-500 outline-none" maxLength={11} />
-                    </div>
-                    <button onClick={handleSendOtp} disabled={busy} data-testid="newsnow-hero-send" className="w-full mt-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg py-3 font-bold disabled:opacity-50 text-sm">{busy ? t.sending : t.sendOtp}</button>
-                    <p className="text-[10px] text-slate-400 mt-2 text-center" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{t.chargeNotice}</p>
-                  </>
-                ) : (
-                  <>
-                    <input data-testid="newsnow-hero-otp" value={otpInput} onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ""))} placeholder={t.otpHint} className="w-full mt-2 border-2 border-amber-200 rounded-lg px-3 py-3 text-center font-mono text-lg tracking-widest focus:border-amber-500 outline-none" maxLength={6} />
-                    <p className="text-[10px] mt-1 text-slate-500">{t.demoOtp}: <button className="text-amber-700 font-mono underline" onClick={() => setOtpInput(demoOtp)}>{demoOtp}</button></p>
-                    <button onClick={handleVerifyAndSub} disabled={busy} data-testid="newsnow-hero-verify" className="w-full mt-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg py-3 font-bold text-sm disabled:opacity-50">{busy ? t.sending : t.verify}</button>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className="md:col-span-3">
-              <div className="rounded-2xl p-3 bg-gradient-to-br from-slate-800 to-blue-950 text-white shadow-xl">
-                <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold"><span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>{t.livePreview}</div>
-                <div className="mt-2 space-y-2">
-                  {[
-                    { cat: t.categoryColors.Bangladesh, color: "bg-rose-200 text-rose-900", title: ARTICLES[0].title },
-                    { cat: t.categoryColors.Business, color: "bg-emerald-200 text-emerald-900", title: ARTICLES[6].title },
-                    { cat: t.categoryColors.Sports, color: "bg-amber-200 text-amber-900", title: ARTICLES[9].title },
-                  ].map((it, i) => (
-                    <div key={i} className="bg-white/95 rounded-lg p-2 text-slate-900">
-                      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${it.color}`}>{it.cat}</span>
-                      <div className="text-[11px] font-bold mt-1 leading-snug line-clamp-2" style={{ fontFamily: bn ? "'Tiro Bangla', serif" : "inherit" }}>{it.title}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ───── DUPLICATE-PROOF DUMMY (keeps original-section anchor working) ───── */}
-      {false && (
-        <header className="hidden">
-          <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between"></div>
-        </header>
-      )}
-
-      {page === "home" && (
-        <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-          {/* Hero featured */}
-          <div onClick={() => openArticle(ARTICLES[0])} className={`relative rounded-2xl overflow-hidden h-72 bg-gradient-to-br ${CAT_COLORS[ARTICLES[0].cat]} cursor-pointer hover:shadow-xl transition-shadow`} data-testid="newsnow-hero-article">
-            <div className="absolute inset-0 bg-black/40"></div>
-            <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
-              <span className="inline-block w-fit text-[10px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur px-2 py-0.5 rounded">{ARTICLES[0].cat}</span>
-              <h1 className="text-3xl font-bold mt-3 leading-tight">{ARTICLES[0].title}</h1>
-              <div className="text-xs opacity-80 mt-2">{ARTICLES[0].author} · {ARTICLES[0].date} · {ARTICLES[0].readTime} min read</div>
-            </div>
-          </div>
-
-          {/* Subscribe banner */}
-          {!subscribed && (
-            <div className="bg-gradient-to-r from-rose-600 to-red-700 rounded-2xl text-white p-5 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="font-bold">📱 Get Breaking News via SMS</div>
-                <div className="text-xs opacity-80 mt-1">Text NEWS to 16222 or subscribe here</div>
-              </div>
-              <button onClick={() => setSubModalOpen(true)} data-testid="newsnow-subscribe-btn" className="bg-white text-rose-700 font-bold rounded-full px-5 py-2 text-sm">Subscribe</button>
-            </div>
-          )}
-
-          {/* Category sections */}
-          {CATEGORIES.map((cat) => {
-            const list = ARTICLES.filter((a) => a.cat === cat);
-            return (
-              <section key={cat}>
-                <div className="flex justify-between items-end mb-3">
-                  <h2 className="font-bold text-xl">{cat === "Bangladesh" ? "🇧🇩" : cat === "Technology" ? "💻" : cat === "Business" ? "📈" : cat === "Sports" ? "⚽" : "🌍"} {cat}</h2>
-                  <button onClick={() => { setSelectedCat(cat); setPage("category"); }} className="text-xs font-bold text-rose-600 hover:underline" data-testid={`newsnow-see-more-${cat.toLowerCase()}`}>See More →</button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {list.slice(0, 3).map((a) => (
-                    <div key={a.id} data-testid={`newsnow-article-${a.id}`} onClick={() => openArticle(a)} className="bg-white rounded-xl border border-slate-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
-                      <div className={`h-24 bg-gradient-to-br ${CAT_COLORS[cat]}`}></div>
-                      <div className="p-3">
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-rose-600">{cat}</div>
-                        <h3 className="font-bold text-sm mt-1 line-clamp-2">{a.title}</h3>
-                        <div className="text-[11px] text-slate-500 mt-2">{a.author} · {a.date} · {a.readTime} min</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            );
-          })}
-
-          {/* Broadcast tool */}
-          {subscribed && (
-            <div className="bg-slate-100 rounded-2xl p-4 border border-slate-200">
-              <h3 className="font-bold text-sm">📤 Broadcast News Alert (Demo)</h3>
-              <p className="text-xs text-slate-600 mt-1">Send breaking news to all subscribers via SMS</p>
-              <button onClick={broadcast} disabled={busy} data-testid="newsnow-broadcast" className="mt-2 bg-slate-900 text-white rounded-lg px-4 py-2 text-xs font-bold">{busy ? "Sending..." : "Send Breaking Alert"}</button>
-            </div>
-          )}
-        </main>
-      )}
-
-      {page === "category" && selectedCat && (
-        <main className="max-w-6xl mx-auto px-4 py-6">
-          <button onClick={() => setPage("home")} className="text-xs text-rose-600 mb-3 flex items-center gap-1"><ChevronLeft size={12} /> Back</button>
-          <h1 className="font-bold text-2xl mb-4">{selectedCat}</h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {ARTICLES.filter((a) => a.cat === selectedCat).map((a) => (
-              <div key={a.id} onClick={() => openArticle(a)} className="bg-white rounded-xl border border-slate-200 overflow-hidden cursor-pointer hover:shadow-md">
-                <div className={`h-28 bg-gradient-to-br ${CAT_COLORS[selectedCat]}`}></div>
-                <div className="p-3">
-                  <h3 className="font-bold text-sm line-clamp-2">{a.title}</h3>
-                  <div className="text-[11px] text-slate-500 mt-2">{a.author} · {a.date}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </main>
-      )}
-
-      {page === "article" && selectedArticle && (
-        <main className="max-w-3xl mx-auto px-4 py-6" data-testid="newsnow-article-detail">
-          <button onClick={() => setPage("home")} className="text-xs text-rose-600 mb-3 flex items-center gap-1"><ChevronLeft size={12} /> Home</button>
-          <span className="inline-block text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-700 px-2 py-0.5 rounded">{selectedArticle.cat}</span>
-          <h1 className="text-3xl md:text-4xl font-bold mt-3 leading-tight">{selectedArticle.title}</h1>
-          <div className="flex items-center gap-3 mt-4 text-sm text-slate-500">
-            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">{selectedArticle.author[0]}</div>
-            <span>by <b>{selectedArticle.author}</b> · {selectedArticle.date} · {selectedArticle.readTime} min · {selectedArticle.shares} shares</span>
-          </div>
-          <div className="flex gap-2 mt-3">
-            <button className="text-xs bg-slate-100 rounded-full px-3 py-1.5 flex items-center gap-1"><Share2 size={11} /> Share</button>
-            <button onClick={() => toggleBookmark(selectedArticle.id)} data-testid="newsnow-bookmark-btn" className={`text-xs rounded-full px-3 py-1.5 flex items-center gap-1 ${bookmarks.includes(selectedArticle.id) ? "bg-amber-100 text-amber-700" : "bg-slate-100"}`}><Bookmark size={11} /> {bookmarks.includes(selectedArticle.id) ? "Saved" : "Save"}</button>
-          </div>
-          <article className="mt-6 prose prose-slate max-w-none text-slate-700 leading-relaxed whitespace-pre-line text-base">{selectedArticle.body}</article>
-          {!subscribed && (
-            <div className="mt-6 bg-gradient-to-r from-rose-600 to-red-700 text-white rounded-xl p-4 flex justify-between items-center">
-              <div className="text-sm">📱 Get SMS alerts for {selectedArticle.cat} news</div>
-              <button onClick={() => setSubModalOpen(true)} className="bg-white text-rose-700 font-bold rounded-full px-4 py-1.5 text-xs">Subscribe</button>
-            </div>
-          )}
-        </main>
-      )}
-
-      {/* Subscribe modal */}
-      {subModalOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6" data-testid="newsnow-sub-modal">
-            <h3 className="font-bold text-lg">Subscribe for SMS Alerts</h3>
-            <p className="text-xs text-slate-500 mt-1">Free OTP-based subscription</p>
-            {!otpSent ? (
-              <>
-                <input data-testid="newsnow-phone" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="Mobile (e.g. 1711234567)" className="w-full border border-slate-200 rounded-lg px-3 py-2.5 mt-3 text-sm" maxLength={11} />
-                <div className="mt-3 flex gap-2">
-                  <button onClick={() => setSubModalOpen(false)} className="flex-1 border border-slate-200 rounded-lg py-2 text-sm">Cancel</button>
-                  <button onClick={handleSendOtp} disabled={busy} data-testid="newsnow-send-otp" className="flex-1 bg-slate-900 text-white rounded-lg py-2 text-sm font-bold disabled:opacity-50">{busy ? "..." : "Send OTP"}</button>
-                </div>
-              </>
-            ) : (
-              <>
-                <input data-testid="newsnow-otp" value={otpInput} onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ""))} placeholder="6-digit OTP" className="w-full border border-slate-200 rounded-lg px-3 py-2.5 mt-3 text-center font-mono tracking-widest" maxLength={6} />
-                <p className="text-[10px] mt-1">Demo: <button className="text-rose-600 font-mono underline" onClick={() => setOtpInput(demoOtp)}>{demoOtp}</button></p>
-                <button onClick={handleVerifyAndSub} disabled={busy} data-testid="newsnow-verify-sub" className="w-full mt-2 bg-slate-900 text-white rounded-lg py-2.5 font-bold text-sm disabled:opacity-50">{busy ? "..." : "Verify & Subscribe"}</button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Single source of truth — identical to the /digital Live Preview */}
+      <div className="flex-1 flex flex-col" data-testid="newsnow-app">
+        <NewsWebPreview
+          cfg={{ appName: "NewsNow BD", tagline: "Bangladesh's Independent Daily", primary: "#111827", accent: "#dc2626", language }}
+          onPhoneSubmit={handlePhoneSubmit}
+          onOtpVerify={handleOtpVerify}
+        />
+      </div>
 
       <APIMonitor />
     </div>

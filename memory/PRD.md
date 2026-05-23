@@ -26,6 +26,35 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 
 ## What's Been Implemented (Feb 23, 2026 — iteration 13: BondoBD Matrimony template isolation across Digital Builder)
 
+### Iteration 15 — News + Quiz Content Isolation + SOT Sync (Feb 23, 2026)
+Same content-isolation bug fixed for News (web-newsnow) and Quiz (web-quizbd) templates, applying the proven Single Source of Truth pattern from BondoBD/Matrimony. Root cause: PREVIEWS map in `UniversalWebPreview.jsx` and `WebPreviews.jsx` had no entries for web-newsnow / pro-newsnow / web-quizbd / pro-quizbd, so both fell through to `EcomStore` default — Step 4 + Step 5 + /apps/* all rendered "Wireless Headphones / Add to Cart / Electronics, Fashion" generic e-commerce UI.
+
+**Files patched:**
+- `/src/mocks/contentSeeds.js` — Added `news` + `quiz` to `TEMPLATE_KIND`, `EMPTY_CONTENT`, and full `SAMPLE_CONTENT` seeds with Bangladeshi data (8 news articles spanning Politics/Sports/Business/Tech, 8 quiz questions across 5 categories, 3 certificate tiers).
+- `/src/components/digital/ContentManager.jsx` — Extended `SECTIONS`, `SECTION_LABELS`, `MIN_REQUIRED` to handle the two new kinds. Added inline editors: `NewsBannerEditor`, `QuizDetailsEditor`, `QuizSettingsEditor`, `LeaderboardSettingsEditor`. `renderEditor()` wires all 13 new section types (newsBanner / newsCategories / articles / trending / editorsPicks / ads / liveFeed + quizDetails / quizCategories / questions / quizSettings / leaderboardSettings / certificates). MiniPreview tiles added for every section with the right visual treatment (NYT-style article cards, Figma-style quiz cards).
+- `/src/components/digital/interactive/NewsPreview.jsx` (NEW, ~360 lines) — Premium NYT-inspired newsroom UI. Breaking ticker (marquee), serif "NewsNow BD" masthead, category navigation, hero article with featured image, multi-column editorial grid, trending sidebar, editor's picks section, ad slots, article detail screen with related stories, OTP subscribe modal. Exposes optional `onPhoneSubmit`, `onOtpVerify` hooks.
+- `/src/components/digital/interactive/QuizPreview.jsx` (NEW, ~330 lines) — Figma-inspired premium quiz UI. Landing with stats (1,84,000+ subs / 2M+ answered / ৳50K prize), OTP login, home screen with category grid + cover banner, question screen (timer, progress bar, A/B/C/D with correct/incorrect highlighting + explanation), results screen with points + certificate tier, leaderboard. Exposes optional `onPhoneSubmit`, `onOtpVerify`, `onFinish` hooks. Verify→Home transition is now OPTIMISTIC (advances immediately, API chain runs in background).
+- `/src/components/digital/interactive/UniversalWebPreview.jsx` — PREVIEWS map adds `web-newsnow → NewsWebPreview`, `web-quizbd → QuizWebPreview`.
+- `/src/components/digital/interactive/WebPreviews.jsx` — Pro builder PREVIEWS map adds `pro-newsnow → ProNewsAdapter`, `pro-quizbd → ProQuizAdapter` via cfg-passing wrappers.
+- `/src/pages/apps/NewsNow.jsx` (REWRITTEN, ~110 lines) — Thin SOT wrapper. Wraps `<NewsWebPreview cfg={...} onPhoneSubmit onOtpVerify />` with outer Back + Lang toolbar + APIMonitor. Real BDAppsAPI: requestOTP → verifyOTP → userSubscription → sendSMS → notifySubscribers.
+- `/src/pages/apps/QuizBD.jsx` (REWRITTEN, ~115 lines) — Thin SOT wrapper. Wraps `<QuizWebPreview cfg={...} onPhoneSubmit onOtpVerify onFinish />`. Real BDAppsAPI: requestOTP → verifyOTP → userSubscription → sendSMS, plus directDebit credit (BDT 5 prize) when score ≥ 90%.
+
+**Bugs fixed mid-iteration (caught by testing agent iter 15):**
+1. P1: QuizBD OTP→Home transition appeared "stuck" because the BDAppsAPI chain (verifyOTP + userSubscription + sendSMS ≈ 2.5s total) blocked `onStart()` until completion. Restructured `handleOtp` to call `onStart()` synchronously BEFORE awaiting the API chain — user reaches home instantly, toasts/APIMonitor entries arrive as each call resolves.
+
+**Testing — iteration_15.json + manual screenshot verification:**
+- ✅ /apps/newsnow renders NYT-style premium UI (breaking ticker, serif masthead, multi-column grid, category nav). NO e-commerce elements.
+- ✅ /apps/quizbd renders Figma-style premium UI (stats hero, OTP login, category grid, question screen with timer, results, leaderboard). NO e-commerce elements.
+- ✅ Step 4 for web-newsnow: 8 news sections (Hero Banner, News Categories, News Articles, Trending News, Editor's Picks, Ad Blocks, Live News Feed, Service Info). Header shows "0 of 8 sections complete".
+- ✅ Step 4 for web-quizbd: 7 quiz sections (Quiz Details, Quiz Categories, Questions, Quiz Settings, Leaderboard, Certificates, Service Info).
+- ✅ Skip — Use Sample Data populates the Bangladeshi seed data and lights up the LIVE MINI PREVIEW tiles on the right.
+- ✅ Step 5 Preview & Launch renders the actual NewsNow / QuizBD UI inside the browser-chrome iframe — NOT the generic e-commerce mockup.
+- ✅ APIMonitor logs all expected entries (requestOTP, verifyOTP, userSubscription, sendSMS, notifySubscribers, directDebit) during the user journeys.
+- ✅ /apps/* == /digital preview byte-identical (same React component).
+- ✅ Quiz timer / progress bar / explanation reveal / certificate tier all functional. Bangladesh GK shows 4 questions; other categories scaled accordingly from the seed.
+
+
+
 ### Iteration 14 — Preview ↔ Implementation Sync + APIMonitor fix (Feb 23, 2026)
 After iteration 13 (matrimony isolation in /digital), the user invoked the **Preview-to-Implementation Synchronization** rule: the actual generated app at `/apps/bondobd` was still showing the OLD UI (red gradient header, letter avatars, simple cards) while the new premium UI lived only in the /digital Live Preview. Refactored `/apps/bondobd` as a thin 100-line wrapper around the SAME `MatrimonyWebPreview` component → single source of truth. Wired the preview's optional integration hooks to real BDAppsAPI calls so APIMonitor lights up live during OTP/Interest/Subscribe flows.
 
