@@ -26,6 +26,25 @@ Two roles: Developer & Admin. Color scheme: deep navy (#0f172a) + red (#e11d48) 
 
 ## What's Been Implemented (Feb 23, 2026 — iteration 13: BondoBD Matrimony template isolation across Digital Builder)
 
+### Iteration 16 — Site-wide Responsiveness Fix (Feb 24, 2026)
+User uploaded a mobile screenshot showing the Digital page content pushed off-screen (cards cut off right edge, category pills wrapping into 3+ rows of mess, "Build complete apps in under … needed" truncating awkwardly). Did a root-cause investigation: the bug was traced to **one single Tailwind class** at the end of the sidebar className.
+
+**Root cause:** `/src/components/Sidebar.jsx` line 54 had `... lg:sticky lg:top-0 ... shrink-0 relative` — the trailing `relative` class overrode the earlier `fixed` and `lg:sticky` position values, forcing the sidebar to stay in the flex flow at every viewport size. On mobile, instead of sliding off-screen (translate-x-full), the 256px-wide aside was occupying horizontal space inside the parent flex container, pushing the main content right past the viewport edge.
+
+**Files patched:**
+- `/src/components/Sidebar.jsx` — Removed the trailing `relative` class. Sidebar is now correctly `fixed` on mobile (out of flex flow, slides in/out via translate-x) and `lg:sticky` on desktop (in flex flow, sticky to top).
+- `/src/index.css` — Added site-wide overflow guards: `html, body { overflow-x: hidden; max-width: 100vw }`, `*, *::before, *::after { box-sizing: border-box }`, `img, video, iframe, svg { max-width: 100% }`. Added `.scrollbar-hide` utility class for horizontal-scroll category pills / tab strips.
+- `/src/pages/Digital.jsx` — Header h1 now responsive (`text-2xl sm:text-3xl lg:text-4xl`), header button row wraps with `flex-wrap`, the dark "WEB APP BUILDER" promo banner now `flex-col sm:flex-row` so the tagline wraps below the badge on mobile instead of truncating mid-sentence, builder tabs (Pro/Web/Android) now `text-[11px] sm:text-sm` with `whitespace-nowrap` + truncate so all 3 labels fit in mobile 375px width.
+- `/src/components/digital/TemplateGallery.jsx` — Search input now `w-full sm:max-w-md`. Category filter pills now use `flex md:flex-wrap gap-2 overflow-x-auto scrollbar-hide` — single-row horizontal scroll on mobile (matches the user's spec), wraps to multi-row only on tablet+. Pills marked `shrink-0 whitespace-nowrap` so they never break.
+
+**Testing — 21 routes × 3 viewports = 63 tests, ALL PASS (zero horizontal overflow):**
+- Mobile 375px: /digital, /dashboard, /provisioning, /appstore, /my-apps, /reports, /lite, /, /login, /apps/newsnow, /apps/quizbd, /apps/bondobd, /apps/robimart all return `scrollWidth === innerWidth`
+- Tablet 768px: same 13 routes — all pass
+- Desktop 1280px: same 13 routes — all pass
+- Manual screenshot at /apps/newsnow mobile shows perfect rendering: breaking ticker, serif masthead, category nav, hero article all contained, no clip.
+
+
+
 ### Iteration 15 — News + Quiz Content Isolation + SOT Sync (Feb 23, 2026)
 Same content-isolation bug fixed for News (web-newsnow) and Quiz (web-quizbd) templates, applying the proven Single Source of Truth pattern from BondoBD/Matrimony. Root cause: PREVIEWS map in `UniversalWebPreview.jsx` and `WebPreviews.jsx` had no entries for web-newsnow / pro-newsnow / web-quizbd / pro-quizbd, so both fell through to `EcomStore` default — Step 4 + Step 5 + /apps/* all rendered "Wireless Headphones / Add to Cart / Electronics, Fashion" generic e-commerce UI.
 

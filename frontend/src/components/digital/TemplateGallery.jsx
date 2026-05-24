@@ -103,13 +103,13 @@ const TemplateGallery = ({ templates, type, categories, onSelect, onLivePreview,
 
   return (
     <div className="space-y-5">
-      <div className="relative max-w-md">
+      <div className="relative w-full sm:max-w-md">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-        <Input data-testid={`${testidPrefix}-search`} placeholder="Search templates..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        <Input data-testid={`${testidPrefix}-search`} placeholder="Search templates..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 w-full" />
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex md:flex-wrap gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1 md:overflow-x-visible md:mx-0 md:px-0">
         {categories.map((c) => (
-          <button key={c} data-testid={`${testidPrefix}-cat-${c.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} onClick={() => setCategory(c)} className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all ${category === c ? "bg-[#0f172a] text-white shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:border-slate-400"}`}>{c}</button>
+          <button key={c} data-testid={`${testidPrefix}-cat-${c.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`} onClick={() => setCategory(c)} className={`shrink-0 whitespace-nowrap text-xs font-semibold px-3 py-1.5 rounded-full transition-all ${category === c ? "bg-[#0f172a] text-white shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:border-slate-400"}`}>{c}</button>
         ))}
       </div>
       {filtered.length === 0 ? (

@@ -70,11 +70,11 @@ const Digital = () => {
       <div className="space-y-6 max-w-7xl">
         {/* Header */}
         <div className="flex items-end justify-between flex-wrap gap-3">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight">{t("digital.title")}</h1>
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">{t("digital.title")}</h1>
             <p className="text-sm text-slate-600 mt-1">{t("digital.subtitle")}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button data-testid="demo-tour-btn" variant="outline" onClick={() => setTourOpen(true)} className="gap-1"><PlayCircle size={14} /> {t("digital.demoTour")}</Button>
             <Button data-testid="addons-btn" onClick={() => navigate("/add-ons")} className="bg-gradient-to-r from-amber-500 to-rose-500 hover:opacity-90 gap-1 text-white">
               <Sparkles size={14} /> {t("digital.browseAddOns")}
@@ -129,20 +129,21 @@ const Digital = () => {
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList data-testid="digital-tabs" className="grid grid-cols-3 w-full h-auto bg-slate-100 p-1.5 rounded-xl gap-1.5">
               {Object.entries(TAB_META).map(([key, m]) => (
-                <TabsTrigger key={key} value={key} data-testid={`tab-${key}`} className="data-[state=active]:bg-[#e11d48] data-[state=active]:text-white data-[state=active]:shadow-md py-3 rounded-lg gap-1.5 font-bold">
-                  <span>{m.icon}</span> {m.label}
+                <TabsTrigger key={key} value={key} data-testid={`tab-${key}`} className="data-[state=active]:bg-[#e11d48] data-[state=active]:text-white data-[state=active]:shadow-md py-2.5 sm:py-3 px-2 rounded-lg gap-1 sm:gap-1.5 font-bold text-[11px] sm:text-sm whitespace-nowrap overflow-hidden">
+                  <span>{m.icon}</span>
+                  <span className="truncate">{m.label}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
 
             {Object.entries(TAB_META).map(([key, m]) => (
               <TabsContent key={key} value={key} className="pt-5 space-y-5">
-                <div className="bg-gradient-to-r from-slate-900 via-rose-900 to-slate-900 text-white rounded-xl px-5 py-4 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs uppercase tracking-widest font-bold opacity-70">{m.label}</div>
-                    <div className="text-lg font-bold mt-0.5">{m.tagline}</div>
+                <div className="bg-gradient-to-r from-slate-900 via-rose-900 to-slate-900 text-white rounded-xl px-4 sm:px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-[10px] sm:text-xs uppercase tracking-widest font-bold opacity-70">{m.label}</div>
+                    <div className="text-base sm:text-lg font-bold mt-0.5 break-words">{m.tagline}</div>
                   </div>
-                  <span className="text-3xl">{m.icon}</span>
+                  <span className="text-2xl sm:text-3xl shrink-0">{m.icon}</span>
                 </div>
                 <TemplateGallery
                   templates={key === "pro" ? PRO_TEMPLATES : key === "web" ? WEB_TEMPLATES : ANDROID_TEMPLATES}

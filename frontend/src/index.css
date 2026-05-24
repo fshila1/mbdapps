@@ -20,6 +20,19 @@ body {
   color: #0f172a;
 }
 
+/* Site-wide horizontal overflow guard — prevents any rogue element from
+   pushing the page wider than the viewport on mobile (iter 16 fix). */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+*, *::before, *::after { box-sizing: border-box; }
+img, video, iframe, svg { max-width: 100%; height: auto; }
+
+/* Hide-scrollbar utility for horizontal-scroll category pills, etc. */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
 code, .font-mono {
   font-family: 'JetBrains Mono', monospace;
 }

@@ -51,7 +51,7 @@ const Sidebar = ({ open, onClose }) => {
   return (
     <>
       {open && <div onClick={onClose} className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden" data-testid="sidebar-overlay" />}
-      <aside data-testid="sidebar" data-collapsed={collapsed} className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:sticky lg:top-0 left-0 top-0 z-50 ${width} h-screen bg-[#0f172a] text-white flex flex-col transition-[width,transform] duration-200 ease-in-out shrink-0 relative`}>
+      <aside data-testid="sidebar" data-collapsed={collapsed} className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:sticky lg:top-0 left-0 top-0 z-50 ${width} h-screen bg-[#0f172a] text-white flex flex-col transition-[width,transform] duration-200 ease-in-out shrink-0`}>
         {/* Collapse toggle */}
         <button data-testid="sidebar-collapse-toggle" onClick={() => setCollapsed(!collapsed)}
           className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-white text-[#0f172a] border border-slate-200 rounded-full items-center justify-center shadow-sm hover:bg-slate-50 z-10">
