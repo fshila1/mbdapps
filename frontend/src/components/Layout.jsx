@@ -7,7 +7,7 @@ import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
 } from "../components/ui/dropdown-menu";
 import { Badge } from "../components/ui/badge";
-import Sidebar from "./Sidebar";
+import Sidebar, { useSidebarCollapsed } from "./Sidebar";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 
@@ -31,6 +31,7 @@ const Layout = ({ children, subnav = null }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed] = useSidebarCollapsed();
   const unread = (appNotifs || []).filter((n) => !n.read).length;
 
   const onLogout = () => {
@@ -38,10 +39,15 @@ const Layout = ({ children, subnav = null }) => {
     navigate("/", { replace: true });
   };
 
+  // Sidebar uses position:fixed at all viewports. We reserve space for it on
+  // desktop (lg+) by pushing the main column with margin-left. Width tracks
+  // the collapsed state so the column shrinks/grows when the user toggles it.
+  const mainOffsetClass = user ? (collapsed ? "lg:ml-16" : "lg:ml-64") : "";
+
   return (
-    <div className="min-h-screen bg-white text-[#0f172a] flex" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
+    <div className="min-h-screen bg-white text-[#0f172a]" style={{ fontFamily: "'IBM Plex Sans', sans-serif" }}>
       {user && <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className={`flex flex-col min-h-screen ${mainOffsetClass} transition-[margin] duration-200 ease-in-out`}>
         <header className="sticky top-0 z-30 bg-white border-b border-slate-200">
           <div className="px-4 lg:px-8 h-16 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
