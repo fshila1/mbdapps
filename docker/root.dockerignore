@@ -1,0 +1,22 @@
+# Copy to repo root before building:
+#   cp docker/root.dockerignore .dockerignore
+
+.git
+.emergent
+memory
+test_reports
+tests
+**/.env
+**/.env.*
+**/node_modules
+**/build
+**/__pycache__
+**/*.pyc
+**/.venv
+**/venv
+**/.pytest_cache
+**/.cache
+**/*.md
+frontend/node_modules
+frontend/build
+backend/__pycache__
